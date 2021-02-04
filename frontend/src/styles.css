@@ -1,9 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
-body {
-    display: flex;
-    justify-content: center;
+.picsum-img-wrapper {
+  max-height: 1000px;
 }
-
-input {
-    margin: 5px;
+body {
+  background-color: #adb5bd;
 }

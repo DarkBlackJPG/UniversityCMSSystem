@@ -1,0 +1,28 @@
+<div class="row justify-content-center">
+  <h1 class="font-weight-bold">Plan programa</h1>
+</div>
+
+<div *ngFor="let semester of semesters" class="row justify-content-center">
+  <table class="table col-md-5 table-dark">
+    <thead>
+    <tr class="text-center">
+      <h5> <i>Plan za {{semester}}. semestar</i></h5>
+    </tr>
+    <tr>
+      <th scope="col">Sifra</th>
+      <th scope="col">Naziv</th>
+      <th scope="col">Semestar</th>
+      <th scope="col">Tip</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let course of filterCourses(departmentCourses, semester)">
+      <th scope="row">{{course.id}}</th>
+      <td>{{course.name}}</td>
+      <td>{{course.semester}}</td>
+      <td *ngIf="course.type == 1">Izborni</td>
+      <td *ngIf="course.type == 0">Obavezni</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
