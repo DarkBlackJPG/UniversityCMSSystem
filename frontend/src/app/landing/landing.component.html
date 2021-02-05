@@ -4,17 +4,29 @@
   <ng-template ngbSlide *ngFor="let image of images">
     <div class="picsum-img-wrapper">
       <img width="100%" [src]="image">
+      <div class="carousel-caption d-none d-md-block">
+        <h1>Scroll down</h1>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+      </div>
     </div>
 
   </ng-template>
-</ngb-carousel>
-<div class="row w-100">
-  <div class="col-12 text-center justify-content-center ">
-    <h1>
-      RTI Katedra Elektrotehnickog fakulteta
-    </h1>
-    <h5>
 
-    </h5>
+</ngb-carousel>
+<div class="row w-100 justify-content-center">
+  <div class="jumbotron shadow mt-4 col-md-10">
+    <h1 class="display-4">RTI Katedra Elektrotehnickog fakulteta</h1>
+    <p class="lead font-italic">Da budemo vodeća visokoškolska ustanova u oblasti elektrotehnike i računarstva na prostoru Jugoistočne Evrope, posvećena poštovanju najviših standarda u nastavi, nauci i primenjenim istraživanjima.</p>
+    <hr class="my-4">
+    <p>
+      Razvoj Elektrotehničkog fakulteta u bliskoj je vezi sa istorijom univerzitetskog obrazovanja u Srbiji. Prvo visokoškolsko predavanje iz oblasti elektrotehnike održano je davne 1894. Profesor Stevan Marković bio je prvi predavač i osnivač Elektrotehničke katedre Inženjerskog odeljenja Velike škole u Beogradu. Stevan Marković Samo četiri godine kasnije, profesor Marković je osnovao i elektroinženjersku laboratoriju. Od tada, elektrotehničke teme su se izučavale na Velikoj školi, a zatim i na beogradskom Univerzitetu koji je iz nje nastao 1905. Prve diplome dodeljene su 1922 godine.
+
+      Obrazovanje elektroinženjera bitno je prošireno posle reorganizacije Inženjerskog odeljenja 1935. Mašinski odsek je postao Mašinsko-elektrotehnički odsek, na kom su do početka 1937. oformljena su četiri smera - mašinski, aeronautički, energetski i telekomunikacioni. Zbog nedostatka laboratorijske opreme, otvaranje četvrtog smera (telekomunikacije) je odlagano sve do kraja Drugog svetskog rata. Godine 1946. ustanovljeno je elektrotehničko odeljenje, koje je 1948. preraslo u Elektrotehnički fakultet, sa smerovima Energetika i Telekomunikacije. 1955. godine osnovan je novi smer - Fizička elektronika.
+
+      Tokom godina, smer Telekomunikacije je proširivan oblastima elektronike, automatike i računarstva. Četvrti smer - Računarstvo i informatika - ustanovljen je 1987. godine.
+
+    </p>
   </div>
 </div>

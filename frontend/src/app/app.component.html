@@ -15,7 +15,7 @@
             <a class="nav-link" aria-current="page" routerLink="employee/all">Zaposleni</a>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                aria-expanded="false">
               Obavestenja
             </a>
@@ -27,7 +27,7 @@
             </ul>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+            <a class="nav-link dropdown-toggle" href="#"  role="button" data-bs-toggle="dropdown"
                aria-expanded="false">
               Osnovne studije
             </a>
@@ -43,12 +43,27 @@
           <li class="nav-item">
             <a class="nav-link" aria-current="page">Projekti</a>
           </li>
-          <div *ngIf="sessionNull; else sessionNotNull">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#"  role="button" data-bs-toggle="dropdown"
+               aria-expanded="false">
+              Nauka
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" routerLink="courses/info" (click)="view_course_info(rtiCoursesId)">Projekti zaposlenih</a></li>
+              <li><a class="dropdown-item" routerLink="courses/info" (click)="view_course_info(siCoursesId)">Istrazivanja</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" routerLink="contact">Kontakt</a>
+          </li>
+
+
+          <div *ngIf="sessionNull; else sessionNotNull" style="display: flex;">
             <li class="nav-item">
               <a class="nav-link " aria-current="page" routerLink="login">Login</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" routerLink="register">Register</a>
+              <a class="nav-link" routerLink="register/student">Register</a>
             </li>
           </div>
           <ng-template #sessionNotNull>

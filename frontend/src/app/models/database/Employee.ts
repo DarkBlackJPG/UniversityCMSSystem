@@ -12,6 +12,7 @@ export class Employee {
     this.biography = '';
     this.title ='' ;
     this.educational = 1;
+    this.profilePicture = 'default';
     this.office ='';
     this.courses =[] ;
   }
@@ -24,6 +25,7 @@ export class Employee {
   website: string;
   biography: string;
   title: string;
+  profilePicture: string;
   educational: number;
   office: string;
   courses: Course[];

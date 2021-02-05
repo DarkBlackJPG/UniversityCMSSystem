@@ -11,6 +11,7 @@
       <th scope="col">Zvanje</th>
       <th scope="col">Tip</th>
       <th scope="col">Zaduzen na predmetima</th>
+      <th scope="col">Pogledaj informacije</th>
     </tr>
     </thead>
     <tbody>
@@ -18,7 +19,9 @@
       <td>{{employee.name}}</td>
       <td>{{employee.surname}}</td>
       <td>{{employee.title}}</td>
-      <td>{{employee.title}}</td>
+      <td *ngIf="employee.educational == 1">Nastavno osoblje</td>
+      <td *ngIf="employee.educational == 0">Nenastavno osoblje</td>
+
       <td>
         <ol *ngIf="employee.courses.length >= 1; else elseNo">
           <li *ngFor="let course of employee.courses">{{course.name}}</li>
@@ -26,10 +29,93 @@
         <ng-template #elseNo>
           Nije zaduzen na predmetima
         </ng-template>
-
+      </td>
+      <td>
+        <button class="btn btn-outline-light" (click)="showEmployeeModal(employee)" data-toggle="modal" data-target="#exampleModalLong">Pogledaj informacije</button>
       </td>
     </tr>
-
     </tbody>
   </table>
+  <div *ngIf="employeeModal != null" class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">{{employeeModal.name}} {{employeeModal.surname}}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body justify-content-center">
+          <table class="col-12">
+            <tr>
+              <td colspan="2" class="justify-content-center">
+                <img src="assets/images/default.jpg" style="max-width: 300px; max-height: 300px" class="img-fluid">
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <b>Zvanje: </b>
+              </td>
+              <td>
+                {{employeeModal.title}}
+              </td>
+            </tr><tr>
+              <td>
+                <b>Kancelarija: </b>
+              </td>
+              <td>
+                {{employeeModal.office}}
+              </td>
+            </tr><tr>
+              <td>
+                <b>Adresa: </b>
+              </td>
+              <td *ngIf="employeeModal.address != null">
+                {{employeeModal.address}}
+              </td>
+              <td *ngIf="employeeModal.address == null">
+                Nedefinisano
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <b>Kontakt telefon: </b>
+              </td>
+              <td *ngIf="employeeModal.phonenumber != null">
+                {{employeeModal.phonenumber}}
+              </td>
+              <td *ngIf="employeeModal.phonenumber == null">
+                Nedefinisano
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <b>Web sajt: </b>
+              </td>
+              <td *ngIf="employeeModal.website != null">
+                <a [href]="employeeModal.website">{{employeeModal.website}}</a>
+              </td>
+              <td *ngIf="employeeModal.website == null">
+                Nedefinisano
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <b>Biografija: </b>
+              </td>
+              <td *ngIf="employeeModal.biography != null">
+                {{employeeModal.biography}}
+              </td>
+              <td *ngIf="employeeModal.biography == null">
+                Nedefinisano
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Zatvori</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

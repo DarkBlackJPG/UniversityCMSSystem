@@ -13,6 +13,9 @@ import { UserComponent } from './user/user.component';
 import { CourseComponent } from './course/course.component';
 import { DepartmentCoursesComponent } from './department-courses/department-courses.component';
 import { EmployeesListComponent } from './employees-list/employees-list.component';
+import { ContactComponent } from './contact/contact.component';
+import { RegisterComponent } from './register/register.component';
+
 
 
 @NgModule({
@@ -25,6 +28,8 @@ import { EmployeesListComponent } from './employees-list/employees-list.componen
     CourseComponent,
     DepartmentCoursesComponent,
     EmployeesListComponent,
+    ContactComponent,
+    RegisterComponent,
   ],
   imports: [
     BrowserModule,

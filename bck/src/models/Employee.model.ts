@@ -9,6 +9,7 @@ const Employee = new Schema({
     phonenumber: {type: String},
     website: {type: String},
     biography: {type: String},
+    profilePicture: {type: String},
     title: {type: Number},
     office: {type: String},
     courses: {type: Array},

@@ -139,9 +139,13 @@ router.route('/employees/get/all').get((req, res) => {
                         for (const employee of employeeResult) {
                             const preparedEmployee = new Employee_API_1.EmployeeAPI();
                             const titleId = Number(employee.title);
-                            const myTitle = titles.find((value, index) => {
-                                return value.id === index;
-                            }, titleId);
+                            let myTitle;
+                            for (const title of titles) {
+                                if (title.id === titleId) {
+                                    myTitle = title;
+                                    break;
+                                }
+                            }
                             for (const user of users) {
                                 if (user.id === employee.user_id) {
                                     preparedEmployee.name = user.name;
