@@ -20,10 +20,10 @@
               Obavestenja
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item" href="#">Takmicenja</a></li>
-              <li><a class="dropdown-item" href="#">Konferencije</a></li>
-              <li><a class="dropdown-item" href="#">Ponude za praksu</a></li>
-              <li><a class="dropdown-item" href="#">Ponude za posao</a></li>
+              <li><a class="dropdown-item" routerLink="notifications/get/all" (click)="view_notifications_for(0)" href="#">Takmicenja</a></li>
+              <li><a class="dropdown-item" routerLink="notifications/get/all" (click)="view_notifications_for(1)" href="#">Konferencije</a></li>
+              <li><a class="dropdown-item" routerLink="notifications/get/all" (click)="view_notifications_for(2)" href="#">Ponude za praksu</a></li>
+              <li><a class="dropdown-item" routerLink="notifications/get/all" (click)="view_notifications_for(3)" href="#">Ponude za posao</a></li>
             </ul>
           </li>
           <li class="nav-item dropdown">
@@ -41,7 +41,7 @@
             <a class="nav-link " aria-current="page">Master studije</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" aria-current="page">Projekti</a>
+            <a class="nav-link" routerLink="projects/proposals/all" aria-current="page">Projekti</a>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#"  role="button" data-bs-toggle="dropdown"

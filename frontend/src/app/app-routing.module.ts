@@ -10,6 +10,12 @@ import {DepartmentCoursesComponent} from "./department-courses/department-course
 import {EmployeesListComponent} from "./employees-list/employees-list.component";
 import {ContactComponent} from "./contact/contact.component";
 import {RegisterComponent} from "./register/register.component";
+import {ProjectProposalsComponent} from "./project-proposals/project-proposals.component";
+import {NotificationsComponent} from "./notifications/notifications.component";
+import {AdminViewAccountsComponent} from "./admin-view-accounts/admin-view-accounts.component";
+import {AdminRegistrationComponent} from "./admin-registration/admin-registration.component";
+import {AdminCoursesEditComponent} from "./admin-courses-edit/admin-courses-edit.component";
+import {AdminEngagementPlanComponent} from "./admin-engagement-plan/admin-engagement-plan.component";
 
 
 const routes: Routes = [
@@ -43,7 +49,33 @@ const routes: Routes = [
   {
     path: 'register/student',
     component: RegisterComponent
-  }
+  },
+  {
+    path: 'projects/proposals/all',
+    component: ProjectProposalsComponent
+  },
+  // -------| Admin pages begin
+  {
+    path: 'admin/accounts/all',
+    component: AdminViewAccountsComponent
+  },
+  {
+    path: 'admin/student/register',
+    component: AdminRegistrationComponent
+  },
+  {
+    path: 'admin/faculty/register',
+    component: AdminRegistrationComponent
+  },
+  {
+    path: 'admin/courses',
+    component: AdminCoursesEditComponent
+  },
+  {
+    path: 'admin/courses/engagement_plan',
+    component: AdminEngagementPlanComponent
+  },
+  // ---------| Admin pages end
 ];
 
 @NgModule({

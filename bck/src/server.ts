@@ -12,6 +12,11 @@ import Employee from './models/Employee.model';
 import Title from './models/Title.model';
 import UserModel from './models/User.model';
 import {UsersAPI} from "./API/Users.API";
+import ProjectProposal from "./models/ProjectProposal";
+import {NotificationTypesAPI} from "./API/NotificationTypes.API";
+import NotificationType from './models/NotificationTypes.model';
+import Notification from "./models/Notification.model";
+import {NotificationAPI} from "./API/Notification.API";
 
 const app = express();
 
@@ -123,6 +128,66 @@ router.route('/department/course/info/get/:id').get(
                 }
             });
     });
+router.route('/projects/get/all/proposals').get(
+    (req, res) => {
+
+        ProjectProposal.find({},
+            (error, projects) => {
+                if (error) {
+                    res.status(505).json(error);
+                    console.log(error.message);
+                } else {
+                    res.status(200).json(projects);
+                }
+            });
+    });
+router.route('/titles/get/all').get(
+    (req, res) => {
+        let titles: TitleAPI[] = [];
+        Title.find({},
+            (titleError, titleResult: TitleAPI[]) => {
+                if (titleError) {
+                    res.status(505).json(titleError);
+                    console.log(titleError.message);
+                } else {
+                    titles = titleResult;
+                    res.status(200).json(titles);
+                }
+            });
+    });
+router.route('/notifications/get/all/:id').get(
+    (req, res) => {
+        const notificationType = req.params.id;
+        let notificationTypesNames: NotificationTypesAPI;
+        NotificationType.find({id: notificationType}, (error, types: NotificationTypesAPI) => {
+            if (error) {
+                res.status(505).json(error);
+                console.log(error.message);
+            } else {
+                notificationTypesNames = types;
+            }
+        }).then(() => {
+            Notification.find({notification_type: notificationType}, (error, notifications: NotificationAPI[]) => {
+                if (error) {
+                    res.status(505).json(error);
+                    console.log(error.message);
+                } else {
+                    let notifs: NotificationAPI[] = [];
+                    for (let i = 0; i < notifications.length; i++) {
+                        const tempModel: NotificationAPI = new NotificationAPI();
+                        tempModel.id = notifications[i].id;
+                        tempModel.date = notifications[i].date;
+                        tempModel.description = notifications[i].description;
+                        tempModel.title = notifications[i].title;
+                        tempModel.notification_type = notifications[i].notification_type;
+                        tempModel.notification_type_name = notificationTypesNames.name;
+                        notifs.push(tempModel);
+                    }
+                    res.status(200).json(notifs);
+                }
+            });
+        });
+    });
 router.route('/employees/get/all').get(
     (req, res) => {
         let courses: CourseAPI[] = [];
@@ -180,6 +245,7 @@ router.route('/employees/get/all').get(
                                             preparedEmployee.name = user.name;
                                             preparedEmployee.surname = user.surname;
                                             preparedEmployee.email = user.email;
+                                            preparedEmployee.status = user.status;
                                         }
                                     }
 
@@ -199,8 +265,10 @@ router.route('/employees/get/all').get(
                                     }
                                     preparedEmployee.user_id = employee.user_id;
                                     preparedEmployee.address = employee.address;
+                                    preparedEmployee.office = employee.office;
                                     preparedEmployee.phonenumber = employee.phonenumber;
                                     preparedEmployee.website = employee.website;
+                                    preparedEmployee.profilePicture = employee.profilePicture;
                                     preparedEmployee.biography = employee.biography;
                                     preparedEmployee.title = myTitle.name;
                                     preparedEmployee.educational = myTitle.educational;

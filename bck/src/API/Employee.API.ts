@@ -13,5 +13,6 @@ export class EmployeeAPI {
     public title: string;
     public educational: number;
     public office: string;
+    public status: number;
     public courses: CourseAPI[];
 };

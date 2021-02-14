@@ -6,6 +6,8 @@ import {Course} from "./models/database/Course";
 import {Department} from "./models/database/Department";
 import {Router} from "@angular/router";
 import {browser} from "protractor";
+import {NotificationService} from "./services/notification.service";
+import { faCoffee } from '@fortawesome/fontawesome-free';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +15,7 @@ import {browser} from "protractor";
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+
   title = 'frontend';
   sessionNull: boolean;
   sessionIsAdmin: boolean;
@@ -23,7 +26,7 @@ export class AppComponent {
   siCoursesId: number;
   otherCoursesId: number;
 
-  constructor(private userValidation: UserValidationServiceService, private courseService: CoursesService, private router: Router) {
+  constructor(private notificationService:NotificationService, private userValidation: UserValidationServiceService, private courseService: CoursesService, private router: Router) {
   }
 
   ngOnInit(): void {
@@ -88,5 +91,9 @@ export class AppComponent {
   view_course_info(courseId: number) {
     this.courseService.changeDepartmentID(courseId);
     this.router.navigate(['department/courses/info']);
+  }
+
+  view_notifications_for(number: number) {
+    this.notificationService.setNotificationID(number);
   }
 }

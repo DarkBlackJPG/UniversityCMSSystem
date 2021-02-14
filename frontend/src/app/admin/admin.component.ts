@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {AdministratorFunctionsService} from "../services/administrator-functions.service";
 
 @Component({
   selector: 'app-admin',
@@ -7,9 +8,12 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AdminComponent implements OnInit {
 
-  constructor() { }
+  constructor(private administratorService: AdministratorFunctionsService) { }
 
   ngOnInit(): void {
   }
 
+  set_register(number: number) {
+    this.administratorService.setIsStudentRegistration(number);
+  }
 }

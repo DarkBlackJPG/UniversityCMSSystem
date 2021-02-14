@@ -17,7 +17,7 @@
     </thead>
     <tbody>
     <tr *ngFor="let course of filterCourses(departmentCourses, semester)">
-      <th scope="row">{{course.id}}</th>
+      <th scope="row">{{course.coursecode}}</th>
       <td>{{course.name}}</td>
       <td>{{course.semester}}</td>
       <td *ngIf="course.type == 1">Izborni</td>

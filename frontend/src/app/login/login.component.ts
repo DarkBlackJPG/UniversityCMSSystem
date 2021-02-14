@@ -32,12 +32,17 @@ export class LoginComponent implements OnInit {
             name: response.name,
             surname: response.surname
           };
+
           localStorage.setItem('session', JSON.stringify(data));
+
           if (response.type == 0) {
             this.router.navigate(['/admin']).then(() => {
+
             });
+          } else if (response.type == 1) {
+            this.router.navigate(['/faculty']);
           } else {
-            this.router.navigate(['/user']);
+            this.router.navigate(['/student']);
           }
         } else {
           Swal.fire({

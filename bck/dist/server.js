@@ -13,6 +13,10 @@ const Department_model_1 = __importDefault(require("./models/Department.model"))
 const Employee_model_1 = __importDefault(require("./models/Employee.model"));
 const Title_model_1 = __importDefault(require("./models/Title.model"));
 const User_model_1 = __importDefault(require("./models/User.model"));
+const ProjectProposal_1 = __importDefault(require("./models/ProjectProposal"));
+const NotificationTypes_model_1 = __importDefault(require("./models/NotificationTypes.model"));
+const Notification_model_1 = __importDefault(require("./models/Notification.model"));
+const Notification_API_1 = require("./API/Notification.API");
 const app = express_1.default();
 app.use(cors_1.default());
 app.use(body_parser_1.default());
@@ -98,6 +102,64 @@ router.route('/department/course/info/get/:id').get((req, res) => {
         }
     });
 });
+router.route('/projects/get/all/proposals').get((req, res) => {
+    ProjectProposal_1.default.find({}, (error, projects) => {
+        if (error) {
+            res.status(505).json(error);
+            console.log(error.message);
+        }
+        else {
+            res.status(200).json(projects);
+        }
+    });
+});
+router.route('/titles/get/all').get((req, res) => {
+    let titles = [];
+    Title_model_1.default.find({}, (titleError, titleResult) => {
+        if (titleError) {
+            res.status(505).json(titleError);
+            console.log(titleError.message);
+        }
+        else {
+            titles = titleResult;
+            res.status(200).json(titles);
+        }
+    });
+});
+router.route('/notifications/get/all/:id').get((req, res) => {
+    const notificationType = req.params.id;
+    let notificationTypesNames;
+    NotificationTypes_model_1.default.find({ id: notificationType }, (error, types) => {
+        if (error) {
+            res.status(505).json(error);
+            console.log(error.message);
+        }
+        else {
+            notificationTypesNames = types;
+        }
+    }).then(() => {
+        Notification_model_1.default.find({ notification_type: notificationType }, (error, notifications) => {
+            if (error) {
+                res.status(505).json(error);
+                console.log(error.message);
+            }
+            else {
+                let notifs = [];
+                for (let i = 0; i < notifications.length; i++) {
+                    const tempModel = new Notification_API_1.NotificationAPI();
+                    tempModel.id = notifications[i].id;
+                    tempModel.date = notifications[i].date;
+                    tempModel.description = notifications[i].description;
+                    tempModel.title = notifications[i].title;
+                    tempModel.notification_type = notifications[i].notification_type;
+                    tempModel.notification_type_name = notificationTypesNames.name;
+                    notifs.push(tempModel);
+                }
+                res.status(200).json(notifs);
+            }
+        });
+    });
+});
 router.route('/employees/get/all').get((req, res) => {
     let courses = [];
     let titles = [];
@@ -151,6 +213,7 @@ router.route('/employees/get/all').get((req, res) => {
                                     preparedEmployee.name = user.name;
                                     preparedEmployee.surname = user.surname;
                                     preparedEmployee.email = user.email;
+                                    preparedEmployee.status = user.status;
                                 }
                             }
                             const myCourses = [];
@@ -167,8 +230,10 @@ router.route('/employees/get/all').get((req, res) => {
                             }
                             preparedEmployee.user_id = employee.user_id;
                             preparedEmployee.address = employee.address;
+                            preparedEmployee.office = employee.office;
                             preparedEmployee.phonenumber = employee.phonenumber;
                             preparedEmployee.website = employee.website;
+                            preparedEmployee.profilePicture = employee.profilePicture;
                             preparedEmployee.biography = employee.biography;
                             preparedEmployee.title = myTitle.name;
                             preparedEmployee.educational = myTitle.educational;

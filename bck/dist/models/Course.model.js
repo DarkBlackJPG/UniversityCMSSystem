@@ -8,7 +8,7 @@ const Schema = mongoose_1.default.Schema;
 const Course = new Schema({
     id: { type: Number },
     name: { type: String },
-    coursename: { type: String },
+    coursecode: { type: String },
     acronym: { type: String },
     semester: { type: Number },
     type: { type: Number },

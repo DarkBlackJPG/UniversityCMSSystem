@@ -1,0 +1,37 @@
+
+<div class="row justify-content-center p-0" *ngFor="let project of projects">
+  <div class="card col-md-6 text-white bg-dark m-3" >
+    <div class="card-header font-weight-bold">{{project.title}}</div>
+    <div class="card-body">
+      <table>
+        <tr>
+          <td>
+            <b class="text-danger">Mentor</b>
+          </td>
+          <td>
+            {{project.mentor}}
+          </td>
+        </tr>
+        <br>
+        <tr>
+        <td>
+          <b class="text-danger">Oblast</b>
+        </td>
+        <td>
+          {{project.field}}
+        </td>
+      </tr>
+        <br>
+        <tr>
+          <td>
+            <b class="text-danger">Kratak opis</b>
+          </td>
+          <td>
+            {{project.description}}
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+</div>

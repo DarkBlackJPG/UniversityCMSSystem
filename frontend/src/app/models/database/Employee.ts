@@ -24,6 +24,7 @@ export class Employee {
   phonenumber: string;
   website: string;
   biography: string;
+  status: number;
   title: string;
   profilePicture: string;
   educational: number;

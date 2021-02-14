@@ -2,7 +2,7 @@ export class Course
 {
   id: number;
   name: string;
-  coursename: string;
+  coursecode: string;
   acronym: string;
   semester: number;
   type: number;
