@@ -13,6 +13,11 @@ const Course = new Schema({
     semester: { type: Number },
     type: { type: Number },
     department: { type: Number },
+    courseDetails: { type: Array },
+    isMapped: { type: Boolean },
+    isMaster: { type: Boolean },
+    engagement: { type: Array },
+    notifications: { type: Array },
 });
 exports.default = mongoose_1.default.model('Course', Course, 'courses');
 //# sourceMappingURL=Course.model.js.map

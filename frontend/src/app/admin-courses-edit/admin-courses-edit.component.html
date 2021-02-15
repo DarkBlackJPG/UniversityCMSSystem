@@ -1,34 +1,4 @@
-<nav class="navbar sticky-top  navbar-expand-lg navbar-light bg-secondary">
-  <div class="container-fluid">
-    <a class="navbar-brand" routerLink="">Admin dashboard | </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav2"
-            aria-controls="navbarNav2" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav2">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" routerLink="/admin/accounts/all">Azuriranje naloga</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" (click)="set_register(0)" routerLink="/admin/student/register">Registracija
-            studenata</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" (click)="set_register(1)" routerLink="/admin/faculty/register">Registracija
-            zaposlenih</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" routerLink="/admin/courses">Predmeti</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" routerLink="/admin/courses/engagement_plan">Plan
-            angazovanja</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
+
 
 <div class="row mt-3 justify-content-center">
   <div class="col-5">
@@ -55,7 +25,7 @@
   </div>
 </div>
 
-<div class="row mt-3 justify-content-center animate__animated invisible" id="new_course_card" >
+<div *ngIf="addNewCourse" class="row mt-3 justify-content-center" id="new_course_card" >
   <div class="col-5">
     <div class="card shadow text-white bg-dark mb-3">
       <div class="card-header">
@@ -70,13 +40,13 @@
             </td>
             <td>
               <div class="form-check">
-                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                <input required class="form-check-input" value="false" [(ngModel)]="newCourseDataObject.type"  type="radio" name="flexRadioDefault" checked id="flexRadioDefault1">
                 <label class="form-check-label" for="flexRadioDefault1">
                   Obavezan
                 </label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
+                <input class="form-check-input" value="true" [(ngModel)]="newCourseDataObject.type" type="radio" name="flexRadioDefault"  id="flexRadioDefault2">
                 <label class="form-check-label" for="flexRadioDefault2">
                   Izborni
                 </label>
@@ -85,11 +55,19 @@
           </tr>
           <tr>
             <td>
-              Sifra predmeta
+              Sifra predmeta za SI ili za Master
             </td>
             <td>
-              <input type="text" class="form-control" placeholder="Na primer: 13S142MIPS">
+              <input [required]="newCourseDataObject.isMaster || newCourseDataObject.isSI" type="text" class="form-control" [(ngModel)]="newCourseDataObject.coursecode_SI" placeholder="Na primer: 13S142MIPS">
 
+            </td>
+          </tr>
+          <tr >
+            <td>
+              Sifra predmeta za RTI
+            </td>
+            <td>
+              <input [required]="newCourseDataObject.isRTI" [disabled]="newCourseDataObject.isMaster" type="text" class="form-control" [(ngModel)]="newCourseDataObject.coursecode_RTI" placeholder="Na primer: 13S142MIPS">
             </td>
           </tr>
           <tr>
@@ -98,13 +76,13 @@
             </td>
             <td>
               <div class="form-check">
-                <input class="form-check-input" type="radio" name="flexRadioDefault1" id="flexRadioDefault3">
+                <input required class="form-check-input" type="radio" name="flexRadioDefault1" value="false" [(ngModel)]="newCourseDataObject.isMaster"  checked id="flexRadioDefault3">
                 <label class="form-check-label" for="flexRadioDefault3">
                   Osnovne akademske
                 </label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="radio" name="flexRadioDefault1" id="flexRadioDefault4" checked>
+                <input class="form-check-input" value="true" [(ngModel)]="newCourseDataObject.isMaster" type="radio" name="flexRadioDefault1"  id="flexRadioDefault4">
                 <label class="form-check-label" for="flexRadioDefault4">
                   Master studije
                 </label>
@@ -117,13 +95,13 @@
             </td>
             <td>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                <input class="form-check-input" [disabled]="newCourseDataObject.isMaster"  type="checkbox" value="" [(ngModel)]="newCourseDataObject.isSI" id="flexCheckDefault">
                 <label class="form-check-label" for="flexCheckDefault">
                   Softversko inzenjerstvo
                 </label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>
+                <input class="form-check-input" type="checkbox" [disabled]="newCourseDataObject.isMaster" [(ngModel)]="newCourseDataObject.isRTI" id="flexCheckChecked" checked>
                 <label class="form-check-label" for="flexCheckChecked">
                   Racunarska tehnika i informatika
                 </label>
@@ -135,7 +113,14 @@
               Semestar
             </td>
             <td>
-              <input type="number" class="form-control">
+              <input required type="number" [(ngModel)]="newCourseDataObject.semester" class="form-control">
+            </td>
+          </tr> <tr>
+            <td>
+              ESPB
+            </td>
+            <td>
+              <input required type="number" [(ngModel)]="newCourseDataObject.ESPB" class="form-control">
             </td>
           </tr>
           <tr>
@@ -143,7 +128,21 @@
               Fond casova
             </td>
             <td>
-              <input type="number" class="form-control">
+              <input required type="text" [(ngModel)]="newCourseDataObject.classCount" placeholder="P+V+L" class="form-control">
+            </td>
+          </tr><tr>
+            <td>
+              Akronim
+            </td>
+            <td>
+              <input required type="text" [(ngModel)]="newCourseDataObject.acronym" placeholder="P+V+L" class="form-control">
+            </td>
+          </tr><tr>
+            <td>
+              Pun naziv
+            </td>
+            <td>
+              <input required type="text" [(ngModel)]="newCourseDataObject.name" class="form-control">
             </td>
           </tr>
           <tr>
@@ -151,7 +150,7 @@
               Uslovi za polaganje predmeta
             </td>
             <td class="text-dark">
-              <ckeditor [editor]="Editor"></ckeditor>
+              <ckeditor required [editor]="Editor" [(ngModel)]="newCourseDataObject.conditions"></ckeditor>
             </td>
           </tr>
           <tr>
@@ -159,7 +158,7 @@
               Cilj predmeta
             </td>
             <td class="text-dark">
-              <ckeditor [editor]="Editor"></ckeditor>
+              <ckeditor required [editor]="Editor" [(ngModel)]="newCourseDataObject.purpose"></ckeditor>
             </td>
           </tr>
           <tr>
@@ -167,7 +166,7 @@
               Ishod predmeta
             </td>
             <td class="text-dark">
-              <ckeditor [editor]="Editor"></ckeditor>
+              <ckeditor [editor]="Editor" [(ngModel)]="newCourseDataObject.outcome"></ckeditor>
             </td>
           </tr>
           <tr>
@@ -175,7 +174,7 @@
               Termini odrzavanja predavanja
             </td>
             <td class="text-dark">
-              <ckeditor [editor]="Editor"></ckeditor>
+              <ckeditor required [editor]="Editor" [(ngModel)]="newCourseDataObject.lectureDates"></ckeditor>
             </td>
           </tr>
           <tr>
@@ -183,7 +182,7 @@
               Termini odrzavanja vezbi
             </td>
             <td class="text-dark">
-              <ckeditor [editor]="Editor"></ckeditor>
+              <ckeditor required [editor]="Editor" [(ngModel)]="newCourseDataObject.auditoryExcercisesDates"></ckeditor>
             </td>
           </tr>
           <tr>
@@ -191,7 +190,7 @@
               Informacije o laboratorijskim vezbama
             </td>
             <td class="text-dark">
-              <ckeditor [editor]="Editor"></ckeditor>
+              <ckeditor [editor]="Editor" [(ngModel)]="newCourseDataObject.labInfo"></ckeditor>
             </td>
           </tr>
           <tr>
@@ -199,43 +198,10 @@
               Seminarski, domaci, projekti
             </td>
             <td class="text-dark">
-              <ckeditor [editor]="Editor"></ckeditor>
+              <ckeditor [editor]="Editor" [(ngModel)]="newCourseDataObject.homeworks"></ckeditor>
             </td>
           </tr>
-          <tr>
-            <td>
-              Angazovani na predmetu
-            </td>
-            <td class="text-center justify-content-center">
-              <table>
-                <tr>
-                  <td style="padding: 0px">
-                    <button class="btn btn-outline-info" (click)="add_new_employee()">Dodaj zaposlenog</button>
-                  </td>
-                  <td style="padding: 0px"><input
-                    id="faculty_focus"
-                    type="text"
-                    class="form-control ml-3"
-                    [(ngModel)]="newTeacher"
-                    [ngbTypeahead]="search_students"
-                    (focus)="focus_students$.next($any($event).target.value)"
-                    (click)="click_students$.next($any($event).target.value)"
-                    #instance_faculty="ngbTypeahead"
-                  /></td>
-                </tr>
-              </table>
 
-
-              <ol>
-                <li
-                  *ngFor="let employee of newCourseTeachers">
-
-                  {{employee.name}} {{employee.surname}} &nbsp; &nbsp;
-                  <span (click)="removeEmployee(employee)"> <i class="far text-danger fa-trash-alt"></i></span>
-                </li>
-              </ol>
-            </td>
-          </tr>
           <tr>
             <td colspan="2">
               <button class="btn btn-outline-success" (click)="add_course()">
@@ -250,7 +216,7 @@
   </div>
 </div>
 
-<div class="row mt-3 justify-content-center animate__animated invisible" id="update_course_card" >
+<div class="row mt-3 justify-content-center animate__animated d-none" id="update_course_card" >
   <div class="col-5">
     <div class="card shadow text-white bg-dark mb-3">
       <div class="card-header">
@@ -258,150 +224,7 @@
         <button class="btn btn-outline-danger float-right" (click)="cancel_new_course()">Odustani</button>
       </div>
       <div class="card-body p-0">
-        <table class="col-12 p-4">
-          <tr>
-            <td>
-              Tip predmeta
-            </td>
-            <td>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-                <label class="form-check-label" for="flexRadioDefault1">
-                  Obavezan
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
-                <label class="form-check-label" for="flexRadioDefault2">
-                  Izborni
-                </label>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Sifra predmeta
-            </td>
-            <td>
-              <input type="text" class="form-control" placeholder="Na primer: 13S142MIPS">
 
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Semestar
-            </td>
-            <td>
-              <input type="number" class="form-control">
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Fond casova
-            </td>
-            <td>
-              <input type="number" class="form-control">
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Uslovi za polaganje predmeta
-            </td>
-            <td class="text-dark">
-              <ckeditor [editor]="Editor"></ckeditor>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Cilj predmeta
-            </td>
-            <td class="text-dark">
-              <ckeditor [editor]="Editor"></ckeditor>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Ishod predmeta
-            </td>
-            <td class="text-dark">
-              <ckeditor [editor]="Editor"></ckeditor>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Termini odrzavanja predavanja
-            </td>
-            <td class="text-dark">
-              <ckeditor [editor]="Editor"></ckeditor>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Termini odrzavanja vezbi
-            </td>
-            <td class="text-dark">
-              <ckeditor [editor]="Editor"></ckeditor>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Informacije o laboratorijskim vezbama
-            </td>
-            <td class="text-dark">
-              <ckeditor [editor]="Editor"></ckeditor>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Seminarski, domaci, projekti
-            </td>
-            <td class="text-dark">
-              <ckeditor [editor]="Editor"></ckeditor>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Angazovani na predmetu
-            </td>
-            <td class="text-center justify-content-center">
-              <table>
-                <tr>
-                  <td style="padding: 0px">
-                    <button class="btn btn-outline-info" (click)="add_new_employee()">Dodaj zaposlenog</button>
-                  </td>
-                  <td style="padding: 0px"><input
-                    id="faculty_focus"
-                    type="text"
-                    class="form-control ml-3"
-                    [(ngModel)]="newTeacher"
-                    [ngbTypeahead]="search_students"
-                    (focus)="focus_students$.next($any($event).target.value)"
-                    (click)="click_students$.next($any($event).target.value)"
-                    #instance_faculty="ngbTypeahead"
-                  /></td>
-                </tr>
-              </table>
-
-
-              <ol>
-                <li
-                  *ngFor="let employee of newCourseTeachers">
-
-                  {{employee.name}} {{employee.surname}} &nbsp; &nbsp;
-                  <span (click)="removeEmployee(employee)"> <i class="far text-danger fa-trash-alt"></i></span>
-                </li>
-              </ol>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2">
-              <button class="btn btn-outline-success" (click)="add_course()">
-                Potvrdi
-              </button>
-            </td>
-
-          </tr>
-        </table>
       </div>
     </div>
   </div>

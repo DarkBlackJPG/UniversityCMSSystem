@@ -7,5 +7,9 @@ export class CourseAPI {
     public semester: number;
     public type: number;
     public department: number;
-
+    public courseDetails: any[];
+    public isMapped: boolean;
+    public isMaster: boolean;
+    public engagement: any[];
+    public notifications: any[];
 }

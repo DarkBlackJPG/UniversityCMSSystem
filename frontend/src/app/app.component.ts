@@ -7,7 +7,8 @@ import {Department} from "./models/database/Department";
 import {Router} from "@angular/router";
 import {browser} from "protractor";
 import {NotificationService} from "./services/notification.service";
-import { faCoffee } from '@fortawesome/fontawesome-free';
+import {faCoffee} from '@fortawesome/fontawesome-free';
+import {AdministratorFunctionsService} from "./services/administrator-functions.service";
 
 @Component({
   selector: 'app-root',
@@ -26,7 +27,7 @@ export class AppComponent {
   siCoursesId: number;
   otherCoursesId: number;
 
-  constructor(private notificationService:NotificationService, private userValidation: UserValidationServiceService, private courseService: CoursesService, private router: Router) {
+  constructor(private adminService: AdministratorFunctionsService, private notificationService: NotificationService, private userValidation: UserValidationServiceService, private courseService: CoursesService, private router: Router) {
   }
 
   ngOnInit(): void {
@@ -95,5 +96,9 @@ export class AppComponent {
 
   view_notifications_for(number: number) {
     this.notificationService.setNotificationID(number);
+  }
+
+  set_register(number: number) {
+    this.adminService.setIsStudentRegistration(number);
   }
 }

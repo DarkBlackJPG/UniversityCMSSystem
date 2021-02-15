@@ -34,7 +34,10 @@ const routes: Routes = [
   {
     path: 'department/courses/info',
     component: DepartmentCoursesComponent,
-
+  },
+  {
+    path: 'courses/master/info',
+    component: DepartmentCoursesComponent,
   },
   {
     path: 'employee/all',

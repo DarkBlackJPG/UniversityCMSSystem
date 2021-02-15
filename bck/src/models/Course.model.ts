@@ -10,6 +10,11 @@ const Course = new Schema({
     semester: {type: Number},
     type: {type: Number},
     department: {type: Number},
+    courseDetails: {type: Array},
+    isMapped: {type: Boolean},
+    isMaster: {type: Boolean},
+    engagement: {type: Array},
+    notifications: {type: Array},
 });
 
 export default mongoose.model('Course', Course, 'courses');

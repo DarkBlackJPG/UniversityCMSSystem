@@ -1,28 +1,227 @@
-<nav class="navbar sticky-top  navbar-expand-lg navbar-light bg-secondary">
-  <div class="container-fluid">
-    <a class="navbar-brand" routerLink="">Admin dashboard | </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav2"
-            aria-controls="navbarNav2" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav2">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" routerLink="/admin/accounts/all">Azuriranje naloga</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" (click)="set_register(0)" routerLink="/admin/student/register">Registracija studenata</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" (click)="set_register(1)" routerLink="/admin/faculty/register">Registracija zaposlenih</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" routerLink="/admin/courses">Predmeti</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" routerLink="/admin/courses/engagement_plan">Plan angazovanja</a>
-        </li>
-      </ul>
+
+<div class="row justify-content-center">
+  <div class="card p-0 bg-dark text-white col-md-5 mt-4">
+    <div class="card-header">
+      <h1 class="card-title">Odabir predmeta</h1>
+    </div>
+    <div class="card-body">
+
+      <div class="mb-3 text-center justify-content-center">
+        <div class="justify-content-center form-inline">
+          <label class="col-3">
+            Odaberite odsek
+          </label>
+          <select (change)="filter_courses($event)" class="form-control col-5">
+            <option value="3">
+              Svi kursevi
+            </option>
+            <option value="1">
+              Softversko inzenjerstvo
+            </option>
+            <option value="0">
+              Racunarska tehnika i informatika
+            </option>
+            <option value="2">
+              Master studije
+            </option>
+          </select>
+        </div>
+        <div class="form-inline justify-content-center">
+          <select [(ngModel)]="selectedCourse" class="form-control col-5">
+            <option *ngFor="let course of viewableCourses" [value]="course.coursecode">
+              {{course.coursecode}} {{course.name}}
+            </option>
+          </select>
+          <button class="btn m-3 btn-outline-warning" (click)="course_selected()">Prikazi</button>
+        </div>
+      </div>
     </div>
   </div>
-</nav>
+</div>
+
+<div *ngIf="selectedCourseObject != null" class="row justify-content-center">
+  <div class="card p-0 bg-dark text-white col-md-5 mt-4">
+    <div
+      class="card-header">
+      <h1 class="card-title">
+        Postojeci plan angazovanja za {{selectedCourseObject.name}}
+      </h1>
+      <span class="text-info" *ngIf="selectedCourseObject.isMaster">
+        <h5> Master studije</h5>
+      </span>
+      <span class="text-info" *ngIf="!selectedCourseObject.isMaster && selectedCourseObject.department == 1">
+        <h5> Softversko inzenjerstvo</h5>
+      </span>
+      <span class="text-info" *ngIf="!selectedCourseObject.isMaster && selectedCourseObject.department == 0">
+        <h5>Racunarska tehinka i informatika</h5>
+      </span>
+    </div>
+    <div class="card-body">
+      <div class="mb-3 text-center row justify-content-center">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#exampleModal">
+          Angazovanje studenata
+        </button>
+
+        <table *ngIf="courseGroups !== undefined && courseGroups.length > 0" class="table mt-5 table-striped table-dark">
+          <thead>
+          <tr>
+            <th scope="col">Naziv grupe za predavanja</th>
+            <th scope="col">Predavac</th>
+            <th scope="col">Naziv grupe za vezbe</th>
+            <th scope="col">Predavac</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let group of courseGroups">
+            <td>{{group.lectureGroupName}}</td>
+            <td>{{convert_lecturer_id(group.lectureLecturer)}}</td>
+            <td>{{group.auditoryExcercisesGroupName}}</td>
+            <td>{{convert_lecturer_id(group.auditoryExcercisesLecturer)}}</td>
+          </tr>
+          </tbody>
+        </table>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog text-dark" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Angazovani studenti na predmetu {{selectedCourse}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="row">
+                  <div class="form-inline">
+                    <label class="col-3">Dodaj novog studenta</label>
+                    <input type="text" [(ngModel)]="newEnrolledStudentIndex" placeholder="Uneti indeks studenta (GGGG/BBBB)" class="col-9 form-control">
+
+                  </div>
+
+                </div>
+                <div class="row justify-content-center text-center">
+                  <button class="btn btn-primary" (click)="add_new_student()">Dodaj</button>
+                </div>
+                <div class="row mt-2">
+                  <table *ngIf="enrolledStudents.length > 0" class="table table-dark table-striped table-hover text-center">
+                    <thead>
+                    <tr>
+                      <th scope="col">Index</th>
+                      <th scope="col">Ime</th>
+                      <th scope="col">Prezime</th>
+                      <th scope="col">Izbrisi sa predmeta</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let student of enrolledStudents">
+                      <td>
+                        {{student.index}}
+                      </td>
+                      <td>
+                        {{student.name}}
+                      </td>
+                      <td>
+                        {{student.surname}}
+                      </td>
+                      <td>
+                        <button class="btn btn-outline-danger" (click)="remove_student_from_course(student)"><i class="fas fa-skull"></i></button>
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                  <div *ngIf="enrolledStudents.length == 0">
+                    <h3>Predmet trenutno nije pracen od strane studenata</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="selectedCourseObject != null" class="row justify-content-center">
+  <div class="card p-0 bg-dark text-white col-md-5 mt-4">
+    <div
+      class="card-header">
+      <h1 class="card-title">
+        {{selectedCourseObject.name}}
+      </h1>
+      <span class="text-info" *ngIf="selectedCourseObject.isMaster">
+        <h5> Master studije</h5>
+      </span>
+      <span class="text-info" *ngIf="!selectedCourseObject.isMaster && selectedCourseObject.department == 1">
+        <h5> Softversko inzenjerstvo</h5>
+      </span>
+      <span class="text-info" *ngIf="!selectedCourseObject.isMaster && selectedCourseObject.department == 0">
+        <h5>Racunarska tehinka i informatika</h5>
+      </span>
+    </div>
+    <div class="card-body">
+      <div class="mb-3 text-center row justify-content-center">
+        <div class="form-inline">
+          <label for="exampleFormControlInput1" class="form-label mr-2">Unesite broj grupa</label>
+          <input type="number" class="form-control" [(ngModel)]="numberOfGroups" id="exampleFormControlInput1" placeholder="Broj grupa">
+          <button (click)="generate_groups()" class="btn ml-2 btn-outline-warning">Generisi</button>
+        </div>
+      </div>
+      <br>
+      <div class="row" *ngFor="let item of courseGroups; let i = index">
+        <h3>
+          Grupa {{i + 1}}
+        </h3>
+        <table class="col-12 justify-content-center  text-center">
+          <tr>
+            <td colspan="2"><h5>Predavanja</h5></td>
+          </tr>
+          <tr>
+            <td>Naziv grupe</td>
+            <td>
+              <input [(ngModel)]="item.lectureGroupName" class="form-control" type="text">
+            </td>
+          </tr>
+          <tr>
+            <td>Predavac</td>
+            <td>
+              <select [(ngModel)]="item.lectureLecturer" class="form-control">
+                <option *ngFor="let lecturer of lecturers" [value]="lecturer.user_id">
+                  {{lecturer.name}} {{lecturer.surname}}
+                </option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2"><h5>Vezbe</h5></td>
+          </tr>
+          <tr>
+            <td>Naziv grupe</td>
+            <td>
+              <input [(ngModel)]="item.auditoryExcercisesGroupName" class="form-control" type="text">
+            </td>
+          </tr>
+          <tr>
+            <td>Predavac</td>
+            <td>
+              <select [(ngModel)]="item.auditoryExcercisesLecturer" class="form-control">
+                <option *ngFor="let lecturer of lecturers" [value]="lecturer.user_id">
+                  {{lecturer.name}} {{lecturer.surname}}
+                </option>
+              </select>
+            </td>
+          </tr>
+        </table>
+
+      </div>
+      <button *ngIf="courseGroups.length > 0" class="btn mt-2 btn-outline-success" (click)="submit_groups()">Potvrdi</button>
+
+    </div>
+  </div>
+</div>
+
