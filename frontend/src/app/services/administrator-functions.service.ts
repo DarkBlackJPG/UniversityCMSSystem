@@ -4,6 +4,8 @@ import {BehaviorSubject} from "rxjs";
 import {CourseGroup} from "../models/appdata/CourseGroup";
 import {Course} from "../models/database/Course";
 import {NewCourseData} from "../models/appdata/NewCourseData";
+import {UserRegistrationData} from "../models/appdata/UserRegistrationData";
+import {EmployeeRegistration} from "../models/appdata/EmployeeRegistration";
 
 @Injectable({
   providedIn: 'root'
@@ -54,7 +56,7 @@ export class AdministratorFunctionsService {
   }
 
   updateEmployee(employee: any) {
-
+    return this.http.post(`${this.url}/employees/update`, {data: employee});
   }
 
   enrollStudent(course: string, index: string) {
@@ -84,7 +86,18 @@ export class AdministratorFunctionsService {
     return this.http.get(`${this.url}/course/${selectedCourseObject.coursecode}/get/engagement`);
   }
 
-  insert_new_course(newCourseDataObject: NewCourseData) {
+  insert_new_course(newCourseDataObject: Course[]) {
     return this.http.post(`${this.url}/course/create`, {data: newCourseDataObject});
+  }
+
+  update_existing_course(course: Course, coursecode: string) {
+    return this.http.post(`${this.url}/course/update`, {data: course, coursecode: coursecode});
+  }
+
+  add_new_student(userData: UserRegistrationData) {
+    return this.http.post(`${this.url}/students/create/new`, {data: userData});
+  }
+  add_new_employee(userData: EmployeeRegistration) {
+    return this.http.post(`${this.url}/employees/create/new`, {data: userData});
   }
 }

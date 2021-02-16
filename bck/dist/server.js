@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -7,7 +16,6 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
-const Employee_API_1 = require("./API/Employee.API");
 const Enrollment_API_1 = require("./API/Enrollment.API");
 const Notification_API_1 = require("./API/Notification.API");
 const Student_API_1 = require("./API/Student.API");
@@ -22,6 +30,7 @@ const ProjectProposal_1 = __importDefault(require("./models/ProjectProposal"));
 const Student_model_1 = __importDefault(require("./models/Student.model"));
 const Title_model_1 = __importDefault(require("./models/Title.model"));
 const User_model_1 = __importDefault(require("./models/User.model"));
+const User_model_2 = __importDefault(require("./models/User.model"));
 const app = express_1.default();
 app.use(cors_1.default());
 app.use(body_parser_1.default());
@@ -38,13 +47,85 @@ router.route('/login').post((request, response) => {
     User_model_1.default.findOne({
         password,
         username,
+        status: 1,
     }, (error, user) => {
         if (error) {
             response.status(505).json(error);
             console.log(error.message);
         }
         else {
-            response.status(200).json(user);
+            if (user !== undefined) {
+                if (user.type === 0) {
+                    response.status(200).json({
+                        id: user.id,
+                        type: user.type,
+                        username: user.username,
+                        name: user.name,
+                        surname: user.surname,
+                    });
+                }
+                else if (user.type === 1) {
+                    User_model_2.default.aggregate([
+                        {
+                            $match: {
+                                id: user.id,
+                            },
+                        }, {
+                            $lookup: {
+                                from: 'employees',
+                                localField: 'id',
+                                foreignField: 'user_id',
+                                as: 'employee_data',
+                            },
+                        }, {
+                            $unwind: {
+                                path: '$employee_data',
+                                preserveNullAndEmptyArrays: true,
+                            },
+                        }
+                    ], (err, users) => {
+                        response.status(200).json(users[0]);
+                    });
+                }
+                else if (user.type === 2) {
+                    User_model_2.default.aggregate([
+                        {
+                            $match: {
+                                id: user.id,
+                            },
+                        }, {
+                            $lookup: {
+                                from: 'students',
+                                localField: 'id',
+                                foreignField: 'user_id',
+                                as: 'student_data',
+                            },
+                        }, {
+                            $unwind: {
+                                path: '$student_data',
+                                preserveNullAndEmptyArrays: true,
+                            },
+                        }, {
+                            $lookup: {
+                                from: 'enrolled_students',
+                                localField: 'id',
+                                foreignField: 'user_id',
+                                as: 'enrollment_data',
+                            },
+                        }, {
+                            $unwind: {
+                                path: '$enrollment_data',
+                                preserveNullAndEmptyArrays: true,
+                            },
+                        },
+                    ], (err, users) => {
+                        response.status(200).json(users[0]);
+                    });
+                }
+            }
+            else {
+                response.status(500);
+            }
         }
     });
 });
@@ -222,90 +303,89 @@ router.route('/notifications/get/all/:id').get((req, res) => {
     });
 });
 router.route('/employees/get/all').get((req, res) => {
-    let courses = [];
-    let titles = [];
-    let users = [];
-    User_model_1.default.find({}, (userError, userResult) => {
-        if (userError) {
-            res.status(505).json(userError);
-            console.log(userError.message);
-        }
-        else {
-            users = userResult;
-        }
-    }).then(() => {
-        Course_model_1.default.find({}, (courseError, coursesResult) => {
-            if (courseError) {
-                res.status(505).json(courseError);
-                console.log(courseError.message);
-            }
-            else {
-                courses = coursesResult;
-            }
-        }).then(() => {
-            Title_model_1.default.find({}, (titleError, titleResult) => {
-                if (titleError) {
-                    res.status(505).json(titleError);
-                    console.log(titleError.message);
-                }
-                else {
-                    titles = titleResult;
-                }
+    User_model_2.default.aggregate([
+        {
+            $match: {
+                type: 1.0,
+            },
+        },
+        {
+            $lookup: {
+                from: 'employees',
+                localField: 'id',
+                foreignField: 'user_id',
+                as: 'employee_data',
+            },
+        },
+        {
+            $unwind: {
+                path: '$employee_data',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+        {
+            $lookup: {
+                from: 'courses',
+                localField: 'employee_data.courses.coursecode',
+                foreignField: 'coursecode',
+                as: 'course_data',
+            },
+        },
+        {
+            $lookup: {
+                from: 'employee_types',
+                localField: 'employee_data.title',
+                foreignField: 'id',
+                as: 'title',
+            },
+        },
+        {
+            $unwind: {
+                path: '$title',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+    ], (err, das) => {
+        console.log(err);
+        res.status(200).json(das);
+    });
+});
+router.route('/employees/update').post((req, res) => {
+    const employee = req.body.data;
+    User_model_2.default.findOne({
+        id: employee.id,
+        type: employee.type,
+    }, (err, doc) => {
+        if (doc !== undefined) {
+            User_model_2.default.updateOne({
+                id: employee.id,
+            }, {
+                $set: {
+                    name: employee.name,
+                    surname: employee.surname,
+                    email: employee.email,
+                    status: employee.status,
+                },
             }).then(() => {
-                Employee_model_1.default.find({}, (employeeError, employeeResult) => {
-                    if (employeeError) {
-                        res.status(505).json(employeeError);
-                        console.log(employeeError.message);
-                    }
-                    else {
-                        const preparedEmployees = [];
-                        for (const employee of employeeResult) {
-                            const preparedEmployee = new Employee_API_1.EmployeeAPI();
-                            const titleId = Number(employee.title);
-                            let myTitle;
-                            for (const title of titles) {
-                                if (title.id === titleId) {
-                                    myTitle = title;
-                                    break;
-                                }
-                            }
-                            for (const user of users) {
-                                if (user.id === employee.user_id) {
-                                    preparedEmployee.name = user.name;
-                                    preparedEmployee.surname = user.surname;
-                                    preparedEmployee.email = user.email;
-                                    preparedEmployee.status = user.status;
-                                }
-                            }
-                            const myCourses = [];
-                            for (const course of employee.courses) {
-                                // tslint:disable-next-line:prefer-const
-                                let tempCourse;
-                                for (let i = 0; i < courses.length; i++) {
-                                    if (course.id === courses[i].id) {
-                                        tempCourse = courses[i];
-                                        myCourses.push(tempCourse);
-                                        break;
-                                    }
-                                }
-                            }
-                            preparedEmployee.user_id = employee.user_id;
-                            preparedEmployee.address = employee.address;
-                            preparedEmployee.office = employee.office;
-                            preparedEmployee.phonenumber = employee.phonenumber;
-                            preparedEmployee.website = employee.website;
-                            preparedEmployee.profilePicture = employee.profilePicture;
-                            preparedEmployee.biography = employee.biography;
-                            preparedEmployee.title = myTitle.name;
-                            preparedEmployee.educational = myTitle.educational;
-                            preparedEmployee.courses = myCourses;
-                            preparedEmployees.push(preparedEmployee);
-                        }
-                        res.status(200).json(preparedEmployees);
-                    }
+                Employee_model_1.default.updateOne({
+                    user_id: employee.id,
+                }, {
+                    $set: {
+                        profilePicture: 'default.jpg',
+                        address: employee.employee_data.address,
+                        website: employee.employee_data.website,
+                        phonenumber: employee.employee_data.phonenumber,
+                        biography: employee.employee_data.biography,
+                        title: employee.title.id,
+                    },
+                }).then(() => {
+                    res.status(200).json({ message: 'ok' });
                 });
             });
-        });
+        }
+        else {
+            res.status(200).json({ message: 'Korisnik ne postoji!' });
+        }
     });
 });
 router.route('/course/student/enroll').post((req, res) => {
@@ -370,166 +450,80 @@ router.route('/course/student/remove').post((req, res) => {
     });
 });
 router.route('/course/create').post((req, res) => {
-    const courseData = req.body.data;
-    if (courseData.isMapped) {
-        Course_model_2.default.find({
-            coursecode: {
-                $in: [
-                    courseData.coursecode_SI,
-                    courseData.coursecode_RTI,
-                ],
-            },
-        }, (error, response) => {
-            if (response.length === 0) {
-                const newCourse = new Course_model_2.default({
-                    id: -1,
-                    name: courseData.name,
-                    coursecode: courseData.coursecode_SI,
-                    acronym: courseData.acronym,
-                    semester: courseData.semester,
-                    type: courseData.type ? 1 : 0,
-                    department: 1,
-                    courseDetails: [
-                        {
-                            conditions: courseData.conditions,
-                            purpose: courseData.purpose,
-                            outcome: courseData.outcome,
-                            lectureDates: courseData.lectureDates,
-                            auditoryExcercisesDates: courseData.auditoryExcercisesDates,
-                            labInfo: courseData.labInfo,
-                            homework: courseData.homeworks,
-                            lectureNotes: [],
-                            excercisesNotes: [],
-                            labNotes: [],
-                            homeworkNotes: [],
-                        },
-                    ],
-                    isMapped: true,
-                    mapHash: -1,
-                    engagement: [],
-                    isMaster: false,
-                    notifications: [],
-                });
-                newCourse.save().then((doc) => {
-                    if (newCourse) {
-                        const newCourseRTI = new Course_model_2.default({
-                            id: -1,
-                            name: courseData.name,
-                            coursecode: courseData.coursecode_RTI,
-                            acronym: courseData.acronym,
-                            semester: courseData.semester,
-                            type: courseData.type ? 1 : 0,
-                            department: 0,
-                            courseDetails: [
-                                {
-                                    conditions: courseData.conditions,
-                                    purpose: courseData.purpose,
-                                    outcome: courseData.outcome,
-                                    lectureDates: courseData.lectureDates,
-                                    auditoryExcercisesDates: courseData.auditoryExcercisesDates,
-                                    labInfo: courseData.labInfo,
-                                    homework: courseData.homeworks,
-                                    lectureNotes: [],
-                                    excercisesNotes: [],
-                                    labNotes: [],
-                                    homeworkNotes: [],
-                                },
-                            ],
-                            isMapped: true,
-                            mapHash: -1,
-                            engagement: [],
-                            isMaster: false,
-                            notifications: [],
-                        });
-                        newCourseRTI.save().then((resp) => {
-                            if (newCourseRTI) {
-                                res.status(505).json({ message: 'ok' });
-                            }
-                            else {
-                                res.status(505).json({ message: 'Nesto nije dobrt' });
-                            }
-                        });
-                    }
-                    else {
-                        res.status(505).json({ message: 'Nesto nije dobrt' });
-                    }
-                });
+    let lastIndex = -1;
+    Course_model_2.default
+        .findOne({})
+        .sort('-id') // give me the max
+        .exec((err, member) => {
+        lastIndex = member.id;
+        const coursesToInsert = req.body.data;
+        const coursenames = [];
+        lastIndex++;
+        // tslint:disable-next-line:prefer-for-of
+        for (let i = 0; i < coursesToInsert.length; i++) {
+            coursesToInsert[i].mapHash = lastIndex;
+            coursenames.push(coursesToInsert[i].coursecode);
+        }
+        Course_model_2.default.find({ coursecode: { $in: coursenames } }).then((founds) => __awaiter(void 0, void 0, void 0, function* () {
+            if (founds.length === 0) {
+                for (let i = 0; i < coursesToInsert.length; i++) {
+                    coursesToInsert[i].id = lastIndex++;
+                    const newCourse = new Course_model_2.default(coursesToInsert[i]);
+                    yield newCourse.save();
+                }
+                res.status(200).json({ message: 'ok' });
             }
             else {
-                res.status(505)
-                    .json({ message: 'Kurs sa ovom sifrom vec postoji (sifra je ista ili za RTI smer ili za SI smer)' });
-                console.log(error); // Failure
+                res.status(200).json({ message: 'Kurs sa definisanim imenom postoji!' });
             }
-        });
-    }
-    else {
-        let courseCode = '';
-        let dept = -1;
-        if (courseData.isSI) {
-            dept = 1;
-            courseCode = courseData.coursecode_SI;
+        }));
+    });
+});
+router.route('/course/update').post((req, res) => {
+    console.log(JSON.stringify(req.body));
+    const courseData = req.body.data;
+    courseData.type = req.body.data.type === true ? 1 : 0;
+    const courseCode = req.body.coursecode;
+    Course_model_2.default.find({
+        coursecode: {
+            $in: [
+                courseCode,
+                courseData.coursecode,
+            ],
+        },
+    }, (error, response) => {
+        if (response.length !== 1) {
+            res.status(200).json({ message: 'Kurs sa definisanim imenom postoji!' });
         }
         else {
-            dept = 0;
-            courseCode = courseData.coursecode_RTI;
-        }
-        Course_model_2.default.find({
-            coursecode: {
-                $in: [
-                    courseCode,
-                ],
-            },
-        }, (error, response) => {
-            if (response.length === 0) {
-                const newCourse = new Course_model_2.default({
-                    id: -1,
-                    name: courseData.name,
+            if (response[0].coursecode === courseCode) {
+                Course_model_2.default.updateOne({
                     coursecode: courseCode,
-                    acronym: courseData.acronym,
-                    semester: courseData.semester,
-                    type: courseData.type ? 1 : 0,
-                    department: dept,
-                    courseDetails: [
-                        {
-                            conditions: courseData.conditions,
-                            purpose: courseData.purpose,
-                            outcome: courseData.outcome,
-                            lectureDates: courseData.lectureDates,
-                            auditoryExcercisesDates: courseData.auditoryExcercisesDates,
-                            labInfo: courseData.labInfo,
-                            homework: courseData.homeworks,
-                            lectureNotes: [],
-                            excercisesNotes: [],
-                            labNotes: [],
-                            homeworkNotes: [],
-                        },
-                    ],
-                    isMapped: false,
-                    mapHash: -1,
-                    engagement: [],
-                    isMaster: courseData.isMaster,
-                    notifications: [],
-                });
-                newCourse.save().then((doc) => {
-                    if (newCourse) {
-                        res.status(200).json({ message: 'ok' });
-                    }
-                    else {
-                        res.status(505).json({ message: 'Nesto nije dobrt' });
-                    }
+                }, {
+                    $set: {
+                        'name': courseData.name,
+                        'coursecode': courseData.coursecode,
+                        'acronym': courseData.acronym,
+                        'semester': courseData.semester,
+                        'type': courseData.type,
+                        'department': courseData.department,
+                        'courseDetails.0': courseData.courseDetails[0],
+                        'isMaster': courseData.isMaster,
+                    },
+                }).then((doc) => {
+                    res.status(200).json({ message: 'ok' });
                 });
             }
             else {
-                res.status(505)
-                    .json({ message: 'Kurs sa ovom sifrom vec postoji' });
-                console.log(error); // Failure
+                res.status(200).json({ message: 'Kurs sa definisanim imenom postoji!' });
             }
-        });
-    }
+        }
+    });
 });
 router.route('/course/engagement/update').post((req, res) => {
     const courseId = req.body.course_id;
     const engagement = req.body.engagement;
+    console.log(engagement);
     Course_model_2.default.findOne({
         coursecode: courseId,
     }, (error, course) => {
@@ -539,12 +533,40 @@ router.route('/course/engagement/update').post((req, res) => {
         }
         else {
             if (course !== undefined) {
-                Course_model_2.default.collection.updateOne({ coursecode: courseId }, {
-                    $push: {
+                Course_model_2.default.updateOne({ coursecode: courseId }, {
+                    $set: {
                         engagement,
                     },
+                }).then(() => {
+                    const lecturersSet = new Set();
+                    for (let i = 0; i < engagement.length; i++) {
+                        lecturersSet.add(Number(engagement[i].lectureLecturer));
+                        lecturersSet.add(Number(engagement[i].auditoryExcercisesLecturer));
+                    }
+                    Employee_model_1.default.find({}, (errorEmployee, employees) => __awaiter(void 0, void 0, void 0, function* () {
+                        for (let i = 0; i < employees.length; i++) {
+                            const employeeCourses = employees[i].courses;
+                            const kurcina = [];
+                            for (let j = 0; j < employeeCourses.length; j++) {
+                                if (String(employeeCourses[j].coursecode) != String(courseId)) {
+                                    kurcina.push({ coursecode: employeeCourses[j].coursecode });
+                                }
+                            }
+                            if (lecturersSet.has(Number(employees[i].user_id))) {
+                                console.log(employees[i].user_id);
+                                kurcina.push({ coursecode: courseId });
+                            }
+                            yield Employee_model_1.default.updateOne({ user_id: employees[i].user_id }, {
+                                $set: {
+                                    courses: kurcina,
+                                },
+                            }).then(() => {
+                                console.log(employeeCourses);
+                            });
+                        }
+                        res.status(200).json({ message: 'ok' });
+                    }));
                 });
-                res.status(200).json({ message: 'ok' });
             }
             else {
                 res.status(505).json({ message: 'Greska' });
@@ -570,6 +592,85 @@ router.route('/course/:id/get/engagement').get((req, res) => {
                 res.status(200).json([]);
             }
         }
+    });
+});
+router.route('/students/create/new').post((req, res) => {
+    const userData = req.body.data;
+    let lastIndex = -1;
+    User_model_2.default
+        .findOne({})
+        .sort('-id') // give me the max
+        .exec((err, member) => {
+        lastIndex = member.id;
+        User_model_2.default.find({ username: userData.username }, (error, document) => {
+            if (document.length !== 0) {
+                res.status(200).json({ message: 'Korisnik vec postoji!' });
+            }
+            else {
+                lastIndex++;
+                const newUser = new User_model_2.default({
+                    id: lastIndex,
+                    username: userData.username,
+                    password: userData.password,
+                    name: userData.name,
+                    surname: userData.surname,
+                    email: userData.username,
+                    status: userData.active,
+                    type: 2,
+                });
+                const newStudent = new Student_model_1.default({
+                    user_id: lastIndex,
+                    index: userData.index,
+                    academic_level: userData.type,
+                    verify: userData.verifyPassword,
+                });
+                newUser.save().then(() => newStudent.save().then(() => {
+                    res.status(200).json({ message: 'ok' });
+                }));
+            }
+        });
+    });
+});
+router.route('/employees/create/new').post((req, res) => {
+    const userData = req.body.data;
+    let lastIndex = -1;
+    User_model_2.default
+        .findOne({})
+        .sort('-id') // give me the max
+        .exec((err, member) => {
+        lastIndex = member.id;
+        User_model_2.default.find({ username: userData.username }, (error, document) => {
+            if (document.length !== 0) {
+                res.status(200).json({ message: 'Korisnik vec postoji!' });
+            }
+            else {
+                lastIndex++;
+                const newUser = new User_model_2.default({
+                    id: lastIndex,
+                    username: userData.username,
+                    password: userData.password,
+                    name: userData.name,
+                    surname: userData.surname,
+                    email: userData.email,
+                    status: userData.active,
+                    type: 1,
+                });
+                const newEmployee = new Employee_model_1.default({
+                    user_id: lastIndex,
+                    address: userData.address,
+                    phonenumber: userData.phonenumber,
+                    website: userData.website,
+                    biography: userData.bio,
+                    profilePicture: 'default.jpg',
+                    title: userData.title.id,
+                    office: userData.office,
+                    courses: [],
+                });
+                newUser.save().then(() => newEmployee.save().then(() => {
+                    res.status(200).json({ message: 'ok' });
+                }));
+            }
+        });
     });
 });
 app.use('/', router);

@@ -23,7 +23,7 @@ export class AdminViewAccountsComponent implements OnInit {
   aa: string;
   titles: Title[] = [];
 
-  selected_employee: Employee = null;
+  selected_employee: any = null;
   isSelected = -1;
 
 
@@ -41,7 +41,7 @@ export class AdminViewAccountsComponent implements OnInit {
       this.faculty = employees;
       for (let i = 0; i < this.faculty.length; i++) {
         this.facultyIDs.push(
-          this.faculty[i].user_id +'. ' +this.faculty[i].name + ' ' + this.faculty[i].surname
+          this.faculty[i].id +'. ' +this.faculty[i].name + ' ' + this.faculty[i].surname
         );
       }
     })
@@ -104,7 +104,7 @@ export class AdminViewAccountsComponent implements OnInit {
       user_id = String(user_id[0]);
       user_id = Number(user_id.split('.').join(""));
       for (let i = 0; i < this.faculty.length; i++) {
-        if (this.faculty[i].user_id == user_id) {
+        if (this.faculty[i].id == user_id) {
          this.selected_employee = this.faculty[i];
          break;
         }
@@ -121,7 +121,22 @@ export class AdminViewAccountsComponent implements OnInit {
 
   update_employee() {
     // TODO
-    alert(this.dropdownList.value)
+    this.administratorService.updateEmployee(this.selected_employee).subscribe( (resp:any) => {
+      if (resp.message == 'ok') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Super!',
+          text: 'Uspesno odradjeno azuriranje',
+        });
+        this.selected_employee = null;
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Greska!',
+          text: 'Doslo je do greske na serveru',
+        })
+      }
+    });
   }
 
   delete_employee() {
@@ -130,5 +145,19 @@ export class AdminViewAccountsComponent implements OnInit {
 
   cancel() {
     // TODO
+  }
+
+  check_title(id: number, id2: string) {
+    return Number(id) === Number(id2);
+  }
+
+  change_title($event) {
+    const title_id = Number($event.target.value);
+    for (let i = 0; i < this.titles.length; i++) {
+      if(this.titles[i].id == title_id){
+        this.selected_employee.title = this.titles[i];
+        break;
+      }
+    }
   }
 }

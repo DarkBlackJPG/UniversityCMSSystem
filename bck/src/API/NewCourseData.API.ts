@@ -3,8 +3,10 @@ export class NewCourseData {
     public coursecode_SI: string;
     public name: string;
     public coursecode_RTI: string;
+    public coursecode_Other: string;
     public isMaster: boolean;
     public isSI: boolean;
+    public isOther: boolean;
     public isRTI: boolean;
     public semester: number;
     public classCount: string;

@@ -18,13 +18,13 @@
     <tr *ngFor="let employee of employees">
       <td>{{employee.name}}</td>
       <td>{{employee.surname}}</td>
-      <td>{{employee.title}}</td>
-      <td *ngIf="employee.educational == 1">Nastavno osoblje</td>
-      <td *ngIf="employee.educational == 0">Nenastavno osoblje</td>
+      <td>{{employee.title.name}}</td>
+      <td *ngIf="employee.title.educational == 1">Nastavno osoblje</td>
+      <td *ngIf="employee.title.educational == 0">Nenastavno osoblje</td>
 
       <td>
-        <ol *ngIf="employee.courses.length >= 1; else elseNo">
-          <li *ngFor="let course of employee.courses">{{course.name}}</li>
+        <ol *ngIf="employee.course_data.length >= 1; else elseNo">
+          <li *ngFor="let course of employee.course_data">{{course.name}}</li>
         </ol>
         <ng-template #elseNo>
           Nije zaduzen na predmetima
@@ -57,57 +57,46 @@
                 <b>Zvanje: </b>
               </td>
               <td>
-                {{employeeModal.title}}
+                {{employeeModal.title.name}}
               </td>
             </tr><tr>
               <td>
                 <b>Kancelarija: </b>
               </td>
               <td>
-                {{employeeModal.office}}
+                {{employeeModal.employee_data.office}}
               </td>
             </tr><tr>
               <td>
                 <b>Adresa: </b>
               </td>
-              <td *ngIf="employeeModal.address != null">
-                {{employeeModal.address}}
-              </td>
-              <td *ngIf="employeeModal.address == null">
-                Nedefinisano
+              <td>
+                {{employeeModal.employee_data.address}}
               </td>
             </tr>
             <tr>
               <td>
                 <b>Kontakt telefon: </b>
               </td>
-              <td *ngIf="employeeModal.phonenumber != null">
-                {{employeeModal.phonenumber}}
-              </td>
-              <td *ngIf="employeeModal.phonenumber == null">
-                Nedefinisano
+              <td >
+                {{employeeModal.employee_data.phonenumber}}
               </td>
             </tr>
             <tr>
               <td>
                 <b>Web sajt: </b>
               </td>
-              <td *ngIf="employeeModal.website != null">
-                <a [href]="employeeModal.website">{{employeeModal.website}}</a>
+              <td>
+                <a [href]="employeeModal.employee_data.website">{{employeeModal.employee_data.website}}</a>
               </td>
-              <td *ngIf="employeeModal.website == null">
-                Nedefinisano
-              </td>
+
             </tr>
             <tr>
               <td>
                 <b>Biografija: </b>
               </td>
-              <td *ngIf="employeeModal.biography != null">
-                {{employeeModal.biography}}
-              </td>
-              <td *ngIf="employeeModal.biography == null">
-                Nedefinisano
+              <td *ngIf="employeeModal.employee_data.biography != null">
+                {{employeeModal.employee_data.biography}}
               </td>
             </tr>
           </table>

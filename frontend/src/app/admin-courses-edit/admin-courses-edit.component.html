@@ -53,7 +53,7 @@
               </div>
             </td>
           </tr>
-          <tr>
+          <tr *ngIf="newCourseDataObject.isSI || newCourseDataObject.isMaster == 'true'">
             <td>
               Sifra predmeta za SI ili za Master
             </td>
@@ -62,12 +62,20 @@
 
             </td>
           </tr>
-          <tr >
+          <tr *ngIf="newCourseDataObject.isRTI">
             <td>
               Sifra predmeta za RTI
             </td>
             <td>
-              <input [required]="newCourseDataObject.isRTI" [disabled]="newCourseDataObject.isMaster" type="text" class="form-control" [(ngModel)]="newCourseDataObject.coursecode_RTI" placeholder="Na primer: 13S142MIPS">
+              <input [required]="newCourseDataObject.isRTI" [disabled]="newCourseDataObject.isMaster" type="text" class="form-control" [(ngModel)]="newCourseDataObject.coursecode_RTI" placeholder="Na primer: 13E142MIPS">
+            </td>
+          </tr>
+          <tr *ngIf="newCourseDataObject.isOther">
+            <td>
+              Sifra predmeta za Ostale odseke
+            </td>
+            <td>
+              <input [required]="newCourseDataObject.isOther" [disabled]="newCourseDataObject.isMaster" type="text" class="form-control" [(ngModel)]="newCourseDataObject.coursecode_Other" placeholder="Na primer: 13E142MIPS">
             </td>
           </tr>
           <tr>
@@ -95,15 +103,21 @@
             </td>
             <td>
               <div class="form-check">
-                <input class="form-check-input" [disabled]="newCourseDataObject.isMaster"  type="checkbox" value="" [(ngModel)]="newCourseDataObject.isSI" id="flexCheckDefault">
+                <input class="form-check-input" [disabled]="newCourseDataObject.isMaster"  type="checkbox" [(ngModel)]="newCourseDataObject.isSI" id="flexCheckDefault">
                 <label class="form-check-label" for="flexCheckDefault">
                   Softversko inzenjerstvo
                 </label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" [disabled]="newCourseDataObject.isMaster" [(ngModel)]="newCourseDataObject.isRTI" id="flexCheckChecked" checked>
+                <input class="form-check-input" type="checkbox" [disabled]="newCourseDataObject.isMaster" [(ngModel)]="newCourseDataObject.isRTI" id="flexCheckChecked" >
                 <label class="form-check-label" for="flexCheckChecked">
                   Racunarska tehnika i informatika
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" [disabled]="newCourseDataObject.isMaster" [(ngModel)]="newCourseDataObject.isOther" id="flexCheckChecked2">
+                <label class="form-check-label" for="flexCheckChecked2">
+                  Ostali odseci
                 </label>
               </div>
             </td>
@@ -135,7 +149,7 @@
               Akronim
             </td>
             <td>
-              <input required type="text" [(ngModel)]="newCourseDataObject.acronym" placeholder="P+V+L" class="form-control">
+              <input required type="text" [(ngModel)]="newCourseDataObject.acronym" class="form-control">
             </td>
           </tr><tr>
             <td>
@@ -216,15 +230,185 @@
   </div>
 </div>
 
-<div class="row mt-3 justify-content-center animate__animated d-none" id="update_course_card" >
+<div *ngIf="editExisting" class="row mt-3 justify-content-center" >
   <div class="col-5">
     <div class="card shadow text-white bg-dark mb-3">
       <div class="card-header">
-        <span class="font-weight-bold" style="font-size: 1.5em">Dodavanje novog predmeta</span>
-        <button class="btn btn-outline-danger float-right" (click)="cancel_new_course()">Odustani</button>
+        <span class="font-weight-bold" style="font-size: 1.5em">Azuriranje opstih podataka postojeceg predmeta</span>
+        <button class="btn btn-outline-danger float-right" (click)="cancel_edit_course()">Odustani</button>
       </div>
       <div class="card-body p-0">
+        <div class="form-inline p-2 col-12 justify-content-center">
+          <select (change)="set_current_course_name($event)" class="form-control mr-2">
+            <option *ngFor="let course of courseNames" [value]="course">
+              {{course}}
+            </option>
+          </select>
+          <button class="btn btn-outline-success" (click)="select_edit_course()">Potvrdi</button>
+        </div>
+        <div *ngIf="selectedEditCourse != null" class="form-group">
+          <table class="col-12 p-4">
+            <tr>
+              <td>
+                Tip predmeta
+              </td>
+              <td>
+                <select (change)="change_selected_course_type($event)" class="form-control">
+                  <option value="0" [selected]="selectedEditCourse.type == 0">
+                    Obavezan predmet
+                  </option>
+                  <option value="1" [selected]="selectedEditCourse.type == 1">
+                    Izborni predmet
+                  </option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Sifra predmeta
+              </td>
+              <td>
+                <input [required]="selectedEditCourse.isMaster || selectedEditCourse.isSI" type="text" class="form-control" [(ngModel)]="selectedEditCourse.coursecode_SI" placeholder="Na primer: 13S142MIPS">
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Tip studija
+              </td>
+              <td>
+                <select (change)="change_course_level($event)" class="form-control">
+                  <option value="0" [selected]="selectedEditCourse.isMaster === 'false'">
+                    Osnovne akademske
+                  </option>
+                  <option value="1" [selected]="selectedEditCourse.isMaster === 'true'">
+                    Master studije
+                  </option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Smer na kome se odrzava
+              </td>
+              <td>
+                <select (change)="change_department($event)" class="form-control">
+                  <option value="1" [selected]="selectedEditCourse.isSI">
+                    Softversko inzenjerstvo
+                  </option>
+                  <option value="0" [selected]="selectedEditCourse.isRTI">
+                    Racunarska tehnika i informatika
+                  </option>
+                  <option value="2" [selected]="selectedEditCourse.isOther">
+                    Ostali odseci
+                  </option>
+                </select>
 
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Semestar
+              </td>
+              <td>
+                <input required type="number" [(ngModel)]="selectedEditCourse.semester" class="form-control">
+              </td>
+            </tr> <tr>
+            <td>
+              ESPB
+            </td>
+            <td>
+              <input required type="number" [(ngModel)]="selectedEditCourse.ESPB" class="form-control">
+            </td>
+          </tr>
+            <tr>
+              <td>
+                Fond casova
+              </td>
+              <td>
+                <input required type="text" [(ngModel)]="selectedEditCourse.classCount" placeholder="P+V+L" class="form-control">
+              </td>
+            </tr><tr>
+            <td>
+              Akronim
+            </td>
+            <td>
+              <input required type="text" [(ngModel)]="selectedEditCourse.acronym" class="form-control">
+            </td>
+          </tr><tr>
+            <td>
+              Pun naziv
+            </td>
+            <td>
+              <input required type="text" [(ngModel)]="selectedEditCourse.name" class="form-control">
+            </td>
+          </tr>
+            <tr>
+              <td>
+                Uslovi za polaganje predmeta
+              </td>
+              <td class="text-dark">
+                <ckeditor required [editor]="Editor" [(ngModel)]="selectedEditCourse.conditions"></ckeditor>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Cilj predmeta
+              </td>
+              <td class="text-dark">
+                <ckeditor required [editor]="Editor" [(ngModel)]="selectedEditCourse.purpose"></ckeditor>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Ishod predmeta
+              </td>
+              <td class="text-dark">
+                <ckeditor [editor]="Editor" [(ngModel)]="selectedEditCourse.outcome"></ckeditor>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Termini odrzavanja predavanja
+              </td>
+              <td class="text-dark">
+                <ckeditor required [editor]="Editor" [(ngModel)]="selectedEditCourse.lectureDates"></ckeditor>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Termini odrzavanja vezbi
+              </td>
+              <td class="text-dark">
+                <ckeditor required [editor]="Editor" [(ngModel)]="selectedEditCourse.auditoryExcercisesDates"></ckeditor>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Informacije o laboratorijskim vezbama
+              </td>
+              <td class="text-dark">
+                <ckeditor [editor]="Editor" [(ngModel)]="selectedEditCourse.labInfo"></ckeditor>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Seminarski, domaci, projekti
+              </td>
+              <td class="text-dark">
+                <ckeditor [editor]="Editor" [(ngModel)]="selectedEditCourse.homeworks"></ckeditor>
+              </td>
+            </tr>
+
+            <tr>
+              <td colspan="2">
+                <button class="btn btn-outline-success" (click)="update_course_info()">
+                  Azuriraj
+                </button>
+              </td>
+
+            </tr>
+          </table>
+        </div>
       </div>
     </div>
   </div>

@@ -26,6 +26,7 @@ export class AppComponent {
   rtiCoursesId: number;
   siCoursesId: number;
   otherCoursesId: number;
+  masterCourseId: number;
 
   constructor(private adminService: AdministratorFunctionsService, private notificationService: NotificationService, private userValidation: UserValidationServiceService, private courseService: CoursesService, private router: Router) {
   }
@@ -49,6 +50,9 @@ export class AppComponent {
             break;
           case 'other':
             this.otherCoursesId = response[i].id;
+            break;
+            case 'mast':
+            this.masterCourseId = response[i].id;
             break;
         }
       }

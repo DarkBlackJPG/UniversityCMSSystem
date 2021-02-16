@@ -25,15 +25,8 @@ export class LoginComponent implements OnInit {
     this.service.loginService(this.username, this.password).subscribe(
       (response: any) => {
         if (response) {
-          let data = {
-            id: response.id,
-            type: response.type,
-            username: response.username,
-            name: response.name,
-            surname: response.surname
-          };
 
-          localStorage.setItem('session', JSON.stringify(data));
+          localStorage.setItem('session', JSON.stringify(response));
 
           if (response.type == 0) {
             this.router.navigate(['/admin']).then(() => {
@@ -44,14 +37,15 @@ export class LoginComponent implements OnInit {
           } else {
             this.router.navigate(['/student']);
           }
+          this.validationService.toggle();
         } else {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'Losi kredencijali',
+            text: 'Losi kredencijali ili deaktiviran nalog',
           })
         }
-        this.validationService.toggle();
+
       }
     );
 

@@ -16,6 +16,7 @@ export class NotificationsComponent implements OnInit {
     this.notificationService.getNotificationID().subscribe((id) => {
       this.notificationService.getAllNotificationsFor(id).subscribe((notifications:Notification[]) => {
         this.notifications = notifications;
+        this.notifications.map(value => { value.date = new Date(value.date)});
       })
     })
   }

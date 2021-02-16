@@ -191,7 +191,7 @@
             <td>Predavac</td>
             <td>
               <select [(ngModel)]="item.lectureLecturer" class="form-control">
-                <option *ngFor="let lecturer of lecturers" [value]="lecturer.user_id">
+                <option *ngFor="let lecturer of lecturers" [value]="lecturer.id">
                   {{lecturer.name}} {{lecturer.surname}}
                 </option>
               </select>
@@ -210,7 +210,7 @@
             <td>Predavac</td>
             <td>
               <select [(ngModel)]="item.auditoryExcercisesLecturer" class="form-control">
-                <option *ngFor="let lecturer of lecturers" [value]="lecturer.user_id">
+                <option *ngFor="let lecturer of lecturers" [value]="lecturer.id">
                   {{lecturer.name}} {{lecturer.surname}}
                 </option>
               </select>

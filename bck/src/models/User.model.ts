@@ -27,6 +27,9 @@ const User = new Schema( {
     type: {
         type: Number,
     },
+    active: {
+        type: Boolean,
+    },
 });
 
 export default mongoose.model('User', User, 'users');

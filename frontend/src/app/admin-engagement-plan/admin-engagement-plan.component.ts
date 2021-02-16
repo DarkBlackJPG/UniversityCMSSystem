@@ -27,7 +27,7 @@ export class AdminEngagementPlanComponent implements OnInit {
   selectedCourseObject: Course = null;
   selectedCourseEngagement: CourseGroup[] = [];
 
-  lecturers: Employee[] = [];
+  lecturers: any[] = [];
   filterText: string = "Prikazuju se svi kursevi";
   enrolledStudents: Student[] = [];
   searchModel: any;
@@ -92,7 +92,9 @@ export class AdminEngagementPlanComponent implements OnInit {
         this.enrolledStudents = response;
       });
       this.administratorService.getEngagementForCourse(this.selectedCourseObject).subscribe((response: CourseGroup[]) => {
+        // @ts-ignore
         this.courseGroups = response;
+
       });
     }
   }
@@ -224,7 +226,7 @@ export class AdminEngagementPlanComponent implements OnInit {
   }
 
   convert_lecturer_id(lectureLecturer: number) {
-    let lecturer = this.lecturers.find(value => value.user_id == lectureLecturer);
+    let lecturer = this.lecturers.find(value => value.id == lectureLecturer);
     return lecturer == undefined ? '' : lecturer.name + " " + lecturer.surname
   }
 }

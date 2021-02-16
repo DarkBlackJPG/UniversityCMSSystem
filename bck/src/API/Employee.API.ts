@@ -14,5 +14,5 @@ export class EmployeeAPI {
     public educational: number;
     public office: string;
     public status: number;
-    public courses: CourseAPI[];
+    public courses: any[];
 };

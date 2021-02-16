@@ -15,6 +15,7 @@ const Course = new Schema({
     department: { type: Number },
     courseDetails: { type: Array },
     isMapped: { type: Boolean },
+    mapHash: { type: Number },
     isMaster: { type: Boolean },
     engagement: { type: Array },
     notifications: { type: Array },

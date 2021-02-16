@@ -6,6 +6,7 @@ export class NewCourseData {
     this.isMaster = null;
     this.isSI = null;
     this.isRTI = null;
+    this.isOther = null;
     this.semester = -1;
     this.classCount = '';
     this.conditions = '';
@@ -23,9 +24,11 @@ export class NewCourseData {
   public type: boolean;
   public coursecode_SI: string;
   public coursecode_RTI: string;
+  public coursecode_Other: string;
   public isMaster: boolean;
   public isSI: boolean;
   public isRTI: boolean;
+  public isOther: boolean;
   public semester: number;
   public classCount: string;
   public ESPB: number;

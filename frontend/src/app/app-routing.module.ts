@@ -50,6 +50,11 @@ const routes: Routes = [
 
   },
   {
+    path: 'notifications/get/all',
+    component: NotificationsComponent,
+
+  },
+  {
     path: 'register/student',
     component: RegisterComponent
   },

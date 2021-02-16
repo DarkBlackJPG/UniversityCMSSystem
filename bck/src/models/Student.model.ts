@@ -7,6 +7,7 @@ const Student = new Schema({
     user_id: {type: Number},
     index: {type: String},
     academic_level: {type: String},
+    verify: {type: Boolean},
 });
 
 export default mongoose.model('Student', Student, 'students');

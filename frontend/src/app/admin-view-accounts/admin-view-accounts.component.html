@@ -43,7 +43,7 @@
 
         <tr>
           <td>
-            <button class="btn btn-outline-success" (click)="find_faculty()">Nadji zaposlenog</button>
+            <button class="btn btn-outline-success mt-2" (click)="find_faculty()">Nadji zaposlenog</button>
           </td>
         </tr>
       </table>
@@ -62,8 +62,7 @@
         <div class="col-md-12 justify-content-center">
           <img class="img-fluid "
 
-               [src]="'assets/images/' + selected_employee.profilePicture">
-          <!--               style="max-height: 300px; max-width: 300px; margin: auto"-->
+               [src]="'assets/images/' + selected_employee.employee_data.profilePicture">
         </div>
         <div class="input-group mt-3 col-md-5">
           <div class="input-group-prepend">
@@ -96,7 +95,7 @@
         <div class="col-12 mt-3">
           <div class="input-group flex-nowrap">
             <span class="input-group-text">Adresa</span>
-            <input type="text" class="form-control" [(ngModel)]="selected_employee.address" aria-label="Username"
+            <input type="text" class="form-control" [(ngModel)]="selected_employee.employee_data.address" aria-label="Username"
                    aria-describedby="addon-wrapping">
           </div>
         </div>
@@ -104,14 +103,14 @@
           <div class="input-group flex-nowrap">
             <span class="input-group-text">Kontakt</span>
             <input placeholder="Kontakt Telefon" type="text" class="form-control"
-                   name="phoneNumber" [(ngModel)]="selected_employee.phonenumber" aria-label="Username"
+                   name="phoneNumber" [(ngModel)]="selected_employee.employee_data.phonenumber" aria-label="Username"
                    aria-describedby="addon-wrapping">
           </div>
         </div>
         <div class="col-12 mt-3">
           <div class="input-group flex-nowrap">
             <span class="input-group-text">Webiste</span>
-            <input type="text" class="form-control" name="website" [(ngModel)]="selected_employee.website"
+            <input type="text" class="form-control" name="website" [(ngModel)]="selected_employee.employee_data.website"
                    aria-label="Username"
                    aria-describedby="addon-wrapping">
           </div>
@@ -120,16 +119,15 @@
           <div class="input-group">
             <span class="input-group-text">Biografija</span>
             <textarea class="form-control" name="bio" aria-label="With textarea"
-                      [(ngModel)]="selected_employee.biography"></textarea>
+                      [(ngModel)]="selected_employee.employee_data.biography"></textarea>
           </div>
         </div>
         <div class="col-12 mt-3">
           <div class="input-group">
             <label class="input-group-text col-2" for="inputGroupSelect01">Options</label>
-            <select name="dropdownList" [(ngModel)]="dropdownList" class="form-select col-10" id="inputGroupSelect01">
-              <option>Odaberi...</option>
+            <select (change)="change_title($event)" name="dropdownList" class="form-select col-10" id="inputGroupSelect01">
               <option *ngFor="let title of titles"
-                      [attr.selected]="title.name === selected_employee.title ? 'selected' : null"
+                      [selected]="check_title(title.id, selected_employee.title.id)"
                       [value]="title.id">{{title.name}}</option>
             </select>
           </div>
@@ -138,7 +136,7 @@
         <div class="col-12 mt-3">
           <div class="input-group flex-nowrap">
             <span class="input-group-text">Kabinet</span>
-            <input placeholder="Kabinet" type="text" class="form-control" [(ngModel)]="selected_employee.office"
+            <input placeholder="Kabinet" type="text" class="form-control" [(ngModel)]="selected_employee.employee_data.office"
                    aria-label="Username" aria-describedby="addon-wrapping">
           </div>
         </div>
@@ -146,7 +144,7 @@
           <div class="input-group flex-nowrap">
             <div class="form-check">
               <input class="form-check-input" type="checkbox"
-                     [attr.checked]="selected_employee.status == 0 ? null : 'checked'" id="flexCheckDefault">
+                     [(ngModel)]="selected_employee.status" id="flexCheckDefault">
               <label class="form-check-label" for="flexCheckDefault">
                 Aktivan
               </label>

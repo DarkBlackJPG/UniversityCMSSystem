@@ -30,6 +30,9 @@ const User = new Schema({
     type: {
         type: Number,
     },
+    active: {
+        type: Boolean,
+    },
 });
 exports.default = mongoose_1.default.model('User', User, 'users');
 //# sourceMappingURL=User.model.js.map

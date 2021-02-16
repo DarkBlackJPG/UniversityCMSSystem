@@ -9,18 +9,17 @@ import {Router} from "@angular/router";
   styleUrls: ['./employees-list.component.css']
 })
 export class EmployeesListComponent implements OnInit {
-  employees: Employee[] = [];
-  employeeModal: Employee;
+  employees: any[] = [];
+  employeeModal: any = null;
   showModal: boolean;
   public isCollapsed = false;
   constructor(private employeeService: EmployeeService,
               private router: Router) { }
 
   ngOnInit(): void {
-    this.employeeService.getAllEmployees().subscribe((result: Employee[]) => {
+    this.employeeService.getAllEmployees().subscribe((result: any[]) => {
       this.employees = result;
     });
-    this.employeeModal = this.employees[0];
     this.showModal = false;
   }
 
