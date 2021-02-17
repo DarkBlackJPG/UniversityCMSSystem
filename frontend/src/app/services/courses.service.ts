@@ -31,4 +31,12 @@ export class CoursesService {
   getCoursesByDepartment(departmentId: number) {
     return this.http.get(`${this.url}/department/course/info/get/${departmentId}`);
   }
+
+  getCoursesNotifications(courseId: number) {
+    return this.http.get(`${this.url}/courses/notifications/${courseId}`);
+  }
+
+  add_new_notification(data) {
+    return this.http.post(`${this.url}/courses/notifications/upload`, data);
+  }
 }

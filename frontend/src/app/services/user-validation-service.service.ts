@@ -13,6 +13,9 @@ export class UserValidationServiceService {
   public toggle(): void {
     this.isOpen$.next(!this.isOpen$.getValue());
   }
+  public setOpen(value: boolean): void {
+    this.isOpen$.next(value);
+  }
   public getIsOpen(): Observable<boolean> {
     return this.isOpen$;
   }

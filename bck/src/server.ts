@@ -1,7 +1,11 @@
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express, {Request, Response} from 'express';
+// @ts-ignore
+import fileExtension from 'file-extension';
 import mongoose from 'mongoose';
+import multer from 'multer';
+import * as path from 'path';
 import {CourseAPI} from './API/CourseAPI';
 import {EmployeeAPI} from './API/Employee.API';
 import {EmployeeRegistrationAPI} from './API/EmployeeRegistration.API';
@@ -41,7 +45,128 @@ connection.once('open', () => {
 
 const router = express.Router();
 
-router.route('/login').post(
+const storage = multer.diskStorage({
+    destination(req, file, cb) {
+        cb(null, 'file_upload');
+    },
+    filename(req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + '.' + fileExtension(file.originalname));
+    },
+});
+
+const upload = multer({storage}).single('file');
+
+router.post('/upload', (req, res) => {
+
+    upload(req, res, (err) => {
+        if (err) {
+            console.log(err);
+        }
+        console.log(req);
+        res.json({
+            message: 'ok',
+            // tslint:disable-next-line:object-literal-sort-keys
+            file_data: req.file,
+            file_extension: fileExtension(req.file.originalname),
+        });
+        // Everything went fine
+    });
+});
+
+router.post('/courses/notifications/upload', (req, res) => {
+    const courseId = req.body.courseId;
+    const notification = req.body.notification;
+    console.log(req.body);
+    Course.aggregate([
+        {
+            $match : {
+                id : courseId,
+            },
+        },
+        {
+            $unwind : {
+                path : '$notifications',
+                preserveNullAndEmptyArrays : true,
+            },
+        },
+        {
+            $sort : {
+                'notifications.id' : -1.0,
+            },
+        },
+    ], (error: Error, users: any[]) => {
+        let lastIndex = users[0].notifications === undefined ? 0 : Number(users[0].notifications.id);
+        lastIndex++;
+        Course.updateOne({
+            id: courseId,
+        }, {
+           $push: {
+               notifications: {
+                   id: lastIndex,
+                   title: notification.title,
+                   description: notification.description,
+                   date: notification.date,
+                   file: notification.file,
+               },
+           },
+        }, null, ((err, raw) => {
+            if(err) {
+                console.log(err);
+            } else {
+                res.status(200).json({message: 'ok'});
+            }
+        }));
+    });
+
+});
+
+    router.post('/download', (req, res) => {
+    const filename = req.body.filename;
+    res.sendFile('file_upload/' + filename, {root: __dirname + '/../'});
+});
+
+    router.get('/courses/notifications/:id', (req, res) => {
+    const courseId = req.params.id;
+    Course.findOne(
+        {
+            id: courseId,
+        },
+        (error: Error, myCourse: CourseAPI) => {
+            if (error) {
+                console.log(error);
+            } else {
+                res.status(200).json(myCourse.notifications);
+            }
+        });
+});
+
+    router.route('/employee/:id/my_courses/get/all').get((req, res) => {
+    const employeeId = req.params.id;
+    console.log(employeeId);
+    Employee.aggregate([
+        {
+            $match: {
+                user_id: 1.0,
+            },
+        },
+        {
+            $lookup: {
+                from: 'courses',
+                localField: 'courses.coursecode',
+                foreignField: 'coursecode',
+                as: 'courses_data',
+            },
+        },
+    ], (error: Error, users: any) => {
+        if (error) {
+            console.log(error);
+        } else {
+            res.status(200).json(users[0].courses_data);
+        }
+    });
+});
+
+    router.route('/login').post(
     (request: Request, response: Response) => {
         console.log('Login request accepted!');
         const username = request.body.username;
@@ -85,7 +210,21 @@ router.route('/login').post(
                                         path: '$employee_data',
                                         preserveNullAndEmptyArrays: true,
                                     },
-                                }], (err: Error, users: any[]) => {
+                                }, {
+                                    $lookup: {
+                                        from: 'employee_types',
+                                        localField: 'employee_data.title',
+                                        foreignField: 'id',
+                                        as: 'title',
+                                    },
+                                }, {
+                                    $unwind: {
+                                        path: '$title',
+                                        preserveNullAndEmptyArrays: true,
+                                    },
+                                },
+
+                            ], (err: Error, users: any[]) => {
                                 response.status(200).json(users[0]);
                             });
                         } else if (user.type === 2) {
@@ -133,7 +272,7 @@ router.route('/login').post(
     },
 );
 
-router.route('/register').post(
+    router.route('/register').post(
     (request: Request, response: Response) => {
         console.log('Register request accepted!');
 
@@ -164,7 +303,7 @@ router.route('/register').post(
     },
 );
 
-router.route('/course/:id/get/enrolled/all').get(
+    router.route('/course/:id/get/enrolled/all').get(
     (req, res) => {
         const courseId = req.params.id;
         const preparedStudents: StudentAPI[] = [];
@@ -222,7 +361,7 @@ router.route('/course/:id/get/enrolled/all').get(
             }
         });
     });
-router.route('/course/get/ids').get(
+    router.route('/course/get/ids').get(
     (req, res) => {
         CourseModel.find({},
             (error, course) => {
@@ -235,7 +374,7 @@ router.route('/course/get/ids').get(
             });
     });
 
-router.route('/department/get/ids').get(
+    router.route('/department/get/ids').get(
     (req, res) => {
         Department.find({},
             (error, department) => {
@@ -247,7 +386,7 @@ router.route('/department/get/ids').get(
                 }
             });
     });
-router.route('/department/course/info/get/:id').get(
+    router.route('/department/course/info/get/:id').get(
     (req, res) => {
         const depId = req.params.id;
 
@@ -261,7 +400,7 @@ router.route('/department/course/info/get/:id').get(
                 }
             });
     });
-router.route('/projects/get/all/proposals').get(
+    router.route('/projects/get/all/proposals').get(
     (req, res) => {
 
         ProjectProposal.find({},
@@ -274,7 +413,7 @@ router.route('/projects/get/all/proposals').get(
                 }
             });
     });
-router.route('/titles/get/all').get(
+    router.route('/titles/get/all').get(
     (req, res) => {
         let titles: TitleAPI[] = [];
         Title.find({},
@@ -288,7 +427,7 @@ router.route('/titles/get/all').get(
                 }
             });
     });
-router.route('/notifications/get/all/:id').get(
+    router.route('/notifications/get/all/:id').get(
     (req, res) => {
         const notificationType = req.params.id;
         let notificationTypesNames: NotificationTypesAPI;
@@ -321,48 +460,170 @@ router.route('/notifications/get/all/:id').get(
             });
         });
     });
-router.route('/employees/get/all').get(
+
+    router.route('/notifications/types/get/all').get((req, res) => {
+    NotificationType.find({}, (error, types) => {
+        if (error) {
+            console.log(error);
+        } else {
+            res.status(200).json(types);
+        }
+    });
+});
+
+    router.route('/notifications/types/remove').post((req, res) => {
+    const typeId = req.body.data;
+    NotificationType.deleteOne({id: typeId}).then(() => {
+        Notification.deleteOne({
+            notification_type: typeId,
+        }).then(() => {
+            res.status(200).json({message: 'ok'});
+        });
+    });
+});
+
+    router.route('/notifications/remove').post((req, res) => {
+    const id = req.body.data;
+    Notification.deleteOne({
+        id,
+    }).then(() => {
+        res.status(200).json({message: 'ok'});
+    });
+
+});
+    router.route('/notifications/types/update').post((req, res) => {
+    const notification = req.body.data;
+    NotificationType.updateOne({
+        id: notification.id,
+    }, {
+        $set: {
+            name: notification.name,
+        },
+    }, null, (err, raw) => {
+        if (err) {
+            console.log(err);
+        } else {
+            res.status(200).json({message: 'ok'});
+        }
+    });
+});
+    router.route('/notifications/update').post((req, res) => {
+    const notification = req.body.data;
+    Notification.updateOne({
+        id: notification.id,
+    }, {
+        $set: {
+            date: notification.id,
+            description: notification.description,
+            notification_type: notification.notification_type,
+            title: notification.title,
+        },
+    }, null, (err, raw) => {
+        if (err) {
+            console.log(err);
+        } else {
+            res.status(200).json({message: 'ok'});
+        }
+    });
+});
+
+    router.route('/notifications/add').post((req, res) => {
+    const notification = req.body.data;
+    let lastIndex: number = -1;
+    Notification
+        .findOne({})
+        .sort('-id')  // give me the max
+        .exec((err, member) => {
+            lastIndex = member.id;
+            lastIndex++;
+            const newNotificationType = new Notification(
+                {
+                    id: lastIndex,
+                    date: notification.date,
+                    description: notification.description,
+                    notification_type: notification.notification_type,
+                    title: notification.title,
+                },
+            );
+
+            newNotificationType.save((err1, product) => {
+                if (err1) {
+                    console.log(err1);
+                } else {
+                    res.status(200).json({message: 'ok'});
+                }
+            });
+        });
+});
+    router.route('/notifications/types/add').post((req, res) => {
+    const notificationType = req.body.data;
+    let lastIndex: number = -1;
+    NotificationType
+        .findOne({})
+        .sort('-id')  // give me the max
+        .exec((err, member) => {
+            lastIndex = member.id;
+            lastIndex++;
+            const newNotificationType = new NotificationType(
+                {
+                    id: lastIndex,
+                    name: notificationType.name,
+                },
+            );
+
+            newNotificationType.save((err1, product) => {
+                if (err1) {
+                    console.log(err1);
+                } else {
+                    res.status(200).json({message: 'ok'});
+                }
+            });
+        });
+
+});
+
+    router.route('/employees/get/all').get(
     (req, res) => {
         User.aggregate([
             {
-                $match : {
-                    type : 1.0,
+                $match: {
+                    type: 1.0,
                 },
             },
             {
-                $lookup : {
-                    from : 'employees',
-                    localField : 'id',
-                    foreignField : 'user_id',
-                    as : 'employee_data',
+                $lookup: {
+                    from: 'employees',
+                    localField: 'id',
+                    foreignField: 'user_id',
+                    as: 'employee_data',
                 },
             },
             {
-                $unwind : {
-                    path : '$employee_data',
-                    preserveNullAndEmptyArrays : true,
+                $unwind: {
+                    path: '$employee_data',
+                    preserveNullAndEmptyArrays: true,
                 },
             },
             {
-                $lookup : {
-                    from : 'courses',
-                    localField : 'employee_data.courses.coursecode',
-                    foreignField : 'coursecode',
-                    as : 'course_data',
+                $lookup: {
+                    from: 'courses',
+                    localField: 'employee_data.courses.coursecode',
+                    foreignField: 'coursecode',
+                    as: 'course_data',
                 },
             },
             {
-                $lookup : {
-                    from : 'employee_types',
-                    localField : 'employee_data.title',
-                    foreignField : 'id',
-                    as : 'title',
+                $lookup: {
+                    from: 'employee_types',
+                    localField: 'employee_data.title',
+                    foreignField: 'id',
+                    as: 'title',
                 },
             },
             {
-                $unwind : {
-                    path : '$title',
-                    preserveNullAndEmptyArrays : true,
+                $unwind: {
+                    path: '$title',
+                    preserveNullAndEmptyArrays: true,
                 },
             },
         ], (err: Error, das: any[]) => {
@@ -370,7 +631,7 @@ router.route('/employees/get/all').get(
             res.status(200).json(das);
         });
     });
-router.route('/employees/update').post((req, res) => {
+    router.route('/employees/update').post((req, res) => {
     const employee = req.body.data;
     User.findOne({
         id: employee.id,
@@ -386,13 +647,13 @@ router.route('/employees/update').post((req, res) => {
                     email: employee.email,
                     status: employee.status,
                 },
-            }).then( () => {
+            }).then(() => {
                 Employee.updateOne(
                     {
                         user_id: employee.id,
                     },
                     {
-                        $set : {
+                        $set: {
                             profilePicture: 'default.jpg', // TODO
                             address: employee.employee_data.address,
                             website: employee.employee_data.website,
@@ -411,7 +672,7 @@ router.route('/employees/update').post((req, res) => {
     });
 });
 
-router.route('/course/student/enroll').post((req, res) => {
+    router.route('/course/student/enroll').post((req, res) => {
     const courseId = req.body.course_id;
     const studentIndex = req.body.student_index;
     const newData = new EnrollmentAPI();
@@ -443,7 +704,7 @@ router.route('/course/student/enroll').post((req, res) => {
         }
     });
 });
-router.route('/course/student/remove').post((req, res) => {
+    router.route('/course/student/remove').post((req, res) => {
     const courseId = req.body.course_id;
     const studentIndex = req.body.student_index;
     let student: StudentAPI = null;
@@ -469,7 +730,7 @@ router.route('/course/student/remove').post((req, res) => {
     });
 });
 
-router.route('/course/create').post((req, res) => {
+    router.route('/course/create').post((req, res) => {
     let lastIndex: number = -1;
     Course
         .findOne({})
@@ -501,7 +762,7 @@ router.route('/course/create').post((req, res) => {
         });
 });
 
-router.route('/course/update').post((req, res) => {
+    router.route('/course/update').post((req, res) => {
     console.log(JSON.stringify(req.body));
     const courseData: CourseAPI = req.body.data;
     courseData.type = req.body.data.type === true ? 1 : 0;
@@ -543,7 +804,7 @@ router.route('/course/update').post((req, res) => {
         });
 });
 
-router.route('/course/engagement/update').post((req, res) => {
+    router.route('/course/engagement/update').post((req, res) => {
     const courseId = req.body.course_id;
     const engagement = req.body.engagement;
     console.log(engagement);
@@ -600,7 +861,7 @@ router.route('/course/engagement/update').post((req, res) => {
         }
     });
 });
-router.route('/course/:id/get/engagement').get((req, res) => {
+    router.route('/course/:id/get/engagement').get((req, res) => {
     const courseId = req.params.id;
     Course.findOne({
         coursecode: courseId,
@@ -618,7 +879,7 @@ router.route('/course/:id/get/engagement').get((req, res) => {
     });
 });
 
-router.route('/students/create/new').post(
+    router.route('/students/create/new').post(
     (req, res) => {
         const userData: UserRegistrationDataAPI = req.body.data;
         let lastIndex: number = -1;
@@ -659,7 +920,7 @@ router.route('/students/create/new').post(
             });
 
     });
-router.route('/employees/create/new').post(
+    router.route('/employees/create/new').post(
     (req, res) => {
         const userData: EmployeeRegistrationAPI = req.body.data;
         let lastIndex: number = -1;
@@ -706,5 +967,5 @@ router.route('/employees/create/new').post(
 
     });
 
-app.use('/', router);
-app.listen(4000, () => console.log(`Express server running on port 4000`));
+    app.use('/', router);
+    app.listen(4000, () => console.log(`Express server running on port 4000`));

@@ -5,6 +5,7 @@ export class ActiveUser {
     this.username = parse.username
     this.name = parse.name
     this.surname = parse.surname
+    this.rawData = parse;
   }
 
   id: number;
@@ -12,4 +13,5 @@ export class ActiveUser {
   username: string;
   name: string;
   surname: string;
+  rawData: {};
 }

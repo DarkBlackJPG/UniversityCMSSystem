@@ -33,7 +33,7 @@ export class LoginComponent implements OnInit {
 
             });
           } else if (response.type == 1) {
-            this.router.navigate(['/faculty']);
+            this.router.navigate(['/employee']);
           } else {
             this.router.navigate(['/student']);
           }

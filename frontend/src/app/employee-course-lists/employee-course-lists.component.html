@@ -1,0 +1,363 @@
+<div class="row justify-content-center mt-2">
+  <div class="card p-0 text-white bg-dark col-md-5 mb-3">
+    <div class="card-header">Odabir predmeta</div>
+    <div class="card-body">
+      <div class="form-group justify-content-center text-center  form-inline col-12">
+        <label for="courseSelect" class="form-text">Odaberite predmet</label>
+        <select id="courseSelect" class="ml-2 form-control">
+          <option *ngFor="let course of myCourses" [value]="course.id">{{course.name}}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="selectedCourse != null" class="row justify-content-center mt-2">
+  <div class="card p-0 text-white bg-dark col-md-5 mb-3">
+    <div class="card-header">{{selectedCourse.name}}</div>
+    <div class="card-body">
+      <div class="col-12 form-inline justify-content-center">
+        <button class="btn btn-link text-warning" [class.border-warning]="activePage === 1" (click)="activePage = 1">O
+          predmetu
+        </button>
+        <button class="btn btn-link text-warning" [class.border-warning]="activePage === 2" (click)="activePage = 2">
+          Predavanja
+        </button>
+        <button class="btn btn-link text-warning" [class.border-warning]="activePage === 3" (click)="activePage = 3">
+          Vezbe
+        </button>
+        <button class="btn btn-link text-warning" [class.border-warning]="activePage === 4" (click)="activePage = 4">
+          Ispitna pitanja
+        </button>
+        <button class="btn btn-link text-warning" [class.border-warning]="activePage === 5" (click)="activePage = 5">
+          Laboratorija
+        </button>
+        <button class="btn btn-link text-warning" [class.border-warning]="activePage === 6" (click)="activePage = 6">
+          Projekti
+        </button>
+      </div>
+      <hr>
+      <div *ngIf="activePage === 1" class="form-group col-12">
+        <div class="mb-3 row">
+          <label for="tipPredmetaSelect" class="col-sm-2 col-form-label">Tip predmeta</label>
+          <div class="col-sm-10">
+            <select id="tipPredmetaSelect" class="form-control col-12">
+              <option value="0" [selected]="selectedCourse.type == 0">
+                Obavezan predmet
+              </option>
+              <option value="1" [selected]="selectedCourse.type == 1">
+                Izborni predmet
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="sifraPredmeta" class="col-sm-2 col-form-label">Sifra predmeta</label>
+          <div class="col-sm-10">
+            <input id="sifraPredmeta" [required]="selectedCourse.isMaster || selectedCourse.isSI" type="text"
+                   class="form-control" [(ngModel)]="selectedCourse.coursecode_SI" placeholder="Na primer: 13S142MIPS">
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="tipStudija" class="col-sm-2 col-form-label">Tip studija</label>
+          <div class="col-sm-10">
+            <select id="tipStudija" class="form-control">
+              <option value="0" [selected]="selectedCourse.isMaster === 'false'">
+                Osnovne akademske
+              </option>
+              <option value="1" [selected]="selectedCourse.isMaster === 'true'">
+                Master studije
+              </option>
+            </select></div>
+        </div>
+        <div class="mb-3 row">
+          <label for="smer" class="col-sm-2 col-form-label">Smer na kome se odrzava</label>
+          <div class="col-sm-10">
+            <select id="smer" class="form-control">
+              <option value="1" [selected]="selectedCourse.isSI">
+                Softversko inzenjerstvo
+              </option>
+              <option value="0" [selected]="selectedCourse.isRTI">
+                Racunarska tehnika i informatika
+              </option>
+              <option value="2" [selected]="selectedCourse.isOther">
+                Ostali odseci
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="semestar" class="col-sm-2 col-form-label">Semestar</label>
+          <div class="col-sm-10">
+            <input id="semestar" required type="number" [(ngModel)]="selectedCourse.semester" class="form-control">
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="espb" class="col-sm-2 col-form-label">ESPB</label>
+          <div class="col-sm-10">
+            <input id="espb" required type="number" [(ngModel)]="selectedCourse.ESPB" class="form-control">
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="fond" class="col-sm-2 col-form-label">Fond casova</label>
+          <div class="col-sm-10">
+            <input id="fond" required type="text" [(ngModel)]="selectedCourse.classCount" placeholder="P+V+L"
+                   class="form-control">
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="acronim" class="col-sm-2 col-form-label">Akronim</label>
+          <div class="col-sm-10">
+            <input required id="acronim" type="text" [(ngModel)]="selectedCourse.acronym" class="form-control">
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="punNaziv" class="col-sm-2 col-form-label">Pun naziv</label>
+          <div class="col-sm-10">
+            <input id="punNaziv" required type="text" [(ngModel)]="selectedCourse.name" class="form-control">
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="uslovi" class="col-sm-2 col-form-label">Uslovi za polaganje predmeta</label>
+          <div class="col-sm-10">
+            <ckeditor id="uslovi" required [editor]="Editor" [(ngModel)]="selectedCourse.conditions"></ckeditor>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="cilj" class="col-sm-2 col-form-label">Cilj</label>
+          <div class="col-sm-10">
+            <ckeditor id="cilj" required [editor]="Editor" [(ngModel)]="selectedCourse.purpose"></ckeditor>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="ishod" class="col-sm-2 col-form-label">Ishod predmeta</label>
+          <div class="col-sm-10">
+            <ckeditor id="ishod" [editor]="Editor" [(ngModel)]="selectedCourse.outcome"></ckeditor>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="predavanja" class="col-sm-2 col-form-label">Termini predavanja</label>
+          <div class="col-sm-10">
+            <ckeditor id="predavanja" required [editor]="Editor" [(ngModel)]="selectedCourse.lectureDates"></ckeditor>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="vezbe" class="col-sm-2 col-form-label">Termini vezbi</label>
+          <div class="col-sm-10">
+            <ckeditor id="vezbe" required [editor]="Editor"
+                      [(ngModel)]="selectedCourse.auditoryExcercisesDates"></ckeditor>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="labovi" class="col-sm-2 col-form-label">Informacije o laboratorijskim vezbama</label>
+          <div class="col-sm-10">
+            <ckeditor id="labovi" [editor]="Editor" [(ngModel)]="selectedCourse.labInfo"></ckeditor>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="seminarski" class="col-sm-2 col-form-label">Seminarski, domaci, projekti</label>
+          <div class="col-sm-10">
+            <ckeditor id="seminarski" [editor]="Editor" [(ngModel)]="selectedCourse.homeworks"></ckeditor>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <button class="btn btn-outline-success">
+            Azuriraj
+          </button>
+        </div>
+
+      </div>
+      <div *ngIf="activePage === 2" class="form-group col-12">
+        <div class="input-group mb-3">
+          <input type="file" multiple class="form-control" id="novoPredavanje">
+          <label class="input-group-text" for="novoPredavanje">Novo predavanje...</label>
+        </div>
+        <button class="btn btn-outline-light" >Postavi</button>
+        <hr>
+        <div cdkDropList class="example-list" (cdkDropListDropped)="drop1($event)">
+          <div class="border-secondary border rounded p-2 mb-3" *ngFor="let predavanje of predavanja" cdkDrag>
+            <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
+            <div class="form-group row">
+              <label [htmlFor]="'filename_' + predavanje.id" class="col-sm-2 col-form-label">Naziv: </label>
+              <div class="col-sm-10">
+                <p [id]="'filename_' + predavanje.id">{{predavanje.filename}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'documentType_' + predavanje.id" class="col-sm-2 col-form-label">Tip dokumenta: </label>
+              <div class="col-sm-10">
+                <p [id]="'documentType_' + predavanje.id">{{predavanje.type}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'size_' + predavanje.id" class="col-sm-2 col-form-label">Velicina: </label>
+              <div class="col-sm-10">
+                <p [id]="'size_' + predavanje.id">{{predavanje.size}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'date_' + predavanje.id" class="col-sm-2 col-form-label">Datum postavljanja: </label>
+              <div class="col-sm-10">
+                <p [id]="'date_' + predavanje.id">{{predavanje.date}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'poster_' + predavanje.id" class="col-sm-2 col-form-label">Postavio: </label>
+              <div class="col-sm-10">
+                <p [id]="'poster_' + predavanje.id">{{predavanje.posted.name}} {{predavanje.posted.surname}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'downld_' + predavanje.id" class="col-sm-2 col-form-label">Skini fajl: </label>
+              <div class="col-sm-10">
+                <a [id]="'downld_' + predavanje.id" [href]="predavanje.download_link">{{predavanje.filename}}</a>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'del_' + predavanje.id" class="col-sm-2 col-form-label">Izbrisi fajl: </label>
+              <div class="col-sm-10">
+                <button [id]="'del_' + predavanje.id" class="btn btn-danger">Izbrisi</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+      <div *ngIf="activePage === 3" class="form-group col-12">
+        <div class="input-group mb-3">
+          <input type="file" class="form-control" id="noveVezbe">
+          <label class="input-group-text" for="novoPredavanje">Nove vezbe...</label>
+        </div>
+        <button class="btn btn-outline-light">Postavi</button>
+        <hr>
+        <div cdkDropList class="example-list" (cdkDropListDropped)="drop2($event)">
+          <div class="border-secondary border rounded p-2 mb-3" *ngFor="let vezba of vezbe" cdkDrag>
+            <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
+            <div class="form-group row">
+              <label [htmlFor]="'filename_' + vezba.id" class="col-sm-2 col-form-label">Naziv: </label>
+              <div class="col-sm-10">
+                <p [id]="'filename_' + vezba.id">{{vezba.filename}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'documentType_' + vezba.id" class="col-sm-2 col-form-label">Tip dokumenta: </label>
+              <div class="col-sm-10">
+                <p [id]="'documentType_' + vezba.id">{{vezba.type}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'size_' + vezba.id" class="col-sm-2 col-form-label">Velicina: </label>
+              <div class="col-sm-10">
+                <p [id]="'size_' + vezba.id">{{vezba.size}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'date_' + vezba.id" class="col-sm-2 col-form-label">Datum postavljanja: </label>
+              <div class="col-sm-10">
+                <p [id]="'date_' + vezba.id">{{vezba.date}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'poster_' + vezba.id" class="col-sm-2 col-form-label">Postavio: </label>
+              <div class="col-sm-10">
+                <p [id]="'poster_' + vezba.id">{{vezba.posted.name}} {{vezba.posted.surname}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'downld_' + vezba.id" class="col-sm-2 col-form-label">Skini fajl: </label>
+              <div class="col-sm-10">
+                <a [id]="'downld_' + vezba.id" [href]="vezba.download_link">{{vezba.filename}}</a>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'del_' + vezba.id" class="col-sm-2 col-form-label">Izbrisi fajl: </label>
+              <div class="col-sm-10">
+                <button [id]="'del_' + vezba.id" class="btn btn-danger">Izbrisi</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+      <div *ngIf="activePage === 4" class="form-group col-12">
+        <div class="input-group mb-3">
+          <input type="file" class="form-control" id="noviRok">
+          <label class="input-group-text" for="noviRok">Novi rok...</label>
+        </div>
+        <button class="btn btn-outline-light">Postavi</button>
+        <hr>
+        <div cdkDropList class="example-list" (cdkDropListDropped)="drop3($event)">
+          <div class="border-secondary border rounded p-2 mb-3" *ngFor="let rok of rokovi" cdkDrag>
+            <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
+            <div class="form-group row">
+              <label [htmlFor]="'filename_' + rok.id" class="col-sm-2 col-form-label">Naziv: </label>
+              <div class="col-sm-10">
+                <p [id]="'filename_' + rok.id">{{rok.filename}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'documentType_' + rok.id" class="col-sm-2 col-form-label">Tip dokumenta: </label>
+              <div class="col-sm-10">
+                <p [id]="'documentType_' + rok.id">{{rok.type}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'size_' + rok.id" class="col-sm-2 col-form-label">Velicina: </label>
+              <div class="col-sm-10">
+                <p [id]="'size_' + rok.id">{{rok.size}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'date_' + rok.id" class="col-sm-2 col-form-label">Datum postavljanja: </label>
+              <div class="col-sm-10">
+                <p [id]="'date_' + rok.id">{{rok.date}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'poster_' + rok.id" class="col-sm-2 col-form-label">Postavio: </label>
+              <div class="col-sm-10">
+                <p [id]="'poster_' + rok.id">{{rok.posted.name}} {{rok.posted.surname}}</p>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'downld_' + rok.id" class="col-sm-2 col-form-label">Skini fajl: </label>
+              <div class="col-sm-10">
+                <a [id]="'downld_' + rok.id" [href]="rok.download_link">{{rok.filename}}</a>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <label [htmlFor]="'del_' + rok.id" class="col-sm-2 col-form-label">Izbrisi fajl: </label>
+              <div class="col-sm-10">
+                <button [id]="'del_' + rok.id" class="btn btn-danger">Izbrisi</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+</div>

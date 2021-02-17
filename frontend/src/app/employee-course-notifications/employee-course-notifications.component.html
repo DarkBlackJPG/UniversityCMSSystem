@@ -1,0 +1,55 @@
+<div class="row justify-content-center mt-2">
+  <div class="card p-0 text-white bg-dark col-md-5 mb-3">
+    <div class="card-header">Odabir predmeta</div>
+    <div class="card-body">
+      <div class="form-group justify-content-center text-center  form-inline col-12">
+        <label for="courseSelect" class="form-text">Odaberite predmet</label>
+        <select id="courseSelect" (change)="course_selection_change($event)" class="ml-2 form-control">
+          <option value="-1">Odaberi..</option>
+          <option *ngFor="let course of myCourses" [value]="course.id">{{course.name}}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="course != null" class="row justify-content-center mt-2">
+  <div class="card p-0 text-white bg-dark col-md-5 mb-3">
+    <div class="card-header">{{course.name}}</div>
+    <div class="card-body">
+      <h3>
+        Nova vest
+      </h3>
+      <div class="row mb-3">
+        <label for="date" class="col-sm-2 col-form-label">Datum:</label>
+        <div class="col-sm-10">
+          <input id="date" type="date" [(ngModel)]="newNotification.date" class="form-control">
+        </div>
+      </div>
+      <div class="row mb-3">
+        <label for="title" class="col-sm-2 col-form-label">Naslov:</label>
+        <div class="col-sm-10">
+          <input [(ngModel)]="newNotification.title" id="title" type="text" class="form-control">
+        </div>
+      </div>
+      <div class="row mb-3">
+        <label for="description" class="col-sm-2 col-form-label">Tekst:</label>
+        <div class="col-sm-10">
+          <ckeditor  id="description" [(ngModel)]="newNotification.description" [editor]="Editor"></ckeditor>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <label for="description" class="col-sm-2 col-form-label">File:</label>
+        <div class="col-sm-10">
+          <input type="file" multiple (change)="set_selected($event)">
+        </div>
+      </div>
+      <div class="row mb-3">
+        <label for="description" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+         <button class="btn btn-success mr-1" (click)="send_notification()">Prihvati</button>
+         <button class="btn btn-danger" (click)="cancel_input()">Odustani</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

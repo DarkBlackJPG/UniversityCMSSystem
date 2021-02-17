@@ -9,6 +9,7 @@ import {browser} from "protractor";
 import {NotificationService} from "./services/notification.service";
 import {faCoffee} from '@fortawesome/fontawesome-free';
 import {AdministratorFunctionsService} from "./services/administrator-functions.service";
+import {NotificationType} from "./models/database/NotificationType";
 
 @Component({
   selector: 'app-root',
@@ -28,7 +29,10 @@ export class AppComponent {
   otherCoursesId: number;
   masterCourseId: number;
 
+  notificationTypes: NotificationType[] = [];
+
   constructor(private adminService: AdministratorFunctionsService, private notificationService: NotificationService, private userValidation: UserValidationServiceService, private courseService: CoursesService, private router: Router) {
+
   }
 
   ngOnInit(): void {
@@ -38,6 +42,8 @@ export class AppComponent {
         this.refreshSession();
       }
     });
+
+
 
     this.courseService.getDepartmentIds().subscribe((response: Department[]) => {
       for (let i = 0; i < response.length; ++i) {
@@ -83,6 +89,10 @@ export class AppComponent {
       this.sessionIsStudent = false;
       this.sessionIsAdmin = false;
     }
+
+    this.notificationService.getAllNotificationTypes().subscribe((resp:NotificationType[]) => {
+      this.notificationTypes = resp;
+    })
   }
 
   logout() {

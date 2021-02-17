@@ -1,6 +1,8 @@
+
+
 <div *ngIf="notifications != null || notifications.length > 0">
   <div class="row justify-content-center p-0" *ngFor="let notification of notifications">
-    <div class="card col-md-6 text-white bg-dark m-3">
+    <div class="card col-md-6 text-dark p-0 bg-white m-3">
       <div class="card-header "><h1>{{notification.title}}</h1></div>
       <div class="card-body">
 
@@ -11,7 +13,7 @@
         <br>
         <h3 class="text-danger">Opis</h3>
         <br>
-        {{notification.description}}
+        <div [innerHTML]="notification.description"></div>
 
       </div>
     </div>

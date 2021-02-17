@@ -15,7 +15,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const body_parser_1 = __importDefault(require("body-parser"));
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
+// @ts-ignore
+const file_extension_1 = __importDefault(require("file-extension"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const multer_1 = __importDefault(require("multer"));
 const Enrollment_API_1 = require("./API/Enrollment.API");
 const Notification_API_1 = require("./API/Notification.API");
 const Student_API_1 = require("./API/Student.API");
@@ -40,6 +43,119 @@ connection.once('open', () => {
     console.log('MongoDB Connection open!');
 });
 const router = express_1.default.Router();
+const storage = multer_1.default.diskStorage({
+    destination(req, file, cb) {
+        cb(null, 'file_upload');
+    },
+    filename(req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + '.' + file_extension_1.default(file.originalname));
+    },
+});
+const upload = multer_1.default({ storage }).single('file');
+router.post('/upload', (req, res) => {
+    upload(req, res, (err) => {
+        if (err) {
+            console.log(err);
+        }
+        console.log(req);
+        res.json({
+            message: 'ok',
+            // tslint:disable-next-line:object-literal-sort-keys
+            file_data: req.file,
+            file_extension: file_extension_1.default(req.file.originalname),
+        });
+        // Everything went fine
+    });
+});
+router.post('/courses/notifications/upload', (req, res) => {
+    const courseId = req.body.courseId;
+    const notification = req.body.notification;
+    console.log(req.body);
+    Course_model_2.default.aggregate([
+        {
+            $match: {
+                id: courseId,
+            },
+        },
+        {
+            $unwind: {
+                path: '$notifications',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+        {
+            $sort: {
+                'notifications.id': -1.0,
+            },
+        },
+    ], (error, users) => {
+        let lastIndex = users[0].notifications === undefined ? 0 : Number(users[0].notifications.id);
+        lastIndex++;
+        Course_model_2.default.updateOne({
+            id: courseId,
+        }, {
+            $push: {
+                notifications: {
+                    id: lastIndex,
+                    title: notification.title,
+                    description: notification.description,
+                    date: notification.date,
+                    file: notification.file,
+                },
+            },
+        }, null, ((err, raw) => {
+            if (err) {
+                console.log(err);
+            }
+            else {
+                res.status(200).json({ message: 'ok' });
+            }
+        }));
+    });
+});
+router.post('/download', (req, res) => {
+    const filename = req.body.filename;
+    res.sendFile('file_upload/' + filename, { root: __dirname + '/../' });
+});
+router.get('/courses/notifications/:id', (req, res) => {
+    const courseId = req.params.id;
+    Course_model_2.default.findOne({
+        id: courseId,
+    }, (error, myCourse) => {
+        if (error) {
+            console.log(error);
+        }
+        else {
+            res.status(200).json(myCourse.notifications);
+        }
+    });
+});
+router.route('/employee/:id/my_courses/get/all').get((req, res) => {
+    const employeeId = req.params.id;
+    console.log(employeeId);
+    Employee_model_1.default.aggregate([
+        {
+            $match: {
+                user_id: 1.0,
+            },
+        },
+        {
+            $lookup: {
+                from: 'courses',
+                localField: 'courses.coursecode',
+                foreignField: 'coursecode',
+                as: 'courses_data',
+            },
+        },
+    ], (error, users) => {
+        if (error) {
+            console.log(error);
+        }
+        else {
+            res.status(200).json(users[0].courses_data);
+        }
+    });
+});
 router.route('/login').post((request, response) => {
     console.log('Login request accepted!');
     const username = request.body.username;
@@ -82,7 +198,19 @@ router.route('/login').post((request, response) => {
                                 path: '$employee_data',
                                 preserveNullAndEmptyArrays: true,
                             },
-                        }
+                        }, {
+                            $lookup: {
+                                from: 'employee_types',
+                                localField: 'employee_data.title',
+                                foreignField: 'id',
+                                as: 'title',
+                            },
+                        }, {
+                            $unwind: {
+                                path: '$title',
+                                preserveNullAndEmptyArrays: true,
+                            },
+                        },
                     ], (err, users) => {
                         response.status(200).json(users[0]);
                     });
@@ -298,6 +426,120 @@ router.route('/notifications/get/all/:id').get((req, res) => {
                     notifs.push(tempModel);
                 }
                 res.status(200).json(notifs);
+            }
+        });
+    });
+});
+router.route('/notifications/types/get/all').get((req, res) => {
+    NotificationTypes_model_1.default.find({}, (error, types) => {
+        if (error) {
+            console.log(error);
+        }
+        else {
+            res.status(200).json(types);
+        }
+    });
+});
+router.route('/notifications/types/remove').post((req, res) => {
+    const typeId = req.body.data;
+    NotificationTypes_model_1.default.deleteOne({ id: typeId }).then(() => {
+        Notification_model_1.default.deleteOne({
+            notification_type: typeId,
+        }).then(() => {
+            res.status(200).json({ message: 'ok' });
+        });
+    });
+});
+router.route('/notifications/remove').post((req, res) => {
+    const id = req.body.data;
+    Notification_model_1.default.deleteOne({
+        id,
+    }).then(() => {
+        res.status(200).json({ message: 'ok' });
+    });
+});
+router.route('/notifications/types/update').post((req, res) => {
+    const notification = req.body.data;
+    NotificationTypes_model_1.default.updateOne({
+        id: notification.id,
+    }, {
+        $set: {
+            name: notification.name,
+        },
+    }, null, (err, raw) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            res.status(200).json({ message: 'ok' });
+        }
+    });
+});
+router.route('/notifications/update').post((req, res) => {
+    const notification = req.body.data;
+    Notification_model_1.default.updateOne({
+        id: notification.id,
+    }, {
+        $set: {
+            date: notification.id,
+            description: notification.description,
+            notification_type: notification.notification_type,
+            title: notification.title,
+        },
+    }, null, (err, raw) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            res.status(200).json({ message: 'ok' });
+        }
+    });
+});
+router.route('/notifications/add').post((req, res) => {
+    const notification = req.body.data;
+    let lastIndex = -1;
+    Notification_model_1.default
+        .findOne({})
+        .sort('-id') // give me the max
+        .exec((err, member) => {
+        lastIndex = member.id;
+        lastIndex++;
+        const newNotificationType = new Notification_model_1.default({
+            id: lastIndex,
+            date: notification.date,
+            description: notification.description,
+            notification_type: notification.notification_type,
+            title: notification.title,
+        });
+        newNotificationType.save((err1, product) => {
+            if (err1) {
+                console.log(err1);
+            }
+            else {
+                res.status(200).json({ message: 'ok' });
+            }
+        });
+    });
+});
+router.route('/notifications/types/add').post((req, res) => {
+    const notificationType = req.body.data;
+    let lastIndex = -1;
+    NotificationTypes_model_1.default
+        .findOne({})
+        .sort('-id') // give me the max
+        .exec((err, member) => {
+        lastIndex = member.id;
+        lastIndex++;
+        const newNotificationType = new NotificationTypes_model_1.default({
+            id: lastIndex,
+            name: notificationType.name,
+        });
+        newNotificationType.save((err1, product) => {
+            if (err1) {
+                console.log(err1);
+            }
+            else {
+                res.status(200).json({ message: 'ok' });
             }
         });
     });

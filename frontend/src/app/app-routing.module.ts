@@ -16,6 +16,12 @@ import {AdminViewAccountsComponent} from "./admin-view-accounts/admin-view-accou
 import {AdminRegistrationComponent} from "./admin-registration/admin-registration.component";
 import {AdminCoursesEditComponent} from "./admin-courses-edit/admin-courses-edit.component";
 import {AdminEngagementPlanComponent} from "./admin-engagement-plan/admin-engagement-plan.component";
+import {EmployeeProjectsComponent} from "./employee-projects/employee-projects.component";
+import {GovernmentProjectsComponent} from "./government-projects/government-projects.component";
+import {AdminNotificationsComponent} from "./admin-notifications/admin-notifications.component";
+import {EmployeeComponent} from "./employee/employee.component";
+import {EmployeeCourseListsComponent} from "./employee-course-lists/employee-course-lists.component";
+import {EmployeeCourseNotificationsComponent} from "./employee-course-notifications/employee-course-notifications.component";
 
 
 const routes: Routes = [
@@ -83,7 +89,34 @@ const routes: Routes = [
     path: 'admin/courses/engagement_plan',
     component: AdminEngagementPlanComponent
   },
+  {
+    path: 'admin/notifications',
+    component: AdminNotificationsComponent
+  },
   // ---------| Admin pages end
+  //----------| Employee pages begin
+
+  {
+    path: 'employee',
+    component: EmployeeComponent
+  },
+  {
+    path: 'employee/my_courses',
+    component: EmployeeCourseListsComponent
+  },
+  {
+    path: 'employee/course/notifications',
+    component: EmployeeCourseNotificationsComponent
+  },
+  //----------| Employee pages end
+  {
+    path: 'statics/employee/projects',
+    component: EmployeeProjectsComponent
+  },
+  {
+    path: 'statics/employee/science',
+    component: GovernmentProjectsComponent
+  },
 ];
 
 @NgModule({

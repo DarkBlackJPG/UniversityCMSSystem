@@ -8,7 +8,6 @@ import {AppComponent} from './app.component';
 import {LoginComponent} from './login/login.component';
 import {LandingComponent} from './landing/landing.component';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
-import {FontAwesomeModule} from '@fortawesome/fontawesome-free/'
 import {AdminComponent} from './admin/admin.component';
 import {UserComponent} from './user/user.component';
 import {CourseComponent} from './course/course.component';
@@ -22,7 +21,15 @@ import {AdminViewAccountsComponent} from './admin-view-accounts/admin-view-accou
 import {AdminRegistrationComponent} from './admin-registration/admin-registration.component';
 import {AdminCoursesEditComponent} from './admin-courses-edit/admin-courses-edit.component';
 import {AdminEngagementPlanComponent} from './admin-engagement-plan/admin-engagement-plan.component';
-import {CKEditorModule} from '@ckeditor/ckeditor5-angular'
+import {CKEditorModule} from '@ckeditor/ckeditor5-angular';
+import { EmployeeProjectsComponent } from './employee-projects/employee-projects.component';
+import { GovernmentProjectsComponent } from './government-projects/government-projects.component';
+import { AdminNotificationsComponent } from './admin-notifications/admin-notifications.component';
+import { EmployeeComponent } from './employee/employee.component';
+import { EmployeeMyCoursesComponent } from './employee-my-courses/employee-my-courses.component';
+import { EmployeeCourseNotificationsComponent } from './employee-course-notifications/employee-course-notifications.component';
+import { EmployeeCourseListsComponent } from './employee-course-lists/employee-course-lists.component'
+import {DragDropModule} from "@angular/cdk/drag-drop";
 
 @NgModule({
   declarations: [
@@ -42,16 +49,25 @@ import {CKEditorModule} from '@ckeditor/ckeditor5-angular'
     AdminRegistrationComponent,
     AdminCoursesEditComponent,
     AdminEngagementPlanComponent,
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule,
-    HttpClientModule,
-    NgbModule,
-    CKEditorModule
+    EmployeeProjectsComponent,
+    GovernmentProjectsComponent,
+    AdminNotificationsComponent,
+    EmployeeComponent,
+    EmployeeMyCoursesComponent,
+    EmployeeCourseNotificationsComponent,
+    EmployeeCourseListsComponent,
 
   ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        FormsModule,
+        HttpClientModule,
+        NgbModule,
+        CKEditorModule,
+        DragDropModule,
+
+    ],
   providers: [],
   bootstrap: [AppComponent]
 })
