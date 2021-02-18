@@ -6,3 +6,14 @@
 body {
   background-color: #adb5bd;
 }
+
+figure .table  {
+  color: aqua !important;
+}
+.table  {
+  color: white !important;
+}
+
+ckeditor {
+  color: black;
+}

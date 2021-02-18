@@ -22,14 +22,16 @@ import {AdminRegistrationComponent} from './admin-registration/admin-registratio
 import {AdminCoursesEditComponent} from './admin-courses-edit/admin-courses-edit.component';
 import {AdminEngagementPlanComponent} from './admin-engagement-plan/admin-engagement-plan.component';
 import {CKEditorModule} from '@ckeditor/ckeditor5-angular';
-import { EmployeeProjectsComponent } from './employee-projects/employee-projects.component';
-import { GovernmentProjectsComponent } from './government-projects/government-projects.component';
-import { AdminNotificationsComponent } from './admin-notifications/admin-notifications.component';
-import { EmployeeComponent } from './employee/employee.component';
-import { EmployeeMyCoursesComponent } from './employee-my-courses/employee-my-courses.component';
-import { EmployeeCourseNotificationsComponent } from './employee-course-notifications/employee-course-notifications.component';
-import { EmployeeCourseListsComponent } from './employee-course-lists/employee-course-lists.component'
+import {EmployeeProjectsComponent} from './employee-projects/employee-projects.component';
+import {GovernmentProjectsComponent} from './government-projects/government-projects.component';
+import {AdminNotificationsComponent} from './admin-notifications/admin-notifications.component';
+import {EmployeeComponent} from './employee/employee.component';
+import {EmployeeMyCoursesComponent} from './employee-my-courses/employee-my-courses.component';
+import {EmployeeCourseNotificationsComponent} from './employee-course-notifications/employee-course-notifications.component';
+import {EmployeeCourseListsComponent} from './employee-course-lists/employee-course-lists.component'
 import {DragDropModule} from "@angular/cdk/drag-drop";
+import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
+import { EmployeeStudentRegistrationListComponent } from './employee-student-registration-list/employee-student-registration-list.component';
 
 @NgModule({
   declarations: [
@@ -56,18 +58,19 @@ import {DragDropModule} from "@angular/cdk/drag-drop";
     EmployeeMyCoursesComponent,
     EmployeeCourseNotificationsComponent,
     EmployeeCourseListsComponent,
+    EmployeeStudentRegistrationListComponent,
 
   ],
-    imports: [
-        BrowserModule,
-        AppRoutingModule,
-        FormsModule,
-        HttpClientModule,
-        NgbModule,
-        CKEditorModule,
-        DragDropModule,
-
-    ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    FormsModule,
+    HttpClientModule,
+    NgbModule,
+    CKEditorModule,
+    DragDropModule,
+    FontAwesomeModule,
+  ],
   providers: [],
   bootstrap: [AppComponent]
 })

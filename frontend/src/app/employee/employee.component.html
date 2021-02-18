@@ -1,29 +1,28 @@
 <div class="row justify-content-center mt-3" >
-  <div class="card text-white bg-dark col-md-5 mb-3">
+  <div class="card p-0 text-white bg-dark col-md-5 mb-3">
     <div class="card-header">Profil</div>
     <div class="card-body">
       <div class="row g-3">
         <div class="col-md-12 justify-content-center">
           <img class="img-fluid "
 
-               [src]="'assets/images/' + active_employe.employee_data.profilePicture">
+               [src]="'http://localhost:4000/download/'+active_employe.employee_data.profilePicture">
         </div>
         <div class="input-group mt-3 col-md-5">
           <div class="input-group-prepend">
             <span class="input-group-text">Promeni sliku</span>
           </div>
           <div class="custom-file">
-            <input type="file" class="custom-file-input" id="inputGroupFile01">
+            <input accept="image/x-png,image/gif,image/jpeg" type="file" class="custom-file-input" (change)="upload_image($event)" id="inputGroupFile01">
             <label class="custom-file-label" for="inputGroupFile01">Odaberi</label>
           </div>
         </div>
       </div>
 
-
       <div class="row g-3 mt-5">
         <div class="col-12">
           <div class="input-group flex-nowrap">
-            <span class="input-group-text">Ime i prezime</span>
+            <span class="input-group-text">Ime | prezime</span>
             <input type="text" aria-label="Ime" class="form-control" [(ngModel)]="active_employe.name">
             <input type="text" aria-label="Prezime" class="form-control" [(ngModel)]="active_employe.surname">
           </div>
@@ -34,6 +33,12 @@
             <span class="input-group-text">Adresa</span>
             <input type="text" class="form-control" [(ngModel)]="active_employe.employee_data.address" aria-label="Username"
                    aria-describedby="addon-wrapping">
+          </div>
+        </div>
+        <div class="col-12 mt-3">
+          <div class="input-group flex-nowrap">
+            <span class="input-group-text">Lozinka</span>
+            <input type="password" aria-label="Password" class="form-control" [(ngModel)]="active_employe.password">
           </div>
         </div>
         <div class="col-12 mt-3">
@@ -76,7 +81,7 @@
           </div>
         </div>
         <div class="col-12 mt-3">
-          <button class="mt-3 btn-outline-success btn">
+          <button class="mt-3 btn-outline-success btn" (click)="save_profile()">
             Sacuvaj
           </button>
         </div>

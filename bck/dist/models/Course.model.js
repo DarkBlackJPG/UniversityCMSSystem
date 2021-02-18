@@ -19,6 +19,13 @@ const Course = new Schema({
     isMaster: { type: Boolean },
     engagement: { type: Array },
     notifications: { type: Array },
+    exams: { type: Array, default: [] },
+    excercises: { type: Array, default: [] },
+    labs_docs: { type: Array, default: [] },
+    labs_texts: { type: Array, default: [] },
+    lectures: { type: Array, default: [] },
+    projects_docs: { type: Array, default: [] },
+    projects_texts: { type: Array, default: [] },
 });
 exports.default = mongoose_1.default.model('Course', Course, 'courses');
 //# sourceMappingURL=Course.model.js.map

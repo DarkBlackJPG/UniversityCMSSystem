@@ -1,3 +1,5 @@
+import * as assert from 'assert';
+import {log} from 'async';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express, {Request, Response} from 'express';
@@ -79,19 +81,19 @@ router.post('/courses/notifications/upload', (req, res) => {
     console.log(req.body);
     Course.aggregate([
         {
-            $match : {
-                id : courseId,
+            $match: {
+                id: courseId,
             },
         },
         {
-            $unwind : {
-                path : '$notifications',
-                preserveNullAndEmptyArrays : true,
+            $unwind: {
+                path: '$notifications',
+                preserveNullAndEmptyArrays: true,
             },
         },
         {
-            $sort : {
-                'notifications.id' : -1.0,
+            $sort: {
+                'notifications.id': -1.0,
             },
         },
     ], (error: Error, users: any[]) => {
@@ -100,17 +102,17 @@ router.post('/courses/notifications/upload', (req, res) => {
         Course.updateOne({
             id: courseId,
         }, {
-           $push: {
-               notifications: {
-                   id: lastIndex,
-                   title: notification.title,
-                   description: notification.description,
-                   date: notification.date,
-                   file: notification.file,
-               },
-           },
+            $push: {
+                notifications: {
+                    id: lastIndex,
+                    title: notification.title,
+                    description: notification.description,
+                    date: notification.date,
+                    file: notification.file,
+                },
+            },
         }, null, ((err, raw) => {
-            if(err) {
+            if (err) {
                 console.log(err);
             } else {
                 res.status(200).json({message: 'ok'});
@@ -119,13 +121,31 @@ router.post('/courses/notifications/upload', (req, res) => {
     });
 
 });
-
-    router.post('/download', (req, res) => {
-    const filename = req.body.filename;
+router.post('/courses/notifications/update', (req, res) => {
+    const courseId = req.body.courseId;
+    const notification = req.body.notification;
+    console.log(notification);
+    Course.updateOne({
+        'id': courseId,
+        'notifications.id': notification.id,
+    }, {
+        $set: {
+            'notifications.$': notification,
+        },
+    }, null, (err, raw) => {
+        if (err) {
+            console.log(err);
+        } else {
+            res.status(200).json({message: 'ok'});
+        }
+    });
+});
+router.get('/download/:id', (req, res) => {
+    const filename = req.params.id;
     res.sendFile('file_upload/' + filename, {root: __dirname + '/../'});
 });
 
-    router.get('/courses/notifications/:id', (req, res) => {
+router.get('/courses/notifications/:id', (req, res) => {
     const courseId = req.params.id;
     Course.findOne(
         {
@@ -140,7 +160,7 @@ router.post('/courses/notifications/upload', (req, res) => {
         });
 });
 
-    router.route('/employee/:id/my_courses/get/all').get((req, res) => {
+router.route('/employee/:id/my_courses/get/all').get((req, res) => {
     const employeeId = req.params.id;
     console.log(employeeId);
     Employee.aggregate([
@@ -166,7 +186,7 @@ router.post('/courses/notifications/upload', (req, res) => {
     });
 });
 
-    router.route('/login').post(
+router.route('/login').post(
     (request: Request, response: Response) => {
         console.log('Login request accepted!');
         const username = request.body.username;
@@ -272,7 +292,7 @@ router.post('/courses/notifications/upload', (req, res) => {
     },
 );
 
-    router.route('/register').post(
+router.route('/register').post(
     (request: Request, response: Response) => {
         console.log('Register request accepted!');
 
@@ -303,7 +323,7 @@ router.post('/courses/notifications/upload', (req, res) => {
     },
 );
 
-    router.route('/course/:id/get/enrolled/all').get(
+router.route('/course/:id/get/enrolled/all').get(
     (req, res) => {
         const courseId = req.params.id;
         const preparedStudents: StudentAPI[] = [];
@@ -361,7 +381,7 @@ router.post('/courses/notifications/upload', (req, res) => {
             }
         });
     });
-    router.route('/course/get/ids').get(
+router.route('/course/get/ids').get(
     (req, res) => {
         CourseModel.find({},
             (error, course) => {
@@ -374,7 +394,7 @@ router.post('/courses/notifications/upload', (req, res) => {
             });
     });
 
-    router.route('/department/get/ids').get(
+router.route('/department/get/ids').get(
     (req, res) => {
         Department.find({},
             (error, department) => {
@@ -386,7 +406,7 @@ router.post('/courses/notifications/upload', (req, res) => {
                 }
             });
     });
-    router.route('/department/course/info/get/:id').get(
+router.route('/department/course/info/get/:id').get(
     (req, res) => {
         const depId = req.params.id;
 
@@ -400,7 +420,7 @@ router.post('/courses/notifications/upload', (req, res) => {
                 }
             });
     });
-    router.route('/projects/get/all/proposals').get(
+router.route('/projects/get/all/proposals').get(
     (req, res) => {
 
         ProjectProposal.find({},
@@ -413,7 +433,7 @@ router.post('/courses/notifications/upload', (req, res) => {
                 }
             });
     });
-    router.route('/titles/get/all').get(
+router.route('/titles/get/all').get(
     (req, res) => {
         let titles: TitleAPI[] = [];
         Title.find({},
@@ -427,7 +447,7 @@ router.post('/courses/notifications/upload', (req, res) => {
                 }
             });
     });
-    router.route('/notifications/get/all/:id').get(
+router.route('/notifications/get/all/:id').get(
     (req, res) => {
         const notificationType = req.params.id;
         let notificationTypesNames: NotificationTypesAPI;
@@ -461,7 +481,7 @@ router.post('/courses/notifications/upload', (req, res) => {
         });
     });
 
-    router.route('/notifications/types/get/all').get((req, res) => {
+router.route('/notifications/types/get/all').get((req, res) => {
     NotificationType.find({}, (error, types) => {
         if (error) {
             console.log(error);
@@ -471,7 +491,7 @@ router.post('/courses/notifications/upload', (req, res) => {
     });
 });
 
-    router.route('/notifications/types/remove').post((req, res) => {
+router.route('/notifications/types/remove').post((req, res) => {
     const typeId = req.body.data;
     NotificationType.deleteOne({id: typeId}).then(() => {
         Notification.deleteOne({
@@ -482,7 +502,7 @@ router.post('/courses/notifications/upload', (req, res) => {
     });
 });
 
-    router.route('/notifications/remove').post((req, res) => {
+router.route('/notifications/remove').post((req, res) => {
     const id = req.body.data;
     Notification.deleteOne({
         id,
@@ -491,7 +511,7 @@ router.post('/courses/notifications/upload', (req, res) => {
     });
 
 });
-    router.route('/notifications/types/update').post((req, res) => {
+router.route('/notifications/types/update').post((req, res) => {
     const notification = req.body.data;
     NotificationType.updateOne({
         id: notification.id,
@@ -507,7 +527,7 @@ router.post('/courses/notifications/upload', (req, res) => {
         }
     });
 });
-    router.route('/notifications/update').post((req, res) => {
+router.route('/notifications/update').post((req, res) => {
     const notification = req.body.data;
     Notification.updateOne({
         id: notification.id,
@@ -527,7 +547,7 @@ router.post('/courses/notifications/upload', (req, res) => {
     });
 });
 
-    router.route('/notifications/add').post((req, res) => {
+router.route('/notifications/add').post((req, res) => {
     const notification = req.body.data;
     let lastIndex: number = -1;
     Notification
@@ -555,7 +575,7 @@ router.post('/courses/notifications/upload', (req, res) => {
             });
         });
 });
-    router.route('/notifications/types/add').post((req, res) => {
+router.route('/notifications/types/add').post((req, res) => {
     const notificationType = req.body.data;
     let lastIndex: number = -1;
     NotificationType
@@ -582,7 +602,7 @@ router.post('/courses/notifications/upload', (req, res) => {
 
 });
 
-    router.route('/employees/get/all').get(
+router.route('/employees/get/all').get(
     (req, res) => {
         User.aggregate([
             {
@@ -631,7 +651,7 @@ router.post('/courses/notifications/upload', (req, res) => {
             res.status(200).json(das);
         });
     });
-    router.route('/employees/update').post((req, res) => {
+router.route('/employees/update').post((req, res) => {
     const employee = req.body.data;
     User.findOne({
         id: employee.id,
@@ -672,7 +692,7 @@ router.post('/courses/notifications/upload', (req, res) => {
     });
 });
 
-    router.route('/course/student/enroll').post((req, res) => {
+router.route('/course/student/enroll').post((req, res) => {
     const courseId = req.body.course_id;
     const studentIndex = req.body.student_index;
     const newData = new EnrollmentAPI();
@@ -704,7 +724,7 @@ router.post('/courses/notifications/upload', (req, res) => {
         }
     });
 });
-    router.route('/course/student/remove').post((req, res) => {
+router.route('/course/student/remove').post((req, res) => {
     const courseId = req.body.course_id;
     const studentIndex = req.body.student_index;
     let student: StudentAPI = null;
@@ -730,7 +750,292 @@ router.post('/courses/notifications/upload', (req, res) => {
     });
 });
 
-    router.route('/course/create').post((req, res) => {
+router.route('/employee/profile/profilepicture/upload/:id').post(((req, res) => {
+    const id = req.params.id;
+    Employee.updateOne({
+        user_id: id,
+    }, {
+        $set: {
+            profilePicture: req.body.picture,
+        },
+    }, null, (err, raw) => {
+        if (err) {
+            console.log(err);
+        } else {
+            res.status(200).json({message: 'ok'});
+        }
+    });
+}));
+router.route('/employee/profile/update').post(((req, res) => {
+    const employeeData = req.body.data;
+    console.log(employeeData);
+    Employee.updateOne({
+        user_id: employeeData.id,
+    }, {
+        $set: {
+            address: employeeData.employee_data.address,
+            website: employeeData.employee_data.website,
+            biography: employeeData.employee_data.biography,
+            office: employeeData.employee_data.office,
+        },
+    }, null, (err, raw) => {
+        if (err) {
+            console.log(err);
+        } else {
+            User.updateOne({
+                id: employeeData.id,
+            }, {
+                $set: {
+                    name: employeeData.name,
+                    surname: employeeData.surname,
+                    password: employeeData.password,
+                },
+            }, null, ((err1, raw1) => {
+                if (err1) {
+                    console.log(err1);
+                } else {
+                    res.status(200).json({message: 'ok'});
+                }
+            }));
+        }
+    });
+}));
+
+router.route('/employee/course/:id/update').post(((req, res) => {
+    const courseId = req.params.id;
+    const courseData = req.body.data;
+    Course.findOne({
+        id: courseId,
+    }, (err: Error, doc: any) => {
+
+        const oldcoursecode = doc.coursecode;
+
+        Course.updateOne(
+            {
+                id: courseId,
+            }, {
+                name: courseData.name,
+                coursecode: courseData.coursecode,
+                acronym: courseData.acronym,
+                semester: courseData.semester,
+                type: courseData.type,
+                department: courseData.department,
+                courseDetails: courseData.courseDetails,
+            }, null, (error: Error, course: any) => {
+                if (error) {
+                    console.log(error);
+                } else {
+                    if (courseData.isMapped) {
+                        Course.updateMany(
+                            {
+                                mapHash: courseData.mapHash,
+                            }, {
+                                courseDetails: courseData.courseDetails,
+                                notifications: courseData.notifications,
+                                exams: courseData.exams,
+                                excercises: courseData.excercises,
+                                labs_docs: courseData.labs_docs,
+                                labs_texts: courseData.labs_texts,
+                                lectures: courseData.lectures,
+                                projects_docs: courseData.projects_docs,
+                                projects_texts: courseData.projects_texts,
+                            },
+                        );
+                    }
+                    EnrolledStudents.updateMany({
+                        course_id: oldcoursecode,
+                    }, {
+                        $set: {
+                            course_id: courseData.coursecode,
+                        },
+                    }, null, (err1, raw) => {
+                        Employee.find(
+                            {
+                                'courses.coursecode': oldcoursecode,
+                            }
+                            , (agg_err: Error, result: any[]) => {
+                                if (agg_err) {
+                                    console.log(agg_err);
+                                } else {
+                                    const ids = [];
+                                    for (const resultElement of result) {
+                                        ids.push(resultElement.user_id);
+                                    }
+                                    Employee.updateMany({
+                                        user_id: {
+                                            $in: ids,
+                                        },
+                                        courses: {
+                                            $elemMatch: {
+                                                coursecode: oldcoursecode,
+                                            },
+                                        },
+                                    }, {
+                                        $set: {
+                                            'courses.$.coursecode': courseData.coursecode,
+                                        },
+                                    }, null, ((err2, raw1) => {
+                                        if (err2) {
+                                            console.log(err2);
+                                        } else {
+                                            res.status(200).json({message: 'ok'});
+                                        }
+                                    }));
+                                }
+                            });
+                    });
+
+                }
+            });
+    });
+}));
+
+router.route('/employee/course/:id/lectures/update').post((req, res) => {
+    let courseId = req.params.id;
+    let data = req.body.data;
+
+    Course.updateOne(
+        {
+            id: courseId,
+        }, {
+            $push: {
+                lectures: data,
+            },
+        }, null, ((err, raw) => {
+            if (err) {
+                console.log(err);
+            } else {
+                res.status(200).json({message: 'ok'});
+            }
+        }));
+
+});
+
+router.route('/employee/course/:id/excercises/update').post((req, res) => {
+    let courseId = req.params.id;
+    let data = req.body.data;
+
+    Course.updateOne(
+        {
+            id: courseId,
+        }, {
+            $push: {
+                excercises: data,
+            },
+        }, null, ((err, raw) => {
+            if (err) {
+                console.log(err);
+            } else {
+                res.status(200).json({message: 'ok'});
+            }
+        }));
+
+});
+
+router.route('/employee/course/:id/exams/update').post((req, res) => {
+    let courseId = req.params.id;
+    let data = req.body.data;
+
+    Course.updateOne(
+        {
+            id: courseId,
+        }, {
+            $push: {
+                exams: data,
+            },
+        }, null, ((err, raw) => {
+            if (err) {
+                console.log(err);
+            } else {
+                res.status(200).json({message: 'ok'});
+            }
+        }));
+
+});
+
+router.route('/employee/course/:id/labs/notification/create').post((req, res) => {
+    let courseId = req.params.id;
+    let data = req.body.data;
+
+    Course.updateOne(
+        {
+            id: courseId,
+        }, {
+            $push: {
+                labs_texts: data,
+            },
+        }, null, ((err, raw) => {
+            if (err) {
+                console.log(err);
+            } else {
+                res.status(200).json({message: 'ok'});
+            }
+        }));
+
+});
+router.route('/employee/course/:id/projects/notification/create').post((req, res) => {
+    let courseId = req.params.id;
+    let data = req.body.data;
+
+    Course.updateOne(
+        {
+            id: courseId,
+        }, {
+            $push: {
+                projects_texts: data,
+            },
+        }, null, ((err, raw) => {
+            if (err) {
+                console.log(err);
+            } else {
+                res.status(200).json({message: 'ok'});
+            }
+        }));
+
+});
+
+router.route('/employee/course/:id/projects/files/create').post((req, res) => {
+    let courseId = req.params.id;
+    let data = req.body.data;
+
+    Course.updateOne(
+        {
+            id: courseId,
+        }, {
+            $push: {
+                projects_docs: data,
+            },
+        }, null, ((err, raw) => {
+            if (err) {
+                console.log(err);
+            } else {
+                res.status(200).json({message: 'ok'});
+            }
+        }));
+
+});
+router.route('/employee/course/:id/labs/files/create').post((req, res) => {
+    let courseId = req.params.id;
+    let data = req.body.data;
+
+    Course.updateOne(
+        {
+            id: courseId,
+        }, {
+            $push: {
+                labs_docs: data,
+            },
+        }, null, ((err, raw) => {
+            if (err) {
+                console.log(err);
+            } else {
+                res.status(200).json({message: 'ok'});
+            }
+        }));
+
+});
+
+router.route('/course/create').post((req, res) => {
     let lastIndex: number = -1;
     Course
         .findOne({})
@@ -762,7 +1067,7 @@ router.post('/courses/notifications/upload', (req, res) => {
         });
 });
 
-    router.route('/course/update').post((req, res) => {
+router.route('/course/update').post((req, res) => {
     console.log(JSON.stringify(req.body));
     const courseData: CourseAPI = req.body.data;
     courseData.type = req.body.data.type === true ? 1 : 0;
@@ -804,7 +1109,7 @@ router.post('/courses/notifications/upload', (req, res) => {
         });
 });
 
-    router.route('/course/engagement/update').post((req, res) => {
+router.route('/course/engagement/update').post((req, res) => {
     const courseId = req.body.course_id;
     const engagement = req.body.engagement;
     console.log(engagement);
@@ -861,7 +1166,7 @@ router.post('/courses/notifications/upload', (req, res) => {
         }
     });
 });
-    router.route('/course/:id/get/engagement').get((req, res) => {
+router.route('/course/:id/get/engagement').get((req, res) => {
     const courseId = req.params.id;
     Course.findOne({
         coursecode: courseId,
@@ -879,7 +1184,7 @@ router.post('/courses/notifications/upload', (req, res) => {
     });
 });
 
-    router.route('/students/create/new').post(
+router.route('/students/create/new').post(
     (req, res) => {
         const userData: UserRegistrationDataAPI = req.body.data;
         let lastIndex: number = -1;
@@ -920,7 +1225,7 @@ router.post('/courses/notifications/upload', (req, res) => {
             });
 
     });
-    router.route('/employees/create/new').post(
+router.route('/employees/create/new').post(
     (req, res) => {
         const userData: EmployeeRegistrationAPI = req.body.data;
         let lastIndex: number = -1;
@@ -967,5 +1272,5 @@ router.post('/courses/notifications/upload', (req, res) => {
 
     });
 
-    app.use('/', router);
-    app.listen(4000, () => console.log(`Express server running on port 4000`));
+app.use('/', router);
+app.listen(4000, () => console.log(`Express server running on port 4000`));

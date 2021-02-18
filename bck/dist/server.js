@@ -113,8 +113,28 @@ router.post('/courses/notifications/upload', (req, res) => {
         }));
     });
 });
-router.post('/download', (req, res) => {
-    const filename = req.body.filename;
+router.post('/courses/notifications/update', (req, res) => {
+    const courseId = req.body.courseId;
+    const notification = req.body.notification;
+    console.log(notification);
+    Course_model_2.default.updateOne({
+        'id': courseId,
+        'notifications.id': notification.id,
+    }, {
+        $set: {
+            'notifications.$': notification,
+        },
+    }, null, (err, raw) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            res.status(200).json({ message: 'ok' });
+        }
+    });
+});
+router.get('/download/:id', (req, res) => {
+    const filename = req.params.id;
     res.sendFile('file_upload/' + filename, { root: __dirname + '/../' });
 });
 router.get('/courses/notifications/:id', (req, res) => {
@@ -690,6 +710,268 @@ router.route('/course/student/remove').post((req, res) => {
             });
         }
     });
+});
+router.route('/employee/profile/profilepicture/upload/:id').post(((req, res) => {
+    const id = req.params.id;
+    Employee_model_1.default.updateOne({
+        user_id: id,
+    }, {
+        $set: {
+            profilePicture: req.body.picture,
+        },
+    }, null, (err, raw) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            res.status(200).json({ message: 'ok' });
+        }
+    });
+}));
+router.route('/employee/profile/update').post(((req, res) => {
+    const employeeData = req.body.data;
+    console.log(employeeData);
+    Employee_model_1.default.updateOne({
+        user_id: employeeData.id,
+    }, {
+        $set: {
+            address: employeeData.employee_data.address,
+            website: employeeData.employee_data.website,
+            biography: employeeData.employee_data.biography,
+            office: employeeData.employee_data.office,
+        },
+    }, null, (err, raw) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            User_model_2.default.updateOne({
+                id: employeeData.id,
+            }, {
+                $set: {
+                    name: employeeData.name,
+                    surname: employeeData.surname,
+                    password: employeeData.password,
+                },
+            }, null, ((err1, raw1) => {
+                if (err1) {
+                    console.log(err1);
+                }
+                else {
+                    res.status(200).json({ message: 'ok' });
+                }
+            }));
+        }
+    });
+}));
+router.route('/employee/course/:id/update').post(((req, res) => {
+    const courseId = req.params.id;
+    const courseData = req.body.data;
+    Course_model_2.default.findOne({
+        id: courseId,
+    }, (err, doc) => {
+        const oldcoursecode = doc.coursecode;
+        Course_model_2.default.updateOne({
+            id: courseId,
+        }, {
+            name: courseData.name,
+            coursecode: courseData.coursecode,
+            acronym: courseData.acronym,
+            semester: courseData.semester,
+            type: courseData.type,
+            department: courseData.department,
+            courseDetails: courseData.courseDetails,
+        }, null, (error, course) => {
+            if (error) {
+                console.log(error);
+            }
+            else {
+                if (courseData.isMapped) {
+                    Course_model_2.default.updateMany({
+                        mapHash: courseData.mapHash,
+                    }, {
+                        courseDetails: courseData.courseDetails,
+                        notifications: courseData.notifications,
+                        exams: courseData.exams,
+                        excercises: courseData.excercises,
+                        labs_docs: courseData.labs_docs,
+                        labs_texts: courseData.labs_texts,
+                        lectures: courseData.lectures,
+                        projects_docs: courseData.projects_docs,
+                        projects_texts: courseData.projects_texts,
+                    });
+                }
+                EnrolledStudents_model_1.default.updateMany({
+                    course_id: oldcoursecode,
+                }, {
+                    $set: {
+                        course_id: courseData.coursecode,
+                    },
+                }, null, (err1, raw) => {
+                    Employee_model_1.default.find({
+                        'courses.coursecode': oldcoursecode,
+                    }, (agg_err, result) => {
+                        if (agg_err) {
+                            console.log(agg_err);
+                        }
+                        else {
+                            const ids = [];
+                            for (const resultElement of result) {
+                                ids.push(resultElement.user_id);
+                            }
+                            Employee_model_1.default.updateMany({
+                                user_id: {
+                                    $in: ids,
+                                },
+                                courses: {
+                                    $elemMatch: {
+                                        coursecode: oldcoursecode,
+                                    },
+                                },
+                            }, {
+                                $set: {
+                                    'courses.$.coursecode': courseData.coursecode,
+                                },
+                            }, null, ((err2, raw1) => {
+                                if (err2) {
+                                    console.log(err2);
+                                }
+                                else {
+                                    res.status(200).json({ message: 'ok' });
+                                }
+                            }));
+                        }
+                    });
+                });
+            }
+        });
+    });
+}));
+router.route('/employee/course/:id/lectures/update').post((req, res) => {
+    let courseId = req.params.id;
+    let data = req.body.data;
+    Course_model_2.default.updateOne({
+        id: courseId,
+    }, {
+        $push: {
+            lectures: data,
+        },
+    }, null, ((err, raw) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            res.status(200).json({ message: 'ok' });
+        }
+    }));
+});
+router.route('/employee/course/:id/excercises/update').post((req, res) => {
+    let courseId = req.params.id;
+    let data = req.body.data;
+    Course_model_2.default.updateOne({
+        id: courseId,
+    }, {
+        $push: {
+            excercises: data,
+        },
+    }, null, ((err, raw) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            res.status(200).json({ message: 'ok' });
+        }
+    }));
+});
+router.route('/employee/course/:id/exams/update').post((req, res) => {
+    let courseId = req.params.id;
+    let data = req.body.data;
+    Course_model_2.default.updateOne({
+        id: courseId,
+    }, {
+        $push: {
+            exams: data,
+        },
+    }, null, ((err, raw) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            res.status(200).json({ message: 'ok' });
+        }
+    }));
+});
+router.route('/employee/course/:id/labs/notification/create').post((req, res) => {
+    let courseId = req.params.id;
+    let data = req.body.data;
+    Course_model_2.default.updateOne({
+        id: courseId,
+    }, {
+        $push: {
+            labs_texts: data,
+        },
+    }, null, ((err, raw) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            res.status(200).json({ message: 'ok' });
+        }
+    }));
+});
+router.route('/employee/course/:id/projects/notification/create').post((req, res) => {
+    let courseId = req.params.id;
+    let data = req.body.data;
+    Course_model_2.default.updateOne({
+        id: courseId,
+    }, {
+        $push: {
+            projects_texts: data,
+        },
+    }, null, ((err, raw) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            res.status(200).json({ message: 'ok' });
+        }
+    }));
+});
+router.route('/employee/course/:id/projects/files/create').post((req, res) => {
+    let courseId = req.params.id;
+    let data = req.body.data;
+    Course_model_2.default.updateOne({
+        id: courseId,
+    }, {
+        $push: {
+            projects_docs: data,
+        },
+    }, null, ((err, raw) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            res.status(200).json({ message: 'ok' });
+        }
+    }));
+});
+router.route('/employee/course/:id/labs/files/create').post((req, res) => {
+    let courseId = req.params.id;
+    let data = req.body.data;
+    Course_model_2.default.updateOne({
+        id: courseId,
+    }, {
+        $push: {
+            labs_docs: data,
+        },
+    }, null, ((err, raw) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            res.status(200).json({ message: 'ok' });
+        }
+    }));
 });
 router.route('/course/create').post((req, res) => {
     let lastIndex = -1;

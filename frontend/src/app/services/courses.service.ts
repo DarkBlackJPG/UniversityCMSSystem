@@ -39,4 +39,12 @@ export class CoursesService {
   add_new_notification(data) {
     return this.http.post(`${this.url}/courses/notifications/upload`, data);
   }
+
+  update_notification(param: {courseId: number, notification: {date: any; file: any; description: any; title: any}}) {
+    return this.http.post(`${this.url}/courses/notifications/update`, param);
+  }
+
+  getCourseRegistrationLists(courseId: any) {
+    return this.http.get(`${this.url}/courses/registration_lists/${courseId}`);
+  }
 }

@@ -1,7 +1,7 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import {NgModule} from '@angular/core';
+import {RouterModule, Routes} from '@angular/router';
 
-import { LoginComponent } from './login/login.component';
+import {LoginComponent} from './login/login.component';
 import {LandingComponent} from "./landing/landing.component";
 import {AdminComponent} from "./admin/admin.component";
 import {UserComponent} from "./user/user.component";
@@ -22,6 +22,7 @@ import {AdminNotificationsComponent} from "./admin-notifications/admin-notificat
 import {EmployeeComponent} from "./employee/employee.component";
 import {EmployeeCourseListsComponent} from "./employee-course-lists/employee-course-lists.component";
 import {EmployeeCourseNotificationsComponent} from "./employee-course-notifications/employee-course-notifications.component";
+import {EmployeeStudentRegistrationListComponent} from "./employee-student-registration-list/employee-student-registration-list.component";
 
 
 const routes: Routes = [
@@ -108,6 +109,10 @@ const routes: Routes = [
     path: 'employee/course/notifications',
     component: EmployeeCourseNotificationsComponent
   },
+  {
+    path: 'employee/student/registration',
+    component: EmployeeStudentRegistrationListComponent
+  },
   //----------| Employee pages end
   {
     path: 'statics/employee/projects',
@@ -123,4 +128,5 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {
+}

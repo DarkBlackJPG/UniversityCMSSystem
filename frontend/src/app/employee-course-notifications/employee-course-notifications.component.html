@@ -14,7 +14,7 @@
 </div>
 <div *ngIf="course != null" class="row justify-content-center mt-2">
   <div class="card p-0 text-white bg-dark col-md-5 mb-3">
-    <div class="card-header">{{course.name}}</div>
+    <div class="card-header bg-info">{{course.name}}</div>
     <div class="card-body">
       <h3>
         Nova vest
@@ -34,7 +34,8 @@
       <div class="row mb-3">
         <label for="description" class="col-sm-2 col-form-label">Tekst:</label>
         <div class="col-sm-10">
-          <ckeditor  id="description" [(ngModel)]="newNotification.description" [editor]="Editor"></ckeditor>
+          <ckeditor id="description" [(ngModel)]="newNotification.description" class="text-dark"
+                    [editor]="Editor"></ckeditor>
         </div>
       </div>
       <div class="row mb-3">
@@ -46,10 +47,113 @@
       <div class="row mb-3">
         <label for="description" class="col-sm-2 col-form-label"></label>
         <div class="col-sm-10">
-         <button class="btn btn-success mr-1" (click)="send_notification()">Prihvati</button>
-         <button class="btn btn-danger" (click)="cancel_input()">Odustani</button>
+          <button class="btn btn-success mr-1" (click)="send_notification()">Prihvati</button>
+          <button class="btn btn-danger" (click)="cancel_input()">Odustani</button>
         </div>
       </div>
     </div>
   </div>
 </div>
+<span *ngIf="course != null">
+<div *ngFor="let notif of notifications" class="row justify-content-center mt-2">
+  <div class="card p-0 text-white bg-dark col-md-5 mb-3">
+    <div class="card-header"><h3>{{notif.title}}</h3>{{notif.date | date: 'yyyy-MM-dd'}}</div>
+    <div class="card-body">
+      <h3>
+        Opis
+      </h3>
+      <div class="row mb-3">
+        <p class="ml-4" [innerHTML]="notif.description">
+        </p>
+      </div>
+      <div class="row mb-3" *ngIf="notif.file.type != undefined">
+        <label for="title" class="col-sm-2 col-form-label">File:</label>
+        <div class="col-sm-10">
+          <a [href]="'http://localhost:4000/download/'+notif.file.download_link">{{notif.file.filename}}</a>
+          <br>
+          Tip: {{notif.file.type}}<br>
+          Velicina: {{notif.file.size}}<br>
+          Datum postavljanja: {{notif.file.type}}<br>
+          Postavio: {{stringify(notif.file.posted)}}
+        </div>
+      </div>
+      <div class="row mb-3">
+        <label for="title" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+          <button class="btn btn-link text-danger" (click)="delete_notification(notif.id)"><i
+            class="fas fa-trash-alt"></i></button>
+          <!-- Button trigger modal -->
+          <button type="button" class="btn btn-link ml-4 text-warning" (click)="update_notification(notif.id)"
+                  data-toggle="modal" data-target="#exampleModalCenter">
+            <i
+              class="fas fa-pen-alt"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</span>
+
+
+<!-- Modal -->
+<div *ngIf="updateNotification != null" class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalCenterTitle"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Azuriranje: {{updateNotification.title}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-3">
+          <label for="date" class="col-sm-2 col-form-label">Datum:</label>
+          <div class="col-sm-10">
+            <input id="date2" type="date" [ngModel]="updateNotification.date | date: 'yyyy-MM-dd'"
+                   (ngModelChange)="updateNotification.date = $event.target.value" class="form-control">
+          </div>
+        </div>
+        <div class="row mb-3">
+          <label for="title" class="col-sm-2 col-form-label">Naslov:</label>
+          <div class="col-sm-10">
+            <input [(ngModel)]="updateNotification.title" id="title2" type="text" class="form-control">
+          </div>
+        </div>
+        <div class="row mb-3">
+          <label for="description" class="col-sm-2 col-form-label">Tekst:</label>
+          <div class="col-sm-10">
+            <ckeditor id="description2" [(ngModel)]="updateNotification.description" class="text-dark"
+                      [editor]="Editor"></ckeditor>
+          </div>
+        </div>
+        <div class="row mb-3" *ngIf="updateNotification.file.type != undefined">
+          <label for="title" class="col-sm-2 col-form-label">Postojeci file:</label>
+          <div class="col-sm-10">
+            <a
+              [href]="'http://localhost:4000/download/'+updateNotification.file.download_link">{{updateNotification.file.filename}}</a>
+            <br>
+            Tip: {{updateNotification.file.type}}<br>
+            Velicina: {{updateNotification.file.size}}<br>
+            Datum postavljanja: {{updateNotification.file.type}}<br>
+            Postavio: {{stringify(updateNotification.file.posted)}}
+            <button class="btn btn-link text-danger" (click)="delete_file()"><i
+              class="fas fa-trash-alt"></i></button>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <label for="description" class="col-sm-2 col-form-label">File:</label>
+          <div class="col-sm-10">
+            <input type="file" multiple (change)="set_update_selected($event)">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Zatvori</button>
+        <button type="button" class="btn btn-primary" (click)="update_send(updateNotification.id)">Sacuvaj izmene
+        </button>
+      </div>
+    </div>
+  </div>
