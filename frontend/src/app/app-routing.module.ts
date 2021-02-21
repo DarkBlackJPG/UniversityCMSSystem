@@ -23,6 +23,14 @@ import {EmployeeComponent} from "./employee/employee.component";
 import {EmployeeCourseListsComponent} from "./employee-course-lists/employee-course-lists.component";
 import {EmployeeCourseNotificationsComponent} from "./employee-course-notifications/employee-course-notifications.component";
 import {EmployeeStudentRegistrationListComponent} from "./employee-student-registration-list/employee-student-registration-list.component";
+import {CourseDetailsComponent} from "./course-details/course-details.component";
+import {StudentComponent} from "./student/student.component";
+import {StudentCourseChooseComponent} from "./student-course-choose/student-course-choose.component";
+import {StudentMyCoursesComponent} from "./student-my-courses/student-my-courses.component";
+import {StudentRegistrationsComponent} from "./student-registrations/student-registrations.component";
+import {EmployeeDetailsComponent} from "./employee-details/employee-details.component";
+import {Verify} from "node:crypto";
+import {StudentVerifyComponent} from "./student-verify/student-verify.component";
 
 
 const routes: Routes = [
@@ -114,6 +122,34 @@ const routes: Routes = [
     component: EmployeeStudentRegistrationListComponent
   },
   //----------| Employee pages end
+
+  // ---------| Student pages begin
+  {
+    path: 'student',
+    component: StudentComponent,
+  },
+  {
+    path: 'student/courses/picker',
+    component: StudentCourseChooseComponent,
+  },
+  {
+    path: 'student/courses/picker',
+    component: StudentCourseChooseComponent,
+  },
+  {
+    path: 'student/courses',
+    component: StudentMyCoursesComponent,
+  },
+  {
+    path: 'student/courses',
+    component: StudentMyCoursesComponent,
+  },
+  {
+    path: 'student/course/registrations',
+    component: StudentRegistrationsComponent,
+  },
+  // ---------| Student pages end
+
   {
     path: 'statics/employee/projects',
     component: EmployeeProjectsComponent
@@ -121,6 +157,18 @@ const routes: Routes = [
   {
     path: 'statics/employee/science',
     component: GovernmentProjectsComponent
+  },
+  {
+    path: 'course/:id',
+    component: CourseDetailsComponent
+  },
+  {
+    path: 'employee/:id',
+    component: EmployeeDetailsComponent
+  },
+  {
+    path: 'verify',
+    component: StudentVerifyComponent
   },
 ];
 

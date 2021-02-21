@@ -7,6 +7,10 @@ import {AdministratorFunctionsService} from "../services/administrator-functions
 import {Title} from "../models/database/Title";
 import {Employee} from "../models/database/Employee";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
+import {HttpResponse} from "@angular/common/http";
+import {UploadServiceService} from "../services/upload-service.service";
+import {EmployeeService} from "../services/employee.service";
+import {isInteractiveElement} from "codelyzer/util/isInteractiveElement";
 const STUDENT_FOCUS = 0;
 const FACULTY_FOCUS = 1;
 
@@ -28,7 +32,9 @@ export class AdminViewAccountsComponent implements OnInit {
 
 
 
-  constructor(private administratorService: AdministratorFunctionsService) {
+  constructor(private administratorService: AdministratorFunctionsService,
+              private uploadService: UploadServiceService,
+              private employeeService: EmployeeService) {
   }
 
   ngOnInit(): void {
@@ -120,31 +126,79 @@ export class AdminViewAccountsComponent implements OnInit {
   }
 
   update_employee() {
-    // TODO
-    this.administratorService.updateEmployee(this.selected_employee).subscribe( (resp:any) => {
-      if (resp.message == 'ok') {
+    if (this.selected_employee.name === '' ||
+      this.selected_employee.surname === '' ||
+      this.selected_employee.employee_data.address === '' ||
+      this.selected_employee.employee_data.office === '' ) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Obavezna polja su polja za ime, prezime, adresu, kontakt i kancelariju/kabinet!',
+      });
+      return;
+    }
+
+    this.administratorService.updateEmployeeData(this.selected_employee).subscribe( (response:any) => {
+      if (response.message === 'ok') {
         Swal.fire({
           icon: 'success',
           title: 'Super!',
-          text: 'Uspesno odradjeno azuriranje',
+          text: 'Uspesno azuriran profil!',
         });
-        this.selected_employee = null;
+        this.selected_employee = null
+        this.isSelected = -1;
       } else {
         Swal.fire({
           icon: 'error',
-          title: 'Greska!',
-          text: 'Doslo je do greske na serveru',
-        })
+          title: 'Oops...',
+          text: 'Doslo je do greske, profil nije azuriran!',
+        });
       }
     });
   }
 
-  delete_employee() {
-    // TODO
+  fileList = FileList
+  upload_image($event) {
+    var _URL = window.URL || window.webkitURL;
+    this.fileList = $event.target.files;
+    var file, img;
+    let skip = false;
+    if ((file = this.fileList[0])) {
+      img = new Image();
+      var objectUrl = _URL.createObjectURL(file);
+      img.onload = function () {
+        if (this.width > 300 || this.height > 300) {
+          skip = true;
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Slika prevazilazi velicinu od 300x300!',
+          });
+        }
+        _URL.revokeObjectURL(objectUrl);
+      };
+      img.src = objectUrl;
+    }
+    if ( skip === false && this.fileList[0] != undefined) {
+      this.uploadService.upload(this.fileList[0]).subscribe((res: any) => {
+        if (res instanceof HttpResponse) {
+          // @ts-ignore
+          let file_data = res.body.file_data;
+          let download_link = file_data.filename;
+          this.selected_employee.employee_data.profilePicture = download_link;
+          this.employeeService.updateEmployeePicture(this.selected_employee.id, download_link).subscribe((doc: any) => {
+
+          });
+          localStorage.setItem('session', JSON.stringify(this.selected_employee));
+        }
+      });
+
+    }
   }
 
   cancel() {
-    // TODO
+    this.isSelected = -1;
+    this.selected_employee = null;
   }
 
   check_title(id: number, id2: string) {

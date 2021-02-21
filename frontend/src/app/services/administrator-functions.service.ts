@@ -36,7 +36,7 @@ export class AdministratorFunctionsService {
   }
 
   getAllEmployees() {
-    return this.http.get(`${this.url}/employees/get/all`);
+    return this.http.get(`${this.url}/employees/get/all/ignore_active`);
   }
 
   getEnrolledStudents(courseID: string) {
@@ -90,8 +90,8 @@ export class AdministratorFunctionsService {
     return this.http.post(`${this.url}/course/create`, {data: newCourseDataObject});
   }
 
-  update_existing_course(course: Course, coursecode: string) {
-    return this.http.post(`${this.url}/course/update`, {data: course, coursecode: coursecode});
+  update_existing_course(course: Course) {
+    return this.http.post(`${this.url}/course/update`, {data: course});
   }
 
   add_new_student(userData: UserRegistrationData) {
@@ -99,5 +99,9 @@ export class AdministratorFunctionsService {
   }
   add_new_employee(userData: EmployeeRegistration) {
     return this.http.post(`${this.url}/employees/create/new`, {data: userData});
+  }
+
+  updateEmployeeData(selected_employee: any) {
+    return this.http.post(`${this.url}/employees/update`, {data: selected_employee});
   }
 }

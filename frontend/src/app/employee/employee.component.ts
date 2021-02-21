@@ -82,7 +82,9 @@ export class EmployeeComponent implements OnInit {
           let file_data = res.body.file_data;
           let download_link = file_data.filename;
           this.active_employe.employee_data.profilePicture = download_link;
-          this.employeeService.updateEmployeePicture(this.active_employe.id, download_link);
+          this.employeeService.updateEmployeePicture(this.active_employe.id, download_link).subscribe((doc: any) => {
+
+          });
           localStorage.setItem('session', JSON.stringify(this.active_employe));
         }
       });

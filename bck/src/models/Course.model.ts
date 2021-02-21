@@ -23,6 +23,9 @@ const Course = new Schema({
     lectures: {type: Array, default: []},
     projects_docs: {type: Array, default: []},
     projects_texts: {type: Array, default: []},
+    exams_visible: {type: Boolean, default: true},
+    project_visible: {type: Boolean, default: true},
+    lab_visible: {type: Boolean, default: true},
 });
 
 export default mongoose.model('Course', Course, 'courses');

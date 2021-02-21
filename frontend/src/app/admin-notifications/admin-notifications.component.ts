@@ -104,6 +104,8 @@ export class AdminNotificationsComponent implements OnInit {
         this.notificationService.getAllNotificationTypes().subscribe((res: NotificationType[]) => {
           this.allNotificationTypes = res;
         });
+        this.userValidationServiceService.setOpen(false);
+        this.userValidationServiceService.setOpen(true);
         this.newNotificationType = new NotificationType();
         this.currentPage = -1;
       }
@@ -129,6 +131,8 @@ export class AdminNotificationsComponent implements OnInit {
         });
         this.existingNotificationType = new NotificationType();
         this.currentPage = -1;
+        this.userValidationServiceService.setOpen(false);
+        this.userValidationServiceService.setOpen(true);
       }
     })
   }
@@ -160,8 +164,6 @@ export class AdminNotificationsComponent implements OnInit {
         text: "Polje za ime ne moze da bude prazno",
       })
     }
-
-
     this.notificationService.updateNotificationType(this.existingNotificationType).subscribe((res: any) => {
       if (res.message !== 'ok') {
         Swal.fire({
@@ -178,6 +180,7 @@ export class AdminNotificationsComponent implements OnInit {
         this.existingNotificationType = new NotificationType();
         this.notificationService.getAllNotificationTypes().subscribe((res: NotificationType[]) => this.allNotificationTypes = res);
         this.currentPage = -1;
+        this.userValidationServiceService.setOpen(false);
         this.userValidationServiceService.setOpen(true);
       }
     })
@@ -220,6 +223,7 @@ export class AdminNotificationsComponent implements OnInit {
     this.updateNotificationData = null;
     let notifType = $event.target.value;
     this.notificationService.getAllNotificationsFor(notifType).subscribe((resp: Notification[]) => {
+      console.log(resp)
       this.notificationsForType = resp;
     })
   }

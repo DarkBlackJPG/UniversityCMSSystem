@@ -14,6 +14,9 @@ export class EmployeeService {
     return this.http.get(`${this.url}/employees/get/all`);
   }
 
+  getEmployeeById(employeeId: number[]) {
+    return this.http.post(`${this.url}/employees/get`, {data: employeeId});
+  }
 
   getEmployeeCourses(employeeId: number) {
     return this.http.get(`${this.url}/employee/${employeeId}/my_courses/get/all`);
@@ -24,7 +27,7 @@ export class EmployeeService {
   }
 
   updateEmployeePicture(userId: number, employeePicture: {picture: string}) {
-    return this.http.post(`${this.url}/employee/profile/profilepicture/upload/${userId}`, employeePicture);
+    return this.http.post(`${this.url}/employee/profile/profilepicture/upload/${userId}`, {picture: employeePicture});
   }
 
   updateCourseData(courseData: any) {
@@ -53,5 +56,25 @@ export class EmployeeService {
   }
   appendNewProjectFile(id, newLabTextNotif: any) {
     return this.http.post(`${this.url}/employee/course/${id}/projects/files/create`, {data: newLabTextNotif});
+  }
+
+  openNewRegistrationList(newRegistrationList: { course_id: number; max_num_students: number; title: string; isActive: boolean; enrolled_number: number; date_open: Date; date_close: Date; location: string; upload_enabled: boolean; id: number; student_files: any[]; exam_date: Date; enrolled: any[] }) {
+    return this.http.post(`${this.url}/employee/course/registration_lists/new`, {data: newRegistrationList});
+  }
+
+  getAllRegistrationListsForCourse(courseId: number) {
+    return this.http.get(`${this.url}/employee/course/${courseId}/registration_lists/get_all`);
+  }
+
+  deleteCourseRegistrationList(courseId: number, data: any) {
+    return this.http.post(`${this.url}/employee/course/${courseId}/registration_lists/delete`, {data: data});
+
+  }
+  updateRegList(courseId: number, data: any) {
+    return this.http.post(`${this.url}/employee/course/${courseId}/registration_lists/update`, {data: data});
+  }
+
+  change_section_visibility(id: number, e: string, exams_visible: boolean) {
+    return this.http.post(`${this.url}/employee/course/${id}/change_section_visibility`, {data: {section: e, status: exams_visible}});
   }
 }

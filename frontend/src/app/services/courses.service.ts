@@ -45,6 +45,10 @@ export class CoursesService {
   }
 
   getCourseRegistrationLists(courseId: any) {
-    return this.http.get(`${this.url}/courses/registration_lists/${courseId}`);
+    return this.http.get(`${this.url}/courses/${courseId}/registration_lists/get/all`);
+  }
+
+  getCourseById(courseId: number) {
+    return this.http.get(`${this.url}/course/${courseId}/get_details`);
   }
 }

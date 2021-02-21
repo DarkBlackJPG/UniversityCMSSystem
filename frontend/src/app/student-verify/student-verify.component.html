@@ -1,0 +1,30 @@
+<div class="row justify-content-center p-0">
+  <div class="card col-md-6 text-white bg-dark m-3">
+    <div class="card-header font-weight-bold"><h1>Unos nove lozinke</h1></div>
+    <div class="card-body">
+      <p>
+        Neophodno je da se unese lozinka jer si unet u sistem od strane administratora!
+      </p>
+      <hr>
+      <div class="mb-3 row">
+        <label for="inputPassword" class="col-sm-2 col-form-label">Lozinka</label>
+        <div class="col-sm-10">
+          <input type="password" [(ngModel)]="password" class="form-control" id="inputPassword">
+        </div>
+      </div>
+      <div class="mb-3 row">
+      <label for="verifyPassword" class="col-sm-2 col-form-label">Ponovni unos lozinke</label>
+      <div class="col-sm-10">
+        <input type="password" [(ngModel)]="passwordVerify" class="form-control" id="verifyPassword">
+      </div>
+    </div><div class="mb-3 row">
+      <label  class="col-sm-2 col-form-label"></label>
+      <div class="col-sm-10">
+        <button (click)="send_password()" class="btn btn-outline-success">
+          Potvrdi
+        </button>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>

@@ -32,6 +32,13 @@ import {EmployeeCourseListsComponent} from './employee-course-lists/employee-cou
 import {DragDropModule} from "@angular/cdk/drag-drop";
 import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
 import { EmployeeStudentRegistrationListComponent } from './employee-student-registration-list/employee-student-registration-list.component';
+import { CourseDetailsComponent } from './course-details/course-details.component';
+import { StudentComponent } from './student/student.component';
+import { StudentCourseChooseComponent } from './student-course-choose/student-course-choose.component';
+import { StudentMyCoursesComponent } from './student-my-courses/student-my-courses.component';
+import { StudentRegistrationsComponent } from './student-registrations/student-registrations.component';
+import { EmployeeDetailsComponent } from './employee-details/employee-details.component';
+import { StudentVerifyComponent } from './student-verify/student-verify.component';
 
 @NgModule({
   declarations: [
@@ -59,6 +66,13 @@ import { EmployeeStudentRegistrationListComponent } from './employee-student-reg
     EmployeeCourseNotificationsComponent,
     EmployeeCourseListsComponent,
     EmployeeStudentRegistrationListComponent,
+    CourseDetailsComponent,
+    StudentComponent,
+    StudentCourseChooseComponent,
+    StudentMyCoursesComponent,
+    StudentRegistrationsComponent,
+    EmployeeDetailsComponent,
+    StudentVerifyComponent,
 
   ],
   imports: [

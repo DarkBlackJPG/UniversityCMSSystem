@@ -1,0 +1,338 @@
+<div class="row justify-content-center pt-3">
+  <div class="card p-0 text-white bg-dark mb-3 col-md-7 text-center justify-content-center">
+    <div class="card-header">
+      <h1>{{courseDetails.name}}</h1>
+    </div>
+
+  </div>
+</div>
+
+<div class="row justify-content-center pt-3">
+  <div class="card p-0 text-white bg-dark mb-3 col-md-7 text-center justify-content-center">
+    <div class="card-header">Odabir pogleda</div>
+    <div class="card-body">
+      <button class="btn btn-link text-warning" (click)="change_view(1)" [class.font-weight-bold]="currentView === 1">
+        Obavestenja
+      </button>
+      <button class="btn btn-link text-warning" (click)="change_view(2)" [class.font-weight-bold]="currentView === 2">
+        Informacije o predmetu
+      </button>
+      <button class="btn btn-link text-warning" (click)="change_view(3)" [class.font-weight-bold]="currentView === 3">
+        Predavanja
+      </button>
+      <button class="btn btn-link text-warning" (click)="change_view(4)" [class.font-weight-bold]="currentView === 4">
+        Vezbe
+      </button>
+      <button [ngClass]="{'font-weight-bold': currentView === 5, 'd-none': courseDetails.exams_visible === false}"
+              class="btn btn-link text-warning" (click)="change_view(5)">
+        Rokovi
+      </button>
+      <button [ngClass]="{'font-weight-bold': currentView === 6, 'd-none': courseDetails.lab_visible === false}"
+              class="btn btn-link text-warning" (click)="change_view(6)">
+        Laboratorija
+      </button>
+      <button [ngClass]="{'font-weight-bold': currentView === 7, 'd-none': courseDetails.project_visible === false}"
+              class="btn btn-link text-warning" (click)="change_view(7)">
+        Projekat / Domaci zadaci
+      </button>
+      <!--      <button class="btn btn-link text-warning" (click)="change_view(8)" [class.font-weight-bold]="currentView === 8">-->
+      <!--        Spiskovi-->
+      <!--      </button>-->
+      <button class="btn btn-link text-warning" (click)="change_view(9)" [class.font-weight-bold]="currentView === 9">
+        Predaja domacih
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="(courseDetails != null && courseDetails.notifications.length > 0) && currentView === 1"
+     class="row justify-content-center pt-3">
+  <div *ngFor="let notification of courseDetails.notifications" class="card p-0 text-white bg-dark mb-3 col-md-7">
+    <div class="card-header"> {{notification.date | date: 'yyyy-MM-dd'}}</div>
+    <div class="card-body">
+      <h5 class="card-title" [class.text-info]="check_seven_day_date(notification.date)">{{notification.title}}</h5>
+      <p [innerHTML]="notification.description"></p>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="(courseDetails != null) && currentView === 2" class="row justify-content-center pt-3">
+  <div class="card p-0 text-white bg-dark mb-3 col-md-7">
+    <div class="card-header"> Informacije o predmetu</div>
+    <div class="card-body justify-content-center">
+      <table class="table table-dark table-striped" style="margin: auto">
+        <tbody>
+        <tr>
+          <th scope="row">Tip Predmeta</th>
+          <td>{{courseDetails.type === 0 ? 'Obavezan' : 'Izborni'}}</td>
+        </tr>
+        <tr>
+          <th scope="row">Odsek</th>
+          <td *ngIf="courseDetails.department === 1">Softversko inzenjerstvo</td>
+          <td *ngIf="courseDetails.department === 0">Racunarska tehnika i informatika</td>
+          <td *ngIf="courseDetails.department === 2">Ostali odseci</td>
+          <td *ngIf="courseDetails.department === 3">Master studije</td>
+        </tr>
+        <tr>
+          <th scope="row">Godina</th>
+          <td *ngIf="courseDetails.department !== 3">{{get_year(courseDetails.semester)}}</td>
+          <td *ngIf="courseDetails.department === 3">-</td>
+        </tr>
+        <tr>
+          <th scope="row">Semestar</th>
+          <td>{{courseDetails.semester}}</td>
+        </tr>
+        <tr>
+          <th scope="row">Fond casova</th>
+          <td>{{courseDetails.courseDetails[0].classCount}}</td>
+        </tr>
+        <tr>
+          <th scope="row">ESPB</th>
+          <td>{{courseDetails.courseDetails[0].ESPB}}</td>
+        </tr>
+        <tr>
+          <th scope="row">Cilj</th>
+          <td [innerHTML]="courseDetails.courseDetails[0].purpose"></td>
+        </tr>
+        <tr>
+          <th scope="row">Ishod</th>
+          <td [innerHTML]="courseDetails.courseDetails[0].outcome"></td>
+        </tr>
+        <tr>
+          <th scope="row">Uslov polaganja</th>
+          <td [innerHTML]="courseDetails.courseDetails[0].conditions"></td>
+        </tr>
+        <tr>
+          <th scope="row">Nastavnici</th>
+          <td>
+            <ul>
+              <li *ngFor="let employee of employees">
+                <button class="btn btn-link text-info"
+                        [routerLink]="'/employee/' + employee.id">{{employee.name}} {{employee.surname}}</button>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<div *ngIf="(courseDetails != null) && currentView === 3" class="row justify-content-center pt-3">
+  <div class="card p-0 text-white bg-dark mb-3 col-md-7">
+    <div class="card-header"> Materijali za skidanje</div>
+    <div class="card-body justify-content-center">
+      <ul>
+        <li *ngFor="let course of courseDetails.lectures">
+          {{course.filename}} &nbsp; {{course.date | date: 'yyyy-MM-dd'}} &nbsp; <a class="btn btn-link text-info"
+                                                                                    [href]="'http://localhost:4000/download/' + course.download_link"><i
+          class="fas fa-download"></i></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<div *ngIf="(courseDetails != null) && currentView === 4" class="row justify-content-center pt-3">
+  <div class="card p-0 text-white bg-dark mb-3 col-md-7">
+    <div class="card-header"> Materijali za skidanje</div>
+    <div class="card-body justify-content-center">
+      <ul>
+        <li *ngFor="let course of courseDetails.excercises">
+          {{course.filename}} &nbsp; {{course.date | date: 'yyyy-MM-dd'}} &nbsp; <a class="btn btn-link text-info"
+                                                                                    [href]="'http://localhost:4000/download/' + course.download_link"><i
+          class="fas fa-download"></i></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<div *ngIf="(courseDetails != null) && currentView === 5" class="row justify-content-center pt-3">
+  <div class="card p-0 text-white bg-dark mb-3 col-md-7">
+    <div class="card-header"> Materijali za skidanje</div>
+    <div class="card-body justify-content-center">
+      <ul>
+        <li *ngFor="let course of courseDetails.exams">
+          {{course.filename}} &nbsp; {{course.date | date: 'yyyy-MM-dd'}} &nbsp; <a class="btn btn-link text-info"
+                                                                                    [href]="'http://localhost:4000/download/' + course.download_link"><i
+          class="fas fa-download"></i></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="(courseDetails != null) && currentView === 6" class="row justify-content-center pt-3">
+  <div class="card p-0 text-white bg-dark mb-3 col-md-7">
+    <div class="card-header"> Osnovne informacije za izradu laboratorijskih vezbi</div>
+    <div class="card-body justify-content-center">
+      <p [innerHTML]="courseDetails.courseDetails[0].labInfo"></p>
+    </div>
+  </div>
+  <div class="card p-0 text-white bg-dark mb-3 col-md-7">
+    <div class="card-header"> Obavestenja vezana za laboratorijske vezbe</div>
+    <div class="card-body justify-content-center">
+      <ul style="list-style: none">
+        <li *ngFor="let course of courseDetails.labs_texts">
+          <h4>
+            {{course.title}}
+          </h4>
+          <p>
+            {{course.desc}}
+          </p>
+          <hr>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card text-white bg-dark mb-3 col-md-7">
+    <div class="card-header"> Materijali za skidanje</div>
+    <div class="card-body justify-content-center">
+      <ul>
+        <li *ngFor="let course of courseDetails.labs_docs">
+          {{course.filename}} &nbsp; {{course.date | date: 'yyyy-MM-dd'}} &nbsp; <a class="btn btn-link text-info"
+                                                                                    [href]="'http://localhost:4000/download/' + course.download_link"><i
+          class="fas fa-download"></i></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="(courseDetails != null) && currentView === 7" class="row justify-content-center pt-3">
+  <div class="card text-white bg-dark mb-3 col-md-7">
+    <div class="card-header"> Osnovne informacije za izradu laboratorijskih vezbi</div>
+    <div class="card-body justify-content-center">
+      <p [innerHTML]="courseDetails.courseDetails[0].homeworks"></p>
+    </div>
+  </div>
+  <div class="card text-white bg-dark mb-3 col-md-7">
+    <div class="card-header"> Obavestenja vezana za projekat</div>
+    <div class="card-body justify-content-center">
+      <ul style="list-style: none">
+        <li *ngFor="let course of courseDetails.projects_texts">
+          <h4>
+            {{course.title}}
+          </h4>
+          <p>
+            {{course.desc}}
+          </p>
+          <hr>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="card text-white bg-dark mb-3 col-md-7">
+    <div class="card-header"> Materijali za skidanje</div>
+    <div class="card-body justify-content-center">
+      <ul>
+        <li *ngFor="let course of courseDetails.projects_docs">
+          {{course.filename}} &nbsp; {{course.date | date: 'yyyy-MM-dd'}} &nbsp; <a class="btn btn-link text-info"
+                                                                                    [href]="'http://localhost:4000/download/' + course.download_link"><i
+          class="fas fa-download"></i></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="(courseDetails != null) && currentView === 8" class="row justify-content-center pt-3">
+  <div class="card p-0 text-white bg-dark mb-3 col-md-7">
+    <div class="card-header"> Spisi za prijavu na predmetu</div>
+    <div class="card-body justify-content-center">
+      <div class="col-12" *ngFor="let registration of registrations">
+        <h2>{{registration.title}}</h2>
+        <hr>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Datum odrzavanja</label>
+          <div class="col-sm-10">
+            <label class="col-form-label">{{registration.exam_date | date: 'yyyy-MM-dd'}}</label>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Lokacija</label>
+          <div class="col-sm-10">
+            <label class="col-form-label">{{registration.location}}</label>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Maksimalan broj studenata</label>
+          <div class="col-sm-10">
+            <label class="col-form-label">{{registration.max_num_students}}</label>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Prijavljeno studenata</label>
+          <div class="col-sm-10">
+            <label class="col-form-label">{{registration.enrolled_number}}</label>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Prijave otvorene od-do</label>
+          <div class="col-sm-10">
+            <label class="col-form-label">{{registration.date_open | date: 'yyyy-MM-dd'}}
+              - {{registration.date_close | date: 'yyyy-MM-dd'}}</label>
+          </div>
+        </div>
+
+        <span class="text-danger"> Treba da se prikazuje u zavisnosti od toga da li si enrollovan ili ne</span>
+        <div class="mb-3 row">
+          <label class="col-sm-12 col-form-label">
+            <button class="btn btn-success ">Prijavi se</button>
+            <button class="btn btn-danger">Odjavi se</button>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="(courseDetails != null) && currentView === 9" class="row justify-content-center pt-3">
+  <div class="card p-0 text-white bg-dark mb-3 col-md-7">
+    <div class="card-header"> Spisi za prijavu na predmetu</div>
+    <div class="card-body justify-content-center">
+      <div class="col-12" *ngFor="let registration of filteredRegs">
+        <h2>{{registration.title}}</h2>
+        <hr>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Datum odrzavanja</label>
+          <div class="col-sm-10">
+            <label class="col-form-label">{{registration.exam_date | date: 'yyyy-MM-dd'}}</label>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Lokacija</label>
+          <div class="col-sm-10">
+            <label class="col-form-label">{{registration.location}}</label>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Maksimalan broj studenata</label>
+          <div class="col-sm-10">
+            <label class="col-form-label">{{registration.max_num_students}}</label>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Prijavljeno studenata</label>
+          <div class="col-sm-10">
+            <label class="col-form-label">{{registration.enrolled_number}}</label>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Prijave otvorene od-do</label>
+          <div class="col-sm-10">
+            <label class="col-form-label">{{registration.date_open | date: 'yyyy-MM-dd'}}
+              - {{registration.date_close | date: 'yyyy-MM-dd'}}</label>
+          </div>
+        </div>
+        <div class="mb-3 row" *ngIf="check_enrolled(registration)">
+          <input class="form-control mb-3"
+                 accept=".zip,.rar,.7zip"
+                 (change)="accept_file($event, registration)" type="file" id="formFile">
+          <button class="btn btn-success" (click)="upload_file(registration)">Predaj domaci</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

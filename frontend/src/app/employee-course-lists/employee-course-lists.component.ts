@@ -208,8 +208,8 @@ export class EmployeeCourseListsComponent implements OnInit {
       });
       return;
     }
-    let regex = new RegExp("^\\d\+\\d\+\\d$")
-    if (this.selectedCourse.courseDetails[0].classCount === undefined || !regex.test(this.selectedCourse.courseDetails[0].classCount)) {
+    let regex = new RegExp("^\\d\\+\\d\\+\\d$")
+    if (this.selectedCourse.courseDetails[0].classCount === undefined || !regex.test(this.selectedCourse.courseDetails[0].classCount.trim())) {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -700,5 +700,42 @@ export class EmployeeCourseListsComponent implements OnInit {
 
   delete_lecture_file(filename: string) {
 
+  }
+
+  project_change_visibility($event) {
+    this.employeeService.change_section_visibility(this.selectedCourse.id, 'p', this.selectedCourse.project_visible).subscribe( (response: any) => {
+      if(response.message !== 'ok') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: "Nije uspesno azurirano stanje vidljivosti!",
+        });
+      }
+    });
+  }
+
+  lab_change_visibility($event) {
+    this.employeeService.change_section_visibility(this.selectedCourse.id, 'l', this.selectedCourse.lab_visible).subscribe( (response: any) => {
+      if(response.message !== 'ok') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: "Nije uspesno azurirano stanje vidljivosti!",
+        });
+      }
+    });
+  }
+
+  exam_change_visibility($event) {
+    alert(this.selectedCourse.exams_visible);
+    this.employeeService.change_section_visibility(this.selectedCourse.id, 'e', this.selectedCourse.exams_visible).subscribe( (response: any) => {
+      if(response.message !== 'ok') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: "Nije uspesno azurirano stanje vidljivosti!",
+        });
+      }
+    });
   }
 }

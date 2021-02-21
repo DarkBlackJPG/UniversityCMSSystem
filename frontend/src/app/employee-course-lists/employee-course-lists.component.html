@@ -306,6 +306,12 @@
         </div>
       </div>
       <div *ngIf="activePage === 4" class="form-group col-12">
+        <div class="form-check mb-3">
+          <input class="form-check-input" [(ngModel)]="selectedCourse.exams_visible" (change)="exam_change_visibility($event)" type="checkbox" value="" id="examVisible">
+          <label class="form-check-label" for="examVisible">
+            Sekcija vidljiva
+          </label>
+        </div>
         <div class="input-group mb-3">
           <input type="file" class="form-control" (change)="register_new_exam_file($event)" id="noviRok">
           <label class="input-group-text" for="noviRok">Novi rok...</label>
@@ -368,6 +374,12 @@
         </div>
       </div>
       <div *ngIf="activePage === 5" class="form-group col-12">
+        <div class="form-check mb-3">
+          <input class="form-check-input" [(ngModel)]="selectedCourse.lab_visible" (change)="lab_change_visibility($event)" type="checkbox" value="" id="labVisible">
+          <label class="form-check-label" for="labVisible">
+            Sekcija vidljiva
+          </label>
+        </div>
         <div class="input-group mb-3">
           <select class="form-control" (change)="lab_view_change($event)">
             <option value="-1">Odaberi..</option>
@@ -480,6 +492,12 @@
 
 
       <div *ngIf="activePage === 6" class="form-group col-12">
+        <div class="form-check mb-3">
+          <input class="form-check-input" [(ngModel)]="selectedCourse.project_visible" (change)="project_change_visibility($event)" type="checkbox" value="" id="projVisible">
+          <label class="form-check-label" for="projVisible">
+            Sekcija vidljiva
+          </label>
+        </div>
         <div class="input-group mb-3">
           <select class="form-control" (change)="proj_view_change($event)">
             <option value="-1">Odaberi..</option>

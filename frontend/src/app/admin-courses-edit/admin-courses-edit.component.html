@@ -58,7 +58,7 @@
               Sifra predmeta za SI ili za Master
             </td>
             <td>
-              <input [required]="newCourseDataObject.isMaster || newCourseDataObject.isSI" type="text" class="form-control" [(ngModel)]="newCourseDataObject.coursecode_SI" placeholder="Na primer: 13S142MIPS">
+              <input type="text" class="form-control" [(ngModel)]="newCourseDataObject.coursecode_SI" placeholder="Na primer: 13S142MIPS">
 
             </td>
           </tr>
@@ -67,7 +67,7 @@
               Sifra predmeta za RTI
             </td>
             <td>
-              <input [required]="newCourseDataObject.isRTI" [disabled]="newCourseDataObject.isMaster" type="text" class="form-control" [(ngModel)]="newCourseDataObject.coursecode_RTI" placeholder="Na primer: 13E142MIPS">
+              <input [disabled]="newCourseDataObject.isMaster" type="text" class="form-control" [(ngModel)]="newCourseDataObject.coursecode_RTI" placeholder="Na primer: 13E142MIPS">
             </td>
           </tr>
           <tr *ngIf="newCourseDataObject.isOther">
@@ -75,7 +75,7 @@
               Sifra predmeta za Ostale odseke
             </td>
             <td>
-              <input [required]="newCourseDataObject.isOther" [disabled]="newCourseDataObject.isMaster" type="text" class="form-control" [(ngModel)]="newCourseDataObject.coursecode_Other" placeholder="Na primer: 13E142MIPS">
+              <input  [disabled]="newCourseDataObject.isMaster" type="text" class="form-control" [(ngModel)]="newCourseDataObject.coursecode_Other" placeholder="Na primer: 13E142MIPS">
             </td>
           </tr>
           <tr>
@@ -240,174 +240,155 @@
       <div class="card-body p-0">
         <div class="form-inline p-2 col-12 justify-content-center">
           <select (change)="set_current_course_name($event)" class="form-control mr-2">
-            <option *ngFor="let course of courseNames" [value]="course">
-              {{course}}
+
+            <option value="-1">
+              Odaberi....
+            </option>
+            <option *ngFor="let course of allCourses" [value]="course.id">
+              {{course.name}}
             </option>
           </select>
           <button class="btn btn-outline-success" (click)="select_edit_course()">Potvrdi</button>
         </div>
-        <div *ngIf="selectedEditCourse != null" class="form-group">
-          <table class="col-12 p-4">
-            <tr>
-              <td>
-                Tip predmeta
-              </td>
-              <td>
-                <select (change)="change_selected_course_type($event)" class="form-control">
-                  <option value="0" [selected]="selectedEditCourse.type == 0">
-                    Obavezan predmet
-                  </option>
-                  <option value="1" [selected]="selectedEditCourse.type == 1">
-                    Izborni predmet
-                  </option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                Sifra predmeta
-              </td>
-              <td>
-                <input [required]="selectedEditCourse.isMaster || selectedEditCourse.isSI" type="text" class="form-control" [(ngModel)]="selectedEditCourse.coursecode_SI" placeholder="Na primer: 13S142MIPS">
-              </td>
-            </tr>
-            <tr>
-              <td>
-                Tip studija
-              </td>
-              <td>
-                <select (change)="change_course_level($event)" class="form-control">
-                  <option value="0" [selected]="selectedEditCourse.isMaster === 'false'">
-                    Osnovne akademske
-                  </option>
-                  <option value="1" [selected]="selectedEditCourse.isMaster === 'true'">
-                    Master studije
-                  </option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                Smer na kome se odrzava
-              </td>
-              <td>
-                <select (change)="change_department($event)" class="form-control">
-                  <option value="1" [selected]="selectedEditCourse.isSI">
-                    Softversko inzenjerstvo
-                  </option>
-                  <option value="0" [selected]="selectedEditCourse.isRTI">
-                    Racunarska tehnika i informatika
-                  </option>
-                  <option value="2" [selected]="selectedEditCourse.isOther">
-                    Ostali odseci
-                  </option>
-                </select>
-
-              </td>
-            </tr>
-            <tr>
-              <td>
-                Semestar
-              </td>
-              <td>
-                <input required type="number" [(ngModel)]="selectedEditCourse.semester" class="form-control">
-              </td>
-            </tr> <tr>
-            <td>
-              ESPB
-            </td>
-            <td>
-              <input required type="number" [(ngModel)]="selectedEditCourse.ESPB" class="form-control">
-            </td>
-          </tr>
-            <tr>
-              <td>
-                Fond casova
-              </td>
-              <td>
-                <input required type="text" [(ngModel)]="selectedEditCourse.classCount" placeholder="P+V+L" class="form-control">
-              </td>
-            </tr><tr>
-            <td>
-              Akronim
-            </td>
-            <td>
-              <input required type="text" [(ngModel)]="selectedEditCourse.acronym" class="form-control">
-            </td>
-          </tr><tr>
-            <td>
-              Pun naziv
-            </td>
-            <td>
-              <input required type="text" [(ngModel)]="selectedEditCourse.name" class="form-control">
-            </td>
-          </tr>
-            <tr>
-              <td>
-                Uslovi za polaganje predmeta
-              </td>
-              <td class="text-dark">
-                <ckeditor required [editor]="Editor" [(ngModel)]="selectedEditCourse.conditions"></ckeditor>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                Cilj predmeta
-              </td>
-              <td class="text-dark">
-                <ckeditor required [editor]="Editor" [(ngModel)]="selectedEditCourse.purpose"></ckeditor>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                Ishod predmeta
-              </td>
-              <td class="text-dark">
-                <ckeditor [editor]="Editor" [(ngModel)]="selectedEditCourse.outcome"></ckeditor>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                Termini odrzavanja predavanja
-              </td>
-              <td class="text-dark">
-                <ckeditor required [editor]="Editor" [(ngModel)]="selectedEditCourse.lectureDates"></ckeditor>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                Termini odrzavanja vezbi
-              </td>
-              <td class="text-dark">
-                <ckeditor required [editor]="Editor" [(ngModel)]="selectedEditCourse.auditoryExcercisesDates"></ckeditor>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                Informacije o laboratorijskim vezbama
-              </td>
-              <td class="text-dark">
-                <ckeditor [editor]="Editor" [(ngModel)]="selectedEditCourse.labInfo"></ckeditor>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                Seminarski, domaci, projekti
-              </td>
-              <td class="text-dark">
-                <ckeditor [editor]="Editor" [(ngModel)]="selectedEditCourse.homeworks"></ckeditor>
-              </td>
-            </tr>
-
-            <tr>
-              <td colspan="2">
-                <button class="btn btn-outline-success" (click)="update_course_info()">
-                  Azuriraj
-                </button>
-              </td>
-
-            </tr>
-          </table>
+        <div *ngIf="selectedCourse != null" class="form-group col-12">
+          <div class="mb-3 row">
+            <label for="tipPredmetaSelect" class="col-sm-2 col-form-label">Tip predmeta</label>
+            <div class="col-sm-10">
+              <select id="tipPredmetaSelect" (change)="change_course_type($event)" class="form-control col-12">
+                <option value="0" [selected]="selectedCourse.type == 0">
+                  Obavezan predmet
+                </option>
+                <option value="1" [selected]="selectedCourse.type == 1">
+                  Izborni predmet
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="sifraPredmeta" class="col-sm-2 col-form-label">Sifra predmeta</label>
+            <div class="col-sm-10">
+              <input id="sifraPredmeta" type="text"
+                     class="form-control" [(ngModel)]="selectedCourse.coursecode" placeholder="Na primer: 13S142MIPS">
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="tipStudija" class="col-sm-2 col-form-label">Tip studija</label>
+            <div class="col-sm-10">
+              <select id="tipStudija" (change)="change_academic_level($event)" class="form-control">
+                <option value="1" [selected]="selectedCourse.isMaster === true">
+                  Master studije
+                </option>
+                <option value="0" [selected]="selectedCourse.isMaster === false">
+                  Osnovne akademske
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="smer" class="col-sm-2 col-form-label">Smer na kome se odrzava</label>
+            <div class="col-sm-10">
+              <select (change)="change_department($event)" id="smer" class="form-control"
+                      [attr.disabled]="selectedCourse.isMaster === true ? '' : null">
+                <option value="-1" [selected]="selectedCourse.department === -1 || selectedCourse.department === 3">
+                  Odaberi
+                </option>
+                <option value="1" [selected]="selectedCourse.department === 1">
+                  Softversko inzenjerstvo
+                </option>
+                <option value="0" [selected]="selectedCourse.department === 0">
+                  Racunarska tehnika i informatika
+                </option>
+                <option value="2" [selected]="selectedCourse.department === 2">
+                  Ostali odseci
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="semestar" class="col-sm-2 col-form-label">Semestar</label>
+            <div class="col-sm-10">
+              <input id="semestar" required type="number" [(ngModel)]="selectedCourse.semester" class="form-control">
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="espb" class="col-sm-2 col-form-label">ESPB</label>
+            <div class="col-sm-10">
+              <input id="espb" required type="number" [(ngModel)]="selectedCourse.courseDetails[0].ESPB"
+                     class="form-control">
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="fond" class="col-sm-2 col-form-label">Fond casova</label>
+            <div class="col-sm-10">
+              <input id="fond" required type="text" [(ngModel)]="selectedCourse.courseDetails[0].classCount"
+                     placeholder="P+V+L"
+                     class="form-control">
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="acronim" class="col-sm-2 col-form-label">Akronim</label>
+            <div class="col-sm-10">
+              <input required id="acronim" type="text" [(ngModel)]="selectedCourse.acronym" class="form-control">
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="punNaziv" class="col-sm-2 col-form-label">Pun naziv</label>
+            <div class="col-sm-10">
+              <input id="punNaziv" required type="text" [(ngModel)]="selectedCourse.name" class="form-control">
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="uslovi" class="col-sm-2 text-dark col-form-label">Uslovi za polaganje predmeta</label>
+            <div class="col-sm-10">
+              <ckeditor id="uslovi" required [editor]="Editor"
+                        [(ngModel)]="selectedCourse.courseDetails[0].conditions"></ckeditor>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="cilj" class="col-sm-2  col-form-label">Cilj</label>
+            <div class="col-sm-10">
+              <ckeditor id="cilj" required [editor]="Editor"
+                        [(ngModel)]="selectedCourse.courseDetails[0].purpose"></ckeditor>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="ishod" class="col-sm-2  col-form-label">Ishod predmeta</label>
+            <div class="col-sm-10">
+              <ckeditor id="ishod" [editor]="Editor" [(ngModel)]="selectedCourse.courseDetails[0].outcome"></ckeditor>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="predavanja" class="col-sm-2  col-form-label">Termini predavanja</label>
+            <div class="col-sm-10">
+              <ckeditor id="predavanja" required [editor]="Editor"
+                        [(ngModel)]="selectedCourse.courseDetails[0].lectureDates"></ckeditor>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="vezbe" class="col-sm-2  col-form-label">Termini vezbi</label>
+            <div class="col-sm-10">
+              <ckeditor id="vezbe" required [editor]="Editor"
+                        [(ngModel)]="selectedCourse.courseDetails[0].auditoryExcercisesDates"></ckeditor>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="labovi" class="col-sm-2  col-form-label">Informacije o laboratorijskim vezbama</label>
+            <div class="col-sm-10">
+              <ckeditor id="labovi" [editor]="Editor" [(ngModel)]="selectedCourse.courseDetails[0].labInfo"></ckeditor>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="seminarski" class="col-sm-2  col-form-label">Seminarski, domaci, projekti</label>
+            <div class="col-sm-10">
+              <ckeditor id="seminarski" [editor]="Editor"
+                        [(ngModel)]="selectedCourse.courseDetails[0].homeworks"></ckeditor>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <button class="btn btn-outline-success" (click)="update_course()">
+              Azuriraj
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -340,6 +340,8 @@ export class AdminCoursesEditComponent implements OnInit {
               text: "Dodat je nov kurs!",
             })
             this.newCourseDataObject = new NewCourseData();
+            this.editExisting = false;
+            this.addNewCourse = false;
           }
         }
       );
@@ -370,9 +372,9 @@ export class AdminCoursesEditComponent implements OnInit {
 
   cancel_new_course() {
     // TODO Treba izbrisati do sad uradjen rad
+    this.newCourseDataObject = new NewCourseData();
     this.editExisting = false;
     this.addNewCourse = false;
-    this.newCourseDataObject = new NewCourseData();
   }
 
   trigger_add_new_course() {
@@ -395,9 +397,6 @@ export class AdminCoursesEditComponent implements OnInit {
       });
       this.courseService.getCourseIds().subscribe((result: Course[]) => {
         this.allCourses = result;
-        for (const vC of result) {
-          this.courseNames.push(vC.coursecode + "| " + vC.name);
-        }
         mySwal.close();
       });
 
@@ -411,17 +410,27 @@ export class AdminCoursesEditComponent implements OnInit {
   }
 
   select_edit_course() {
-    let coursecode = this.currentCourseCode.split('|')[0].trim();
-    for (let i = 0; i < this.allCourses.length; i++) {
-      if (this.allCourses[i].coursecode === coursecode) {
-        let editCourse = this.course_to_newCourseData(this.allCourses[i]);
-        this.selectedEditCourse = editCourse;
-        this.updateCourseCode = editCourse.coursecode_SI;
-        break;
+    let courseId = Number(this.currentCourseCode);
+    for (const course of this.allCourses) {
+      if(course.id === courseId) {
+        this.selectedCourse = course;
       }
     }
   }
 
+  change_academic_level($event) {
+    if ($event.target.value === '1') { // isMaster
+      this.selectedCourse.department = 3;
+      this.selectedCourse.isMaster = true;
+
+    } else { // !isMaster
+      this.selectedCourse.department = -1;
+      this.selectedCourse.isMaster = false;
+    }
+  }
+  change_course_type($event) {
+    this.selectedCourse.type = $event.target.value;
+  }
   private course_to_newCourseData(course: Course) {
     const temp = new NewCourseData();
     if (course.department == 0) {
@@ -464,212 +473,134 @@ export class AdminCoursesEditComponent implements OnInit {
   }
   updateCourseCode: string = '';
 
-  update_course_info() {
-    let hasError = false;
+  selectedCourse: any = null;
 
-    if (this.selectedEditCourse.type === null) {
+  update_course() {
+    if (this.selectedCourse.coursecode === undefined || this.selectedCourse.coursecode === '') {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: 'Obavezno mora da stoji da li je predmet obavezan ili ne!',
-      })
-      hasError = true;
-    }
-
-    // @ts-ignore
-    this.selectedEditCourse.type = this.selectedEditCourse.type === 'true';
-
-    if (this.selectedEditCourse.isMaster === null) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Obavezno mora da stoji da li je predmet na master studijama ili nije!',
-      })
-      hasError = true;
-    }
-    // @ts-ignore
-    this.selectedEditCourse.isMaster = this.selectedEditCourse.isMaster === 'true';
-
-    if (this.selectedEditCourse.isSI === null && this.selectedEditCourse.isRTI === null && this.selectedEditCourse.isOther === null && (this.selectedEditCourse.isMaster !== null && this.selectedEditCourse.isMaster === false)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Mora da se oznaci koji je smer u pitanju!',
-      })
-      hasError = true;
+        text: "Greska sa sifrom predmeta",
+      });
+      return;
     }
 
-    if (this.selectedEditCourse.semester <= 0) {
+    if (this.selectedCourse.semester === undefined || this.selectedCourse.semester < 1) {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: 'Semestar mora da se definise!',
-      })
-      hasError = true;
+        text: "Semestar mora biti pozitivan, nenulti broj",
+      });
+
+      return
     }
-    if (this.selectedEditCourse.ESPB <= 0) {
+    if (this.selectedCourse.courseDetails[0].ESPB === undefined || this.selectedCourse.courseDetails[0].ESPB < 1) {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: 'ESPB bodovi moraju da budu pozitivni!',
-      })
-      hasError = true;
+        text: "ESPB mora biti pozitivan, nenulti broj",
+      });
+      return;
     }
-    if (this.selectedEditCourse.classCount == '') {
+    let regex = new RegExp("^\\d\\+\\d\\+\\d$")
+    if (this.selectedCourse.courseDetails[0].classCount === undefined || !regex.test(this.selectedCourse.courseDetails[0].classCount.trim())) {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: 'Mora da se definise fond casova!',
-      })
-      hasError = true;
+        text: "Fond casova nije u odgovarajucem formatu!",
+      });
+      return;
     }
-    let classCountRegex = new RegExp('^\\d\\+\\d\\+\\d$')
-    if (!classCountRegex.test(this.selectedEditCourse.classCount)) {
+    if (this.selectedCourse.acronym === undefined || this.selectedCourse.acronym === '') {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: 'Format fonda casova je Predavanja + vezve + laboratorija!',
-      })
-      hasError = true;
+        text: "Akronim nije definisan!",
+      });
+      return;
     }
-    if (this.selectedEditCourse.conditions == '') {
+    if (this.selectedCourse.name === undefined || this.selectedCourse.name === '') {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: 'Moraju da se definisu uslovi za polaganje predmeta!',
-      })
-      hasError = true;
+        text: "Naziv nije definisan!",
+      });
+      return;
     }
-    if (this.selectedEditCourse.purpose == '') {
+    if (this.selectedCourse.courseDetails[0].conditions === undefined || this.selectedCourse.courseDetails[0].conditions === '') {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: 'Moraju da se definise cilj predmeta!',
-      })
-      hasError = true;
+        text: "Uslovi moraju da se definisu!",
+      });
+      return;
     }
-    if (this.selectedEditCourse.outcome == '') {
+    if (this.selectedCourse.courseDetails[0].purpose === undefined || this.selectedCourse.courseDetails[0].purpose === '') {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: 'Moraju da se definise ishod predmeta!',
-      })
-      hasError = true;
+        text: "Cilj mora da se definise!",
+      });
+      return;
     }
-    if (this.selectedEditCourse.lectureDates == '') {
+    if (this.selectedCourse.courseDetails[0].outcome === undefined || this.selectedCourse.courseDetails[0].outcome === '') {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: 'Moraju da se definisu termini odrzavanja predavanja!',
-      })
-      hasError = true;
+        text: "Ishod mora da se definise!",
+      });
+      return;
     }
-    if (this.selectedEditCourse.auditoryExcercisesDates == '') {
+    if (this.selectedCourse.courseDetails[0].lectureDates === undefined || this.selectedCourse.courseDetails[0].lectureDates === '') {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: 'Moraju da se definisu termini odrzavanja vezbi!',
-      })
-      hasError = true;
+        text: "Termini predavanja moraju da se definisu!",
+      });
+      return;
     }
-    if (this.selectedEditCourse.acronym == '') {
+    if (this.selectedCourse.courseDetails[0].auditoryExcercisesDates === undefined || this.selectedCourse.courseDetails[0].auditoryExcercisesDates === '') {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: 'Morate uneti akronim!',
-      })
-      hasError = true;
-    }
-    if (this.selectedEditCourse.isMaster == false && this.selectedEditCourse.isRTI == true && this.selectedEditCourse.isSI == true && (this.selectedEditCourse.coursecode_SI == '' || this.selectedEditCourse.coursecode_RTI == '')) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Treba definisati obe sifre za predmete za SI i rti!',
-      })
-      hasError = true;
-    }
-    if (this.selectedEditCourse.name == '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Treba definisati puno ime predmeta!',
-      })
-      hasError = true;
+        text: "Termini predavanja moraju da se definisu!",
+      });
+      return;
     }
 
-    if (!hasError) {
-      let dept = 0;
-      if (this.selectedEditCourse.isSI) {
-        dept = 1;
-      } else if(this.selectedEditCourse.isOther) {
-        dept = 2;
-      } else if (this.selectedEditCourse.isMaster) {
-        dept = 3;
-      }
-      let courseToUpdate = this.create_course(
-        dept,
-        [],
-        [],
-        [
-          {
-            conditions: this.selectedEditCourse.conditions,
-            ESPB: this.selectedEditCourse.ESPB,
-            outcome: this.selectedEditCourse.outcome,
-            purpose: this.selectedEditCourse.purpose,
-            lectureDates: this.selectedEditCourse.lectureDates,
-            auditoryExcercisesDates: this.selectedEditCourse.auditoryExcercisesDates,
-            labInfo: this.selectedEditCourse.labInfo,
-            homeworks: this.selectedEditCourse.homeworks,
-            classCount: this.selectedEditCourse.classCount,
-          }],
-        this.selectedEditCourse.acronym,
-        -1,
-        this.selectedEditCourse.type,
-        this.selectedEditCourse.semester,
-        this.selectedEditCourse.name,
-        this.selectedEditCourse.coursecode_SI,
-        this.selectedEditCourse.isMaster,
-        this.selectedEditCourse.isMapped
-      )
-      this.administratorService.update_existing_course(courseToUpdate, this.updateCourseCode).subscribe((response: any) => {
-          if (response.message != 'ok') {
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: "Doslo je do greske, kurs/kursevi nisu dodati! Proverite sve unete podatke. Kurs mora da ima jedinstvenu sifru",
-            })
-          } else {
-            Swal.fire({
-              icon: 'success',
-              title: 'Cestitam!',
-              text: "Dodat je nov kurs!",
-            })
-            this.selectedEditCourse = new NewCourseData();
-            if (this.allCourses.length == 0) {
-              const mySwal = Swal.fire({
-                title: 'Sacekajte da dohvatimo sve podatke!',
-                timerProgressBar: true,
-                didOpen: () => {
-                  Swal.showLoading()
-                },
-              });
-              this.courseService.getCourseIds().subscribe((result: Course[]) => {
-                this.allCourses = result;
-                for (const vC of result) {
-                  this.courseNames.push(vC.coursecode + "| " + vC.name);
-                }
-                mySwal.close();
-              });
+    this.administratorService.update_existing_course(this.selectedCourse).subscribe( (response:any) => {
+      if(response.message === 'ok') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Super!',
+          text: "Uspesno azuriran kurs!",
+        });
 
-            }
-            this.selectedEditCourse = null;
-            this.updateCourseCode = null;
-            this.editExisting = true;
-            this.addNewCourse = false;
+        this.selectedCourse = null;
+        const mySwal = Swal.fire({
+          title: 'Sacekajte da dohvatimo sve podatke!',
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading()
+          },
+        });
+        this.courseService.getCourseIds().subscribe((result: Course[]) => {
+          this.allCourses = result;
+          this.courseNames = [];
+          for (const vC of result) {
+            this.courseNames.push(vC.coursecode + "| " + vC.name);
           }
-        }
-      );
-    }
+          mySwal.close();
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: "Doslo je do neocekivane greske!",
+        });
+      }
+    });
+
   }
 
   change_department($event) {

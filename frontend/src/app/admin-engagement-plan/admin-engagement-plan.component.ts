@@ -89,6 +89,7 @@ export class AdminEngagementPlanComponent implements OnInit {
         }
       }
       this.administratorService.getEnrolledStudents(this.selectedCourseObject.coursecode).subscribe((response: Student[]) => {
+        console.log(response)
         this.enrolledStudents = response;
       });
       this.administratorService.getEngagementForCourse(this.selectedCourseObject).subscribe((response: CourseGroup[]) => {
@@ -184,14 +185,16 @@ export class AdminEngagementPlanComponent implements OnInit {
       });
     } else {
       this.administratorService.enrollStudent(this.selectedCourseObject.coursecode, this.newEnrolledStudentIndex).subscribe((response:any) => {
+        console.log(response)
         if(response.message != 'ok') {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'Doslo je do greske, student nije dodat',
+            text: response.message,
           });
         } else {
           this.administratorService.getEnrolledStudents(this.selectedCourseObject.coursecode).subscribe((response: Student[]) => {
+            console.log(response)
             this.enrolledStudents = response;
           });
           Swal.fire({
@@ -214,6 +217,7 @@ export class AdminEngagementPlanComponent implements OnInit {
         });
       } else {
         this.administratorService.getEnrolledStudents(this.selectedCourseObject.coursecode).subscribe((response: Student[]) => {
+          console.log(response)
           this.enrolledStudents = response;
         });
         Swal.fire({

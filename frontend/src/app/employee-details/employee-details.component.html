@@ -1,0 +1,70 @@
+<div class="row justify-content-center pt-3">
+  <div class="card p-0 text-white bg-dark mb-3 col-md-7 text-center justify-content-center">
+    <div class="card-header">
+      <h1>{{employee.name}} {{employee.surname}}</h1>
+    </div>
+    <div class="card-body">
+      <div class="col-12">
+        <img class="img-fluid" [src]="'http://localhost:4000/download/' + employee.employee_data.profilePicture">
+      </div>
+      <div class="col-12 mt-5">
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Zvanje</label>
+          <div class="col-sm-10">
+            {{employee.title.name}}
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Email</label>
+          <div class="col-sm-10">
+            {{employee.email}}
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Adresa</label>
+          <div class="col-sm-10">
+            {{employee.employee_data.address}}
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Kontakt</label>
+          <div class="col-sm-10" *ngIf="employee.employee_data.phonenumber != null">
+            {{employee.employee_data.phonenumber}}
+          </div> <div class="col-sm-10" *ngIf="employee.employee_data.phonenumber === null">
+            Nedefinisano
+          </div>
+        </div><div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Licni website</label>
+          <div class="col-sm-10" *ngIf="employee.employee_data.website != null">
+            <a [href]="employee.employee_data.website"> {{employee.employee_data.website}}</a>
+          </div><div class="col-sm-10" *ngIf="employee.employee_data.website == null">
+           Nedefinisano
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Kabinet</label>
+         <div class="col-sm-10" >
+          {{employee.employee_data.office}}
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Biografija</label>
+          <div class="col-sm-10">
+            {{employee.employee_data.biography}}
+          </div>
+        </div>
+        <hr>
+        <div class="mb-3 row">
+          <label class="col-sm-2 col-form-label">Kursevi</label>
+          <div class="col-sm-10">
+            <ul>
+              <li *ngFor="let course of employee.course_data">
+                {{course.name}}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

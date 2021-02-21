@@ -24,7 +24,7 @@ export class LoginComponent implements OnInit {
   login() {
     this.service.loginService(this.username, this.password).subscribe(
       (response: any) => {
-        if (response) {
+        if (response.message === undefined) {
 
           localStorage.setItem('session', JSON.stringify(response));
 
@@ -37,7 +37,8 @@ export class LoginComponent implements OnInit {
           } else {
             this.router.navigate(['/student']);
           }
-          this.validationService.toggle();
+          this.validationService.setOpen(false);
+          this.validationService.setOpen(true);
         } else {
           Swal.fire({
             icon: 'error',

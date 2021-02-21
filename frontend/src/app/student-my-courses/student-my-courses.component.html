@@ -1,0 +1,11 @@
+<div class="row justify-content-center p-0">
+  <div class="card col-md-6 text-white bg-dark m-3">
+    <div class="card-header font-weight-bold">Moji kursevi</div>
+    <div class="card-body">
+      <div class="col-12"  *ngFor="let course of myCourses">
+        <button class="btn btn-link text-info" [routerLink]="'/course/'+course.id"><i
+          class="far fa-hand-point-right mr-2"></i>{{course.name}}</button>
+      </div>
+    </div>
+  </div>
+</div>

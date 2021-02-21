@@ -1,0 +1,1 @@
+{"version":3,"file":"Notification.js","sourceRoot":"","sources":["../../../../../../src/app/models/database/Notification.ts"],"names":[],"mappings":"AAEA,MAAM,OAAO,YAAY;IAEvB;QACE,IAAI,CAAC,IAAI,GAAG,IAAI,IAAI,EAAE,CAAC;QACvB,IAAI,CAAC,WAAW,GAAG,EAAE,CAAC;QACtB,IAAI,CAAC,KAAK,GAAG,EAAE,CAAC;IAClB,CAAC;CAQF"}

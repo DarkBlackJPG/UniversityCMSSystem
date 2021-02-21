@@ -62,14 +62,14 @@
         <div class="col-md-12 justify-content-center">
           <img class="img-fluid "
 
-               [src]="'assets/images/' + selected_employee.employee_data.profilePicture">
+               [src]="'http://localhost:4000/download/' + selected_employee.employee_data.profilePicture">
         </div>
         <div class="input-group mt-3 col-md-5">
           <div class="input-group-prepend">
             <span class="input-group-text">Promeni sliku</span>
           </div>
           <div class="custom-file">
-            <input type="file" class="custom-file-input" id="inputGroupFile01">
+            <input type="file" class="custom-file-input" (change)="upload_image($event)" id="inputGroupFile01">
             <label class="custom-file-label" for="inputGroupFile01">Odaberi</label>
           </div>
         </div>
@@ -146,16 +146,13 @@
               <input class="form-check-input" type="checkbox"
                      [(ngModel)]="selected_employee.status" id="flexCheckDefault">
               <label class="form-check-label" for="flexCheckDefault">
-                Aktivan
+                Aktivan (Soft delete ako je neaktivan)
               </label>
             </div>
           </div>
         </div>
         <div class="col-md-4 mt-3 justify-content-center">
           <button type="submit" class="btn btn-primary" (click)="update_employee()">Azuriraj</button>
-        </div>
-        <div class="col-md-4 mt-3 justify-content-center">
-          <button type="submit" class="btn btn-danger" (click)="delete_employee()">Izbrisi korisnika</button>
         </div>
         <div class="col-md-4 mt-3 mb-5 ">
           <button type="submit" class="btn btn-warning" (click)="cancel()">Odustani</button>

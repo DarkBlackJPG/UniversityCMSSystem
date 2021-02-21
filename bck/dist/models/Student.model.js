@@ -10,6 +10,7 @@ const Student = new Schema({
     index: { type: String },
     academic_level: { type: String },
     verify: { type: Boolean },
+    department: { type: Number },
 });
 exports.default = mongoose_1.default.model('Student', Student, 'students');
 //# sourceMappingURL=Student.model.js.map

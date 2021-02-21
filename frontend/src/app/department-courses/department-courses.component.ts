@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {Course} from "../models/database/Course";
 import {CoursesService} from "../services/courses.service";
+import {UserValidationServiceService} from "../services/user-validation-service.service";
 
 @Component({
   selector: 'app-department-courses',
@@ -10,10 +11,19 @@ import {CoursesService} from "../services/courses.service";
 export class DepartmentCoursesComponent implements OnInit {
   departmentCourses: Course[];
   semesters: number[]
-  constructor(private courseService: CoursesService) {
+  sessionIsActive: boolean;
+  constructor(private courseService: CoursesService,
+              private userValidationService: UserValidationServiceService) {
   }
 
   ngOnInit(): void {
+    let data = localStorage.getItem('session');
+    if (data !== undefined && data !== null) {
+      this.sessionIsActive = true;
+    } else {
+      this.sessionIsActive = false;
+
+    }
     this.courseService.watchSelectedDepartment().subscribe((newId) => {
       let courseIdString = newId;
       let department = Number(courseIdString);
