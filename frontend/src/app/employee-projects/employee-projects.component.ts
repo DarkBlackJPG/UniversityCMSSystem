@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-employee-projects',
@@ -7,9 +8,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class EmployeeProjectsComponent implements OnInit {
 
-  constructor() { }
-
+  constructor(private router: Router) { }
+  userData: any = {}
   ngOnInit(): void {
+
   }
 
 }

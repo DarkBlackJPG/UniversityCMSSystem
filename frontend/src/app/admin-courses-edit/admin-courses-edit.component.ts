@@ -1,15 +1,9 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {AdministratorFunctionsService} from "../services/administrator-functions.service";
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import {Employee} from "../models/database/Employee";
-import {NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
-import {merge, Subject} from "rxjs";
-import {Observable} from "rxjs/internal/Observable";
-import {debounceTime, distinctUntilChanged, filter, map} from "rxjs/operators";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
-import {NewCourseData} from "../models/appdata/NewCourseData";
-import {Course} from "../models/database/Course";
 import {CoursesService} from "../services/courses.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-admin-courses-edit',
@@ -18,634 +12,425 @@ import {CoursesService} from "../services/courses.service";
 })
 export class AdminCoursesEditComponent implements OnInit {
   public Editor = ClassicEditor;
-  newCourseTeachers: Employee[] = [];
-  allEmployees: Employee[] = [];
-  teacherNames: string[] = [];
-  studentsListeningToCourse: any[] = [];
-  newCourseDataObject: NewCourseData = new NewCourseData();
 
+  myUser: any = {}
+  myUserCourses: any[] = [];
 
-  constructor(private courseService: CoursesService, private administratorService: AdministratorFunctionsService) {
+  newCourse: any = {
+    type: -1,
+    isMaster: false,
+    coursecode_SI: '',
+    coursecode_RTI: '',
+    coursecode_Other: '',
+    coursecode_Master: '',
+    isRTI: false,
+    isSI: false,
+    isOther: false,
+    semester: 1,
+    ESPB: 0,
+    classCount: '',
+    name: '',
+    acronym: '',
+    conditions: '',
+    purpose: '',
+    outcome: '',
+    lectureDates: '',
+    excercisesDates: '',
+    labInfo: '',
+    homeworks: '',
+    isMapped: false,
+  };
+
+  constructor(private courseService: CoursesService, private administratorService: AdministratorFunctionsService,
+              private router: Router) {
   }
 
   ngOnInit(): void {
-    this.administratorService.getAllEmployees().subscribe((response: Employee[]) => {
-      this.allEmployees = response.filter(data => data.educational == 1);
-      for (let i = 0; i < this.allEmployees.length; i++) {
-        this.teacherNames.push(this.allEmployees[i].user_id + ' ' + this.allEmployees[i].name + ' ' + this.allEmployees[i].surname)
+    let userString = localStorage.getItem('session');
+    if (userString) {
+      this.myUser = JSON.parse(userString);
+      if (this.myUser.type !== 0) {
+        this.router.navigate(['']);
+      }
+    } else {
+      this.router.navigate([''])
+    }
+
+
+    this.courseService.getCourseIds().subscribe((courses: any) => {
+      if (courses) {
+        this.myUserCourses = courses;
+      } else {
+        this.swalError('Trenutno nema kurseva');
       }
     })
+
+
   }
 
-  addNewCourse: boolean = true;
-  editExisting: boolean = false;
-
-  add_course() {
-    // TODO
-    let hasError = false;
-
-    if (this.newCourseDataObject.type === null) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Obavezno mora da stoji da li je predmet obavezan ili ne!',
-      })
-      hasError = true;
-    }
-
-    // @ts-ignore
-    this.newCourseDataObject.type = this.newCourseDataObject.type === 'true';
-
-    if (this.newCourseDataObject.isMaster === null) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Obavezno mora da stoji da li je predmet na master studijama ili nije!',
-      })
-      hasError = true;
-    }
-    // @ts-ignore
-    this.newCourseDataObject.isMaster = this.newCourseDataObject.isMaster === 'true';
-
-    if (this.newCourseDataObject.isSI === null && this.newCourseDataObject.isRTI === null && this.newCourseDataObject.isOther === null && (this.newCourseDataObject.isMaster !== null && this.newCourseDataObject.isMaster === false)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Mora da se oznaci koji je smer u pitanju!',
-      })
-      hasError = true;
-    }
-
-    if (this.newCourseDataObject.semester <= 0) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Semestar mora da se definise!',
-      })
-      hasError = true;
-    }
-    if (this.newCourseDataObject.ESPB <= 0) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'ESPB bodovi moraju da budu pozitivni!',
-      })
-      hasError = true;
-    }
-    if (this.newCourseDataObject.classCount == '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Mora da se definise fond casova!',
-      })
-      hasError = true;
-    }
-    let classCountRegex = new RegExp('^\\d\\+\\d\\+\\d$')
-    if (!classCountRegex.test(this.newCourseDataObject.classCount)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Format fonda casova je Predavanja + vezve + laboratorija!',
-      })
-      hasError = true;
-    }
-    if (this.newCourseDataObject.conditions == '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Moraju da se definisu uslovi za polaganje predmeta!',
-      })
-      hasError = true;
-    }
-    if (this.newCourseDataObject.purpose == '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Moraju da se definise cilj predmeta!',
-      })
-      hasError = true;
-    }
-    if (this.newCourseDataObject.outcome == '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Moraju da se definise ishod predmeta!',
-      })
-      hasError = true;
-    }
-    if (this.newCourseDataObject.lectureDates == '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Moraju da se definisu termini odrzavanja predavanja!',
-      })
-      hasError = true;
-    }
-    if (this.newCourseDataObject.auditoryExcercisesDates == '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Moraju da se definisu termini odrzavanja vezbi!',
-      })
-      hasError = true;
-    }
-    if (this.newCourseDataObject.acronym == '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Morate uneti akronim!',
-      })
-      hasError = true;
-    }
-    if (this.newCourseDataObject.isMaster == false && this.newCourseDataObject.isRTI == true && this.newCourseDataObject.isSI == true && (this.newCourseDataObject.coursecode_SI == '' || this.newCourseDataObject.coursecode_RTI == '')) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Treba definisati obe sifre za predmete za SI i rti!',
-      })
-      hasError = true;
-    }
-    if (this.newCourseDataObject.name == '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Treba definisati puno ime predmeta!',
-      })
-      hasError = true;
-    }
-
-    if (!hasError) {
-      let isRTI: number = 0;
-      let isSI: number = 0;
-      let isOther: number = 0;
-
-      let coursesToSend: Course[] = [];
-
-      let names: string[] = []
-      if (!this.newCourseDataObject.isMaster) {
-        isRTI = this.newCourseDataObject.isRTI ? 1 : 0;
-        isSI = this.newCourseDataObject.isSI ? 1 : 0;
-        isOther = this.newCourseDataObject.isOther ? 1 : 0;
-
-        if (isRTI + isOther + isSI > 1) {
-          this.newCourseDataObject.isMapped = true;
-        }
-
-        if (isRTI == 1) {
-          let tempCourse: Course = this.create_course(
-            0,
-            [],
-            [],
-            [
-              {
-                conditions: this.newCourseDataObject.conditions,
-                outcome: this.newCourseDataObject.outcome,
-                ESPB: this.newCourseDataObject.ESPB,
-                purpose: this.newCourseDataObject.purpose,
-                lectureDates: this.newCourseDataObject.lectureDates,
-                auditoryExcercisesDates: this.newCourseDataObject.auditoryExcercisesDates,
-                labInfo: this.newCourseDataObject.labInfo,
-                homeworks: this.newCourseDataObject.homeworks,
-              },
-            ],
-            this.newCourseDataObject.acronym,
-            -1,
-            this.newCourseDataObject.type,
-            this.newCourseDataObject.semester,
-            this.newCourseDataObject.name,
-            this.newCourseDataObject.coursecode_RTI,
-            false,
-            this.newCourseDataObject.isMapped);
-          names.push(this.newCourseDataObject.coursecode_RTI)
-          coursesToSend.push(tempCourse)
-        }
-
-        if (isSI == 1) {
-          let tempCourse: Course = this.create_course(
-            1,
-            [],
-            [],
-            [
-              {
-                conditions: this.newCourseDataObject.conditions,
-                outcome: this.newCourseDataObject.outcome,
-                ESPB: this.newCourseDataObject.ESPB,
-                purpose: this.newCourseDataObject.purpose,
-                lectureDates: this.newCourseDataObject.lectureDates,
-                auditoryExcercisesDates: this.newCourseDataObject.auditoryExcercisesDates,
-                labInfo: this.newCourseDataObject.labInfo,
-                homeworks: this.newCourseDataObject.homeworks,
-              },
-            ],
-            this.newCourseDataObject.acronym,
-            -1,
-            this.newCourseDataObject.type,
-            this.newCourseDataObject.semester,
-            this.newCourseDataObject.name,
-            this.newCourseDataObject.coursecode_SI,
-            false,
-            this.newCourseDataObject.isMapped);
-          names.push(this.newCourseDataObject.coursecode_SI)
-          coursesToSend.push(tempCourse)
-        }
-
-        if (isOther == 1) {
-          let tempCourse: Course = this.create_course(
-            2,
-            [],
-            [],
-            [
-              {
-                conditions: this.newCourseDataObject.conditions,
-                outcome: this.newCourseDataObject.outcome,
-                ESPB: this.newCourseDataObject.ESPB,
-                purpose: this.newCourseDataObject.purpose,
-                lectureDates: this.newCourseDataObject.lectureDates,
-                auditoryExcercisesDates: this.newCourseDataObject.auditoryExcercisesDates,
-                labInfo: this.newCourseDataObject.labInfo,
-                homeworks: this.newCourseDataObject.homeworks,
-              },
-            ],
-            this.newCourseDataObject.acronym,
-            -1,
-            this.newCourseDataObject.type,
-            this.newCourseDataObject.semester,
-            this.newCourseDataObject.name,
-            this.newCourseDataObject.coursecode_Other,
-            false,
-            this.newCourseDataObject.isMapped);
-          names.push(this.newCourseDataObject.coursecode_Other)
-          coursesToSend.push(tempCourse)
-        }
-
-        for (let i = 0; i < names.length; i++) {
-          if (names[i].indexOf(" ") != -1) {
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops!',
-              text: "Sifra ne sme da ima razmake!",
-            });
-            return;
-          }
-          for (let j = 0; j < names.length; j++) {
-            if (i != j && names[i].trim().toLowerCase() === names[j].trim().toLowerCase()) {
-              Swal.fire({
-                icon: 'error',
-                title: 'Oops!',
-                text: "Sifre treba da budu disjunktne za sve odseke!",
-              });
-              return;
-            }
-          }
-        }
-
-      } else {
-        let tempCourse: Course = this.create_course(3, [], [], [
-            {
-              conditions: this.newCourseDataObject.conditions,
-              ESPB: this.newCourseDataObject.ESPB,
-              outcome: this.newCourseDataObject.outcome,
-              purpose: this.newCourseDataObject.purpose,
-              lectureDates: this.newCourseDataObject.lectureDates,
-              auditoryExcercisesDates: this.newCourseDataObject.auditoryExcercisesDates,
-              labInfo: this.newCourseDataObject.labInfo,
-              homeworks: this.newCourseDataObject.homeworks,
-              classCount: this.newCourseDataObject.classCount,
-            },
-          ]
-          , this.newCourseDataObject.acronym
-          , -1
-          , this.newCourseDataObject.type
-          , this.newCourseDataObject.semester
-          , this.newCourseDataObject.name
-          , this.newCourseDataObject.coursecode_SI
-          , true
-          , false);
-
-        coursesToSend.push(tempCourse)
-      }
-
-
-      this.administratorService.insert_new_course(coursesToSend).subscribe((response: any) => {
-          if (response.message != 'ok') {
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: "Doslo je do greske, kurs/kursevi nisu dodati! Proverite sve unete podatke. Kurs mora da ima jedinstvenu sifru",
-            })
-          } else {
-            Swal.fire({
-              icon: 'success',
-              title: 'Cestitam!',
-              text: "Dodat je nov kurs!",
-            })
-            this.newCourseDataObject = new NewCourseData();
-            this.editExisting = false;
-            this.addNewCourse = false;
-          }
-        }
-      );
-    }
+  swalError(message: string) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: message,
+    });
   }
 
-  private create_course(department: number, notifs: any[],
-                        engagement: any[], courseDetails: any[],
-                        acronym: string, id: number, type: boolean,
-                        semester: number, courseName: string,
-                        coursecode: string, isMaster: boolean,
-                        isMapped: boolean): Course {
-    let tempCourse: Course = new Course();
-    tempCourse.department = department;
-    tempCourse.notifications = notifs;
-    tempCourse.engagement = engagement;
-    tempCourse.courseDetails = courseDetails;
-    tempCourse.acronym = acronym;
-    tempCourse.id = id;
-    tempCourse.type = type ? 1 : 0;
-    tempCourse.semester = semester;
-    tempCourse.name = courseName;
-    tempCourse.coursecode = coursecode;
-    tempCourse.isMaster = isMaster;
-    tempCourse.isMapped = isMapped;
-    return tempCourse;
+  swalSuccess(message: string) {
+    Swal.fire({
+      icon: 'success',
+      title: 'Uspeh.',
+      text: message,
+    });
   }
 
-  cancel_new_course() {
-    // TODO Treba izbrisati do sad uradjen rad
-    this.newCourseDataObject = new NewCourseData();
-    this.editExisting = false;
-    this.addNewCourse = false;
-  }
+  addNewCourse: boolean = false;
+  editExisting: boolean = true;
 
   trigger_add_new_course() {
-    this.editExisting = false;
     this.addNewCourse = true;
+    this.editExisting = false;
   }
-
-  allCourses: Course[] = [];
-  courseNames: string[] = [];
-  selectedEditCourse: NewCourseData = null;
 
   trigger_update_existing_course() {
-    if (this.allCourses.length == 0) {
-      const mySwal = Swal.fire({
-        title: 'Sacekajte da dohvatimo sve podatke!',
-        timerProgressBar: true,
-        didOpen: () => {
-          Swal.showLoading()
-        },
-      });
-      this.courseService.getCourseIds().subscribe((result: Course[]) => {
-        this.allCourses = result;
-        mySwal.close();
-      });
-
-    }
-    this.editExisting = true;
     this.addNewCourse = false;
+    this.editExisting = true;
   }
 
-  cancel_edit_course() {
+  selectedEditCourse: any = null;
 
-  }
-
-  select_edit_course() {
-    let courseId = Number(this.currentCourseCode);
-    for (const course of this.allCourses) {
-      if(course.id === courseId) {
-        this.selectedCourse = course;
+  edit_course_selected($event) {
+    let id = Number($event.target.value)
+    if (id === -1) {
+      this.selectedEditCourse = null;
+      return;
+    }
+    for (const course of this.myUserCourses) {
+      if (course.id === id) {
+        console.log(course);
+        this.selectedEditCourse = course;
       }
     }
+  }
+
+  selected_edit_course_change_type($event) {
+    this.selectedEditCourse.type = Number($event.target.value);
+
+  }
+
+  selectedEditCourse_isMaster($event) {
+    let value = Number($event.target.value);
+    this.selectedEditCourse.isMaster = value === 1;
+  }
+
+  selectedEditCourse_department_change($event) {
+    this.selectedEditCourse.department = Number($event.target.value);
+  }
+
+
+  update_course() {
+    let classCountRegex = new RegExp('\\d\\+\\d\\+\\d')
+
+    if (this.selectedEditCourse.coursecode === '') {
+      this.swalError('Sifra kursa ne moze da ostnane prazna!');
+      return;
+    }
+
+    if (this.selectedEditCourse.semester < 1 || this.selectedEditCourse.semester > 8) {
+
+      this.swalError('Semestar nije u opsegu!');
+      return;
+    }
+    if (this.selectedEditCourse.department < 0) {
+
+      this.swalError('Odabrati departman!');
+      return;
+    }
+    if (this.selectedEditCourse.department === 3 && this.selectedEditCourse.isMaster === false) {
+
+      this.swalError('Odabrati departman!');
+      return;
+    }
+
+    if (this.selectedEditCourse.courseDetails[0].ESPB === '' || Number(this.selectedEditCourse.courseDetails[0].ESPB) < 1) {
+
+      this.swalError('ESPB nije u opsegu!');
+      return;
+    }
+
+    if (!classCountRegex.test(this.selectedEditCourse.courseDetails[0].classCount)) {
+
+      this.swalError('Fond casova ne zadovoljava pattern!');
+      return;
+    }
+
+    if (this.selectedEditCourse.name === '') {
+
+      this.swalError('Ime kursa ne moze da ostane prazno!');
+      return;
+    }
+
+    if (this.selectedEditCourse.acronym === '') {
+
+      this.swalError('Akronim kursa ne moze da ostane prazan!');
+      return;
+    }
+
+
+    if (this.selectedEditCourse.courseDetails[0].conditions === '') {
+
+      this.swalError('Uslovi kursa su obavezni!');
+      return;
+    }
+    if (this.selectedEditCourse.courseDetails[0].purpose === '') {
+
+      this.swalError('Cilj kursa ne moze da bude prazan!');
+      return;
+    }
+    if (this.selectedEditCourse.courseDetails[0].outcome === '') {
+      this.swalError('Ishod kursa ne moze da ostane prazan!');
+      return;
+    }
+
+    if (this.selectedEditCourse.isMaster) {
+      this.selectedEditCourse.department = 3;
+    }
+
+    this.administratorService.update_existing_course(this.selectedEditCourse).subscribe((response: any) => {
+      if (response.message === 'ok') {
+        this.swalSuccess('Uspesno je kurs azuriran')
+        this.selectedEditCourse = null;
+        this.courseService.getCourseIds().subscribe((courses: any) => {
+          if (courses) {
+            this.myUserCourses = courses;
+          } else {
+            this.swalError('Trenutno nema kurseva');
+          }
+        })
+      } else {
+        this.swalError('Doslo je do greske, kurs nije azuriran');
+      }
+    })
+
+  }
+
+  new_course_change_type($event) {
+    this.newCourse.type = Number($event.target.value);
   }
 
   change_academic_level($event) {
-    if ($event.target.value === '1') { // isMaster
-      this.selectedCourse.department = 3;
-      this.selectedCourse.isMaster = true;
-
-    } else { // !isMaster
-      this.selectedCourse.department = -1;
-      this.selectedCourse.isMaster = false;
+    this.newCourse.isMaster = Number($event.target.value) === 1;
+    if (this.newCourse.isMaster) {
+      this.newCourse.isSI = false;
+      this.newCourse.isRTI = false;
+      this.newCourse.isOther = false;
     }
   }
-  change_course_type($event) {
-    this.selectedCourse.type = $event.target.value;
-  }
-  private course_to_newCourseData(course: Course) {
-    const temp = new NewCourseData();
-    if (course.department == 0) {
-      temp.isRTI = true;
-      // @ts-ignore
-      temp.isMaster = 'false';
-    } else if (course.department == 1) {
-      temp.isSI = true;
-      // @ts-ignore
-      temp.isMaster = 'false';
-    } else if (course.department == 2) {
-      temp.isOther = true;
-      // @ts-ignore
-      temp.isMaster = 'false';
-    } else if (course.department == 3) {
-      // @ts-ignore
-      temp.isMaster = 'true';
-    }
-    temp.coursecode_SI = course.coursecode;
-    temp.type = course.type == 1;
-    temp.isMapped = course.isMapped;
-    temp.name = course.name;
-    temp.ESPB = course.courseDetails[0].ESPB;
-    temp.outcome = course.courseDetails[0].outcome;
-    temp.purpose = course.courseDetails[0].purpose;
-    temp.labInfo = course.courseDetails[0].labInfo;
-    temp.conditions = course.courseDetails[0].conditions;
-    temp.homeworks = course.courseDetails[0].homeworks;
-    temp.acronym = course.acronym;
-    temp.lectureDates = course.courseDetails[0].lectureDates;
-    temp.auditoryExcercisesDates = course.courseDetails[0].auditoryExcercisesDates;
-    temp.classCount = course.courseDetails[0].classCount;
-    temp.semester = course.semester;
 
-    return temp;
-  }
-  currentCourseCode: string = '';
-  set_current_course_name($event) {
-    this.currentCourseCode = $event.target.value;
-  }
-  updateCourseCode: string = '';
-
-  selectedCourse: any = null;
-
-  update_course() {
-    if (this.selectedCourse.coursecode === undefined || this.selectedCourse.coursecode === '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "Greska sa sifrom predmeta",
-      });
+  add_new_course() {
+    if (this.newCourse.type < 0) {
+      this.swalError('Treba definisati da li je kurs obavezan ili izboran tip!');
       return;
     }
 
-    if (this.selectedCourse.semester === undefined || this.selectedCourse.semester < 1) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "Semestar mora biti pozitivan, nenulti broj",
-      });
-
-      return
-    }
-    if (this.selectedCourse.courseDetails[0].ESPB === undefined || this.selectedCourse.courseDetails[0].ESPB < 1) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "ESPB mora biti pozitivan, nenulti broj",
-      });
-      return;
-    }
-    let regex = new RegExp("^\\d\\+\\d\\+\\d$")
-    if (this.selectedCourse.courseDetails[0].classCount === undefined || !regex.test(this.selectedCourse.courseDetails[0].classCount.trim())) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "Fond casova nije u odgovarajucem formatu!",
-      });
-      return;
-    }
-    if (this.selectedCourse.acronym === undefined || this.selectedCourse.acronym === '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "Akronim nije definisan!",
-      });
-      return;
-    }
-    if (this.selectedCourse.name === undefined || this.selectedCourse.name === '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "Naziv nije definisan!",
-      });
-      return;
-    }
-    if (this.selectedCourse.courseDetails[0].conditions === undefined || this.selectedCourse.courseDetails[0].conditions === '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "Uslovi moraju da se definisu!",
-      });
-      return;
-    }
-    if (this.selectedCourse.courseDetails[0].purpose === undefined || this.selectedCourse.courseDetails[0].purpose === '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "Cilj mora da se definise!",
-      });
-      return;
-    }
-    if (this.selectedCourse.courseDetails[0].outcome === undefined || this.selectedCourse.courseDetails[0].outcome === '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "Ishod mora da se definise!",
-      });
-      return;
-    }
-    if (this.selectedCourse.courseDetails[0].lectureDates === undefined || this.selectedCourse.courseDetails[0].lectureDates === '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "Termini predavanja moraju da se definisu!",
-      });
-      return;
-    }
-    if (this.selectedCourse.courseDetails[0].auditoryExcercisesDates === undefined || this.selectedCourse.courseDetails[0].auditoryExcercisesDates === '') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "Termini predavanja moraju da se definisu!",
-      });
+    if (this.newCourse.semester < 1 || this.newCourse > 8) {
+      this.swalError('Semestar je u opsegu od 1 do 8');
       return;
     }
 
-    this.administratorService.update_existing_course(this.selectedCourse).subscribe( (response:any) => {
-      if(response.message === 'ok') {
-        Swal.fire({
-          icon: 'success',
-          title: 'Super!',
-          text: "Uspesno azuriran kurs!",
-        });
+    if (this.newCourse.ESPB === '' || this.newCourse.ESPB < 0) {
+      this.swalError('ESPB treba da bude definisan i nenulti broj')
+      return;
+    }
 
-        this.selectedCourse = null;
-        const mySwal = Swal.fire({
-          title: 'Sacekajte da dohvatimo sve podatke!',
-          timerProgressBar: true,
-          didOpen: () => {
-            Swal.showLoading()
-          },
-        });
-        this.courseService.getCourseIds().subscribe((result: Course[]) => {
-          this.allCourses = result;
-          this.courseNames = [];
-          for (const vC of result) {
-            this.courseNames.push(vC.coursecode + "| " + vC.name);
-          }
-          mySwal.close();
-        });
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: "Doslo je do neocekivane greske!",
-        });
+    const classCountRegex = new RegExp('\\d\+\\d\+\\d');
+
+    if (classCountRegex.test(this.newCourse.classCount)) {
+      this.swalError('Fond casova nije u dobrom formatu');
+      return;
+    }
+
+    if (this.newCourse.name === '') {
+      this.swalError('Pun naziv kursa treba da bude definisan');
+      return;
+    }
+
+    if (this.newCourse.acronym === '') {
+      this.swalError('Akronim treba da bude definisan');
+      return;
+    }
+
+    if (this.newCourse.conditions === '') {
+      this.swalError('Uslovi polaganja predmeta su neophodni');
+      return;
+    }
+
+    if (this.newCourse.outcome === '') {
+      this.swalError('Ishod predmeta je neophodna');
+      return;
+    }
+
+    if (this.newCourse.lectureDates === '') {
+      this.swalError('Termini odrzavanja predavanja su obavezna');
+      return;
+    }
+
+    if (this.newCourse.excercisesDates === '') {
+      this.swalError('Termini odrzavanja vezbi su obavezna');
+      return;
+    }
+
+    if (this.newCourse.isMaster) {
+      this.newCourse.department = 3;
+    }
+
+    if (this.newCourse.isRTI && this.newCourse.coursecode_RTI === '') {
+      this.swalError('Sifra predmeta za RTI je obavezna obzirom da se predmet odrzava i na RTI');
+      return;
+    }
+    if (this.newCourse.isSI && this.newCourse.coursecode_SI === '') {
+      this.swalError('Sifra predmeta za SI je obavezna obzirom da se predmet odrzava i na SI');
+      return;
+    }
+    if (this.newCourse.isOther && this.newCourse.coursecode_Other === '') {
+      this.swalError('Sifra predmeta za druge smerove je obavezna obzirom da se predmet odrzava i na druge smerove');
+      return;
+    }
+    if (this.newCourse.isMaster && this.newCourse.coursecode_Master === '') {
+      this.swalError('Sifra predmeta za master obavezna obzirom da se predmet odrzava na masteru');
+      return;
+    }
+
+    const rti = this.newCourse.isRTI === true ? 1 : 0;
+    const si = this.newCourse.isRTI === true ? 1 : 0;
+    const other = this.newCourse.isRTI === true ? 1 : 0;
+    let isMapped = false;
+    if (rti + si + other > 1) {
+      isMapped = true;
+    }
+    const coursesToSend = [];
+    const mappedData = [
+      {
+        conditions: this.newCourse.conditions,
+        ESPB: this.newCourse.ESPB,
+        outcome: this.newCourse.outcome,
+        purpose: this.newCourse.purpose,
+        auditoryExcercisesDates: this.newCourse.excercisesDates,
+        lectureDates: this.newCourse.lectureDates,
+        labInfo: this.newCourse.labInfo,
+        homeworks: this.newCourse.homeworks,
+        classCount: this.newCourse.classCount,
       }
-    });
+    ];
 
-  }
 
-  change_department($event) {
-    let value = Number($event.target.value);
-    switch (value) {
-      case 0:
-        this.selectedEditCourse.isRTI = true;
-        this.selectedEditCourse.isSI = false;
-        this.selectedEditCourse.isOther = false;
-        break;
-      case 1:
-        this.selectedEditCourse.isRTI = false;
-        this.selectedEditCourse.isSI = true;
-        this.selectedEditCourse.isOther = false;
-        break;
-      case 2:
-        this.selectedEditCourse.isRTI = false;
-        this.selectedEditCourse.isSI = false;
-        this.selectedEditCourse.isOther = true;
-        break;
+    if (this.newCourse.isMaster) {
+      let newCourse = {};
+      newCourse['name'] = this.newCourse.name;
+      newCourse['coursecode'] = this.newCourse.coursecode_Master;
+      newCourse['acronym'] = this.newCourse.acronym;
+      newCourse['semester'] = this.newCourse.semester;
+      newCourse['type'] = this.newCourse.type;
+      newCourse['department'] = 3;
+      newCourse['courseDetails'] = mappedData;
+      newCourse['isMapped'] = false;
+      newCourse['isMaster'] = true;
+      newCourse['engagement'] = [];
+      newCourse['notifications'] = [];
+      coursesToSend.push(newCourse);
+
+    } else {
+      let newCourse = {};
+      if (this.newCourse.isRTI) {
+        newCourse['name'] = this.newCourse.name;
+        newCourse['coursecode'] = this.newCourse.coursecode_RTI;
+        newCourse['acronym'] = this.newCourse.acronym;
+        newCourse['semester'] = this.newCourse.semester;
+        newCourse['type'] = this.newCourse.type;
+        newCourse['department'] = 0;
+        newCourse['courseDetails'] = mappedData;
+        newCourse['isMapped'] = isMapped;
+        newCourse['isMaster'] = false;
+        newCourse['engagement'] = [];
+        newCourse['notifications'] = [];
+        coursesToSend.push(newCourse);
+      }
+      newCourse = {};
+
+      if (this.newCourse.isSI) {
+        newCourse['name'] = this.newCourse.name;
+        newCourse['coursecode'] = this.newCourse.coursecode_SI;
+        newCourse['acronym'] = this.newCourse.acronym;
+        newCourse['semester'] = this.newCourse.semester;
+        newCourse['type'] = this.newCourse.type;
+        newCourse['department'] = 1;
+        newCourse['courseDetails'] = mappedData;
+        newCourse['isMapped'] = isMapped;
+        newCourse['isMaster'] = false;
+        newCourse['engagement'] = [];
+        newCourse['notifications'] = [];
+        coursesToSend.push(newCourse);
+      }
+      newCourse = {};
+
+      if (this.newCourse.isOther) {
+        newCourse['name'] = this.newCourse.name;
+        newCourse['coursecode'] = this.newCourse.coursecode_Other;
+        newCourse['acronym'] = this.newCourse.acronym;
+        newCourse['semester'] = this.newCourse.semester;
+        newCourse['type'] = this.newCourse.type;
+        newCourse['department'] = 2;
+        newCourse['courseDetails'] = mappedData;
+        newCourse['isMapped'] = isMapped;
+        newCourse['isMaster'] = false;
+        newCourse['engagement'] = [];
+        newCourse['notifications'] = [];
+        coursesToSend.push(newCourse);
+      }
+
+
     }
 
-  }
+    console.log(coursesToSend)
 
-  change_course_level($event) {
-    let value = Number($event.target.value);
-    switch (value) {
-      case 0:
-        this.selectedEditCourse.isMaster = false;
-        break;
-      case 1:
-        this.selectedEditCourse.isMaster = true;
-        break;
-    }
-  }
+    this.administratorService.insert_new_course(coursesToSend).subscribe((response: any) => {
+      if(response.message === 'ok') {
+        this.swalSuccess('Uspesno dodad kurs');
+        this.courseService.getCourseIds().subscribe((data: any) => {
+          if(data) {
+            this.myUserCourses = data;
+          } else {
+            this.swalError("Nema kurseva da se prikazu");
+          }
+          this.newCourse = {
+            type: -1,
+            isMaster: false,
+            coursecode_SI: '',
+            coursecode_RTI: '',
+            coursecode_Other: '',
+            coursecode_Master: '',
+            isRTI: false,
+            isSI: false,
+            isOther: false,
+            semester: 1,
+            ESPB: 0,
+            classCount: '',
+            name: '',
+            acronym: '',
+            conditions: '',
+            purpose: '',
+            outcome: '',
+            lectureDates: '',
+            excercisesDates: '',
+            labInfo: '',
+            homeworks: '',
+            isMapped: false,
+          };
+        })
+      } else {
+        this.swalError(response.message)
+      }
+    })
 
-  change_selected_course_type($event) {
-    let value = Number($event.target.value);
-    switch (value) {
-      case 0:
-        this.selectedEditCourse.type = false;
-        break;
-      case 1:
-        this.selectedEditCourse.type = true;
-        break;
-    }
   }
 }

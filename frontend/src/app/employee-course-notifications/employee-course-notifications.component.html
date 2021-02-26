@@ -4,9 +4,9 @@
     <div class="card-body">
       <div class="form-group justify-content-center text-center  form-inline col-12">
         <label for="courseSelect" class="form-text">Odaberite predmet</label>
-        <select id="courseSelect" (change)="course_selection_change($event)" class="ml-2 form-control">
+        <select id="courseSelect" (change)="course_selection_change($event)" [(ngModel)]="asdf" class="ml-2 form-control">
           <option value="-1">Odaberi..</option>
-          <option *ngFor="let course of myCourses" [value]="course.id">{{course.name}}</option>
+          <option *ngFor="let course of myCourses" [value]="course.id">{{course.coursecode}} -{{course.name}}</option>
         </select>
       </div>
     </div>
@@ -48,7 +48,6 @@
         <label for="description" class="col-sm-2 col-form-label"></label>
         <div class="col-sm-10">
           <button class="btn btn-success mr-1" (click)="send_notification()">Prihvati</button>
-          <button class="btn btn-danger" (click)="cancel_input()">Odustani</button>
         </div>
       </div>
     </div>
@@ -57,7 +56,25 @@
 <span *ngIf="course != null">
 <div *ngFor="let notif of notifications" class="row justify-content-center mt-2">
   <div class="card p-0 text-white bg-dark col-md-5 mb-3">
-    <div class="card-header"><h3>{{notif.title}}</h3>{{notif.date | date: 'yyyy-MM-dd'}}</div>
+    <div class="card-header">
+      <div class="d-flex  justify-content-between">
+        <h3 class="float-start">{{notif.title}}</h3>
+        <div class="mb-3 float-end">
+        <div>
+          <button class="btn btn-link text-danger" (click)="delete_notification(notif)"><i
+            class="fas fa-trash-alt"></i></button>
+          <button type="button" class="btn btn-link text-warning" (click)="update_notification(notif.id)"
+                  data-toggle="modal" data-target="#exampleModalCenter">
+            <i
+              class="fas fa-pen-alt"></i>
+          </button>
+        </div>
+      </div>
+
+
+      </div>
+      {{notif.date | date: 'yyyy-MM-dd'}}
+    </div>
     <div class="card-body">
       <h3>
         Opis
@@ -67,29 +84,13 @@
         </p>
       </div>
       <div class="row mb-3" *ngIf="notif.file.type != undefined">
-        <label for="title" class="col-sm-2 col-form-label">File:</label>
+        <label for="title" class="col-sm-2 col-form-label">Prateci fajl uz notifikaciju:</label>
         <div class="col-sm-10">
           <a [href]="'http://localhost:4000/download/'+notif.file.download_link">{{notif.file.filename}}</a>
           <br>
-          Tip: {{notif.file.type}}<br>
-          Velicina: {{notif.file.size}}<br>
-          Datum postavljanja: {{notif.file.type}}<br>
-          Postavio: {{stringify(notif.file.posted)}}
         </div>
       </div>
-      <div class="row mb-3">
-        <label for="title" class="col-sm-2 col-form-label"></label>
-        <div class="col-sm-10">
-          <button class="btn btn-link text-danger" (click)="delete_notification(notif.id)"><i
-            class="fas fa-trash-alt"></i></button>
-          <!-- Button trigger modal -->
-          <button type="button" class="btn btn-link ml-4 text-warning" (click)="update_notification(notif.id)"
-                  data-toggle="modal" data-target="#exampleModalCenter">
-            <i
-              class="fas fa-pen-alt"></i>
-          </button>
-        </div>
-      </div>
+
     </div>
   </div>
 </div>
@@ -113,7 +114,7 @@
           <label for="date" class="col-sm-2 col-form-label">Datum:</label>
           <div class="col-sm-10">
             <input id="date2" type="date" [ngModel]="updateNotification.date | date: 'yyyy-MM-dd'"
-                   (ngModelChange)="updateNotification.date = $event.target.value" class="form-control">
+                   (ngModelChange)="updateNotification.date = $event" class="form-control">
           </div>
         </div>
         <div class="row mb-3">
@@ -135,10 +136,6 @@
             <a
               [href]="'http://localhost:4000/download/'+updateNotification.file.download_link">{{updateNotification.file.filename}}</a>
             <br>
-            Tip: {{updateNotification.file.type}}<br>
-            Velicina: {{updateNotification.file.size}}<br>
-            Datum postavljanja: {{updateNotification.file.type}}<br>
-            Postavio: {{stringify(updateNotification.file.posted)}}
             <button class="btn btn-link text-danger" (click)="delete_file()"><i
               class="fas fa-trash-alt"></i></button>
           </div>
@@ -152,7 +149,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Zatvori</button>
-        <button type="button" class="btn btn-primary" (click)="update_send(updateNotification.id)">Sacuvaj izmene
+        <button type="button" class="btn btn-primary" data-dismiss="modal" (click)="update_send(updateNotification.id)">Sacuvaj izmene
         </button>
       </div>
     </div>

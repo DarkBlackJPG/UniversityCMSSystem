@@ -3,6 +3,7 @@ import {EmployeeService} from "../services/employee.service";
 import {UploadServiceService} from "../services/upload-service.service";
 import {CoursesService} from "../services/courses.service";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-employee-student-registration-list',
@@ -14,7 +15,8 @@ export class EmployeeStudentRegistrationListComponent implements OnInit {
 
   constructor(private employeeService: EmployeeService,
               private uploadService: UploadServiceService,
-              private courseService: CoursesService
+              private courseService: CoursesService,
+              private router: Router
   ) {
 
   }
@@ -40,8 +42,17 @@ export class EmployeeStudentRegistrationListComponent implements OnInit {
   myCourses: any[] = [];
 
   ngOnInit(): void {
-    this.userData = JSON.parse(localStorage.getItem('session'));
+    let userString = localStorage.getItem('session');
+    if(userString) {
+      this.userData = JSON.parse(userString);
+      if (this.userData.type !== 1) {
+        this.router.navigate(['']);
+      }
+    } else {
+      this.router.navigate([''])
+    }
     this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
+      console.log(courses)
       this.myCourses = courses;
     });
   }
@@ -58,6 +69,7 @@ export class EmployeeStudentRegistrationListComponent implements OnInit {
               doc.date_open = new Date(doc.date_open);
               doc.date_close = new Date(doc.date_close);
             }
+            console.log(docs)
             this.courseLists = docs;
           })
         }

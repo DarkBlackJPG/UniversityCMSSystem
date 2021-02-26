@@ -31,6 +31,7 @@ import {StudentRegistrationsComponent} from "./student-registrations/student-reg
 import {EmployeeDetailsComponent} from "./employee-details/employee-details.component";
 import {Verify} from "node:crypto";
 import {StudentVerifyComponent} from "./student-verify/student-verify.component";
+import {StudentPasswordChangeComponent} from "./student-password-change/student-password-change.component";
 
 
 const routes: Routes = [
@@ -143,6 +144,10 @@ const routes: Routes = [
   {
     path: 'student/courses',
     component: StudentMyCoursesComponent,
+  },
+  {
+    path: 'student/password',
+    component: StudentPasswordChangeComponent,
   },
   {
     path: 'student/course/registrations',

@@ -6,7 +6,7 @@
         <label for="courseSelect" class="form-text">Odaberite predmet</label>
         <select id="courseSelect" (change)="course_selection_change($event)" class="ml-2 form-control">
           <option value="-1">Odaberi..</option>
-          <option *ngFor="let course of myCourses" [value]="course.id">{{course.name}}</option>
+          <option *ngFor="let course of myCourses" [value]="course.id">{{course.coursecode}} -  {{course.name}}</option>
         </select>
       </div>
     </div>
@@ -100,8 +100,8 @@
           </div>
           <div class="col-md-3 p-1">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="" [checked]="course.isActive" id="defaultCheck12">
-              <label class="form-check-label" for="defaultCheck12">
+              <input class="form-check-input" type="checkbox" value="" [checked]="course.isActive" disabled [id]="course.id + '_defaultCheck12'">
+              <label class="form-check-label" [htmlFor]="course.id + '_defaultCheck12'">
                 Aktivno
               </label>
 
@@ -164,7 +164,7 @@
           <div class="col-sm-10">
             <div class="form-check form-switch">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" [(ngModel)]="editable_course.upload_enabled" value="" id="defaultCheck1">
+                <input class="form-check-input" type="checkbox" [(ngModel)]="editable_course.uploadEnabled"  value="" id="defaultCheck1">
                 <label class="form-check-label" for="defaultCheck1">
                   Ocekuje se upload fajlova
                 </label>

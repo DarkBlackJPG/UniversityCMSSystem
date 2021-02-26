@@ -39,6 +39,7 @@ import { StudentMyCoursesComponent } from './student-my-courses/student-my-cours
 import { StudentRegistrationsComponent } from './student-registrations/student-registrations.component';
 import { EmployeeDetailsComponent } from './employee-details/employee-details.component';
 import { StudentVerifyComponent } from './student-verify/student-verify.component';
+import { StudentPasswordChangeComponent } from './student-password-change/student-password-change.component';
 
 @NgModule({
   declarations: [
@@ -73,6 +74,7 @@ import { StudentVerifyComponent } from './student-verify/student-verify.componen
     StudentRegistrationsComponent,
     EmployeeDetailsComponent,
     StudentVerifyComponent,
+    StudentPasswordChangeComponent,
 
   ],
   imports: [

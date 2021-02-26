@@ -22,6 +22,7 @@ export class StudentVerifyComponent implements OnInit {
   passwordVerify: string = '';
 
   ngOnInit(): void {
+
     let userString = localStorage.getItem('session');
     if (userString) {
       this.myUser = JSON.parse(userString);

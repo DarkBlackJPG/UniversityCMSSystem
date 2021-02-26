@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Employee} from "../models/database/Employee";
+import {Observable} from "rxjs/internal/Observable";
 
 @Injectable({
   providedIn: 'root'
@@ -76,5 +77,34 @@ export class EmployeeService {
 
   change_section_visibility(id: number, e: string, exams_visible: boolean) {
     return this.http.post(`${this.url}/employee/course/${id}/change_section_visibility`, {data: {section: e, status: exams_visible}});
+  }
+
+  update_order(course) {
+    return this.http.post(`${this.url}/employee/course/${course.id}/update/order`, {data: course});
+
+  }
+
+  removeNotification(notification, course) {
+    return this.http.post(`${this.url}/employee/course/${course.id}/notification/${notification.id}/delete`, {});
+  }
+
+  delete_project_file(download_link: string, course_id: number) {
+    return this.http.post(`${this.url}/course/${course_id}/projects/${download_link}/delete`, {});
+  }
+
+  delete_lab_file(download_link: string, course_id: number) {
+    return this.http.post(`${this.url}/course/${course_id}/labs/${download_link}/delete`, {});
+  }
+
+  delete_exam_file(download_link: string, course_id: number) {
+    return this.http.post(`${this.url}/course/${course_id}/exams/${download_link}/delete`, {});
+  }
+
+  delete_excercise_file(download_link: string, course_id: number) {
+    return this.http.post(`${this.url}/course/${course_id}/exercises/${download_link}/delete`, {});
+  }
+
+  delete_lecture_file(download_link: string, course_id: number) {
+    return this.http.post(`${this.url}/course/${course_id}/lectures/${download_link}/delete`, {});
   }
 }

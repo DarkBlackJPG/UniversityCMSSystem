@@ -11,6 +11,9 @@ import {HttpResponse} from "@angular/common/http";
 import {UploadServiceService} from "../services/upload-service.service";
 import {EmployeeService} from "../services/employee.service";
 import {isInteractiveElement} from "codelyzer/util/isInteractiveElement";
+import {Router} from "@angular/router";
+import {finished} from "stream";
+
 const STUDENT_FOCUS = 0;
 const FACULTY_FOCUS = 1;
 
@@ -20,9 +23,9 @@ const FACULTY_FOCUS = 1;
   styleUrls: ['./admin-view-accounts.component.css']
 })
 export class AdminViewAccountsComponent implements OnInit {
-  studentsIDs = ['a'];
+  studentsIDs = [];
   facultyIDs = [];
-  students = ['a'];
+  students = [];
   faculty = [];
   aa: string;
   titles: Title[] = [];
@@ -30,15 +33,25 @@ export class AdminViewAccountsComponent implements OnInit {
   selected_employee: any = null;
   isSelected = -1;
 
-
+  myUser: any = {};
 
   constructor(private administratorService: AdministratorFunctionsService,
               private uploadService: UploadServiceService,
-              private employeeService: EmployeeService) {
+              private employeeService: EmployeeService,
+              private router: Router) {
   }
 
   ngOnInit(): void {
-    this.aa = "sds"
+    let userString = localStorage.getItem('session');
+    if (userString) {
+      this.myUser = JSON.parse(userString);
+      if (this.myUser.type !== 0) {
+        this.router.navigate(['']);
+      }
+    } else {
+      this.router.navigate([''])
+    }
+
     this.administratorService.getAllTitles().subscribe((titles: Title[]) => {
       this.titles = titles;
     });
@@ -47,14 +60,23 @@ export class AdminViewAccountsComponent implements OnInit {
       this.faculty = employees;
       for (let i = 0; i < this.faculty.length; i++) {
         this.facultyIDs.push(
-          this.faculty[i].id +'. ' +this.faculty[i].name + ' ' + this.faculty[i].surname
+          this.faculty[i].id + '. ' + this.faculty[i].name + ' ' + this.faculty[i].surname
         );
+      }
+    });
+    this.administratorService.getAllStudents().subscribe((students: any[]) => {
+      console.log(students)
+      this.students = students;
+      for (const student of this.students) {
+        this.studentsIDs.push(student.student_data[0].index + " - " + student.name + " " + student.surname);
       }
     })
   }
+
   set_register(number: number) {
     this.administratorService.setIsStudentRegistration(number);
   }
+
   model1: any;
   model2: any;
   dropdownList: any;
@@ -91,10 +113,20 @@ export class AdminViewAccountsComponent implements OnInit {
   }
 
   lastFocused: number;
+  selectedStudent: any = {}
 
   find_student() {
-    if (this.model1 != null && this.model1 !== '') {
 
+    if (this.model1 != null && this.model1 !== '') {
+      let index = this.model1.split('-')[0].trim();
+      for (const student of this.students) {
+        if (index === student.student_data[0].index) {
+          this.selectedStudent = student;
+          break
+        }
+      }
+      this.isSelected = 0;
+      this.selected_employee = {};
     } else {
       Swal.fire({
         icon: 'error',
@@ -105,16 +137,18 @@ export class AdminViewAccountsComponent implements OnInit {
   }
 
   find_faculty() {
+
     if (this.model2 != null && this.model2 !== '') {
       let user_id = this.model2.split(' ');
       user_id = String(user_id[0]);
       user_id = Number(user_id.split('.').join(""));
       for (let i = 0; i < this.faculty.length; i++) {
         if (this.faculty[i].id == user_id) {
-         this.selected_employee = this.faculty[i];
-         break;
+          this.selected_employee = this.faculty[i];
+          break;
         }
       }
+      this.selectedStudent = {};
       this.isSelected = 1;
     } else {
       Swal.fire({
@@ -129,7 +163,7 @@ export class AdminViewAccountsComponent implements OnInit {
     if (this.selected_employee.name === '' ||
       this.selected_employee.surname === '' ||
       this.selected_employee.employee_data.address === '' ||
-      this.selected_employee.employee_data.office === '' ) {
+      this.selected_employee.employee_data.office === '') {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -138,7 +172,7 @@ export class AdminViewAccountsComponent implements OnInit {
       return;
     }
 
-    this.administratorService.updateEmployeeData(this.selected_employee).subscribe( (response:any) => {
+    this.administratorService.updateEmployeeData(this.selected_employee).subscribe((response: any) => {
       if (response.message === 'ok') {
         Swal.fire({
           icon: 'success',
@@ -154,15 +188,30 @@ export class AdminViewAccountsComponent implements OnInit {
           text: 'Doslo je do greske, profil nije azuriran!',
         });
       }
+      this.model2 = '';
+      this.model1 = '';
+
+      this.administratorService.getAllEmployees().subscribe((employees: Employee[]) => {
+        this.faculty = employees;
+        this.facultyIDs = [];
+        for (let i = 0; i < this.faculty.length; i++) {
+          this.facultyIDs.push(
+            this.faculty[i].id + '. ' + this.faculty[i].name + ' ' + this.faculty[i].surname
+          );
+        }
+      });
     });
   }
 
   fileList = FileList
+
   upload_image($event) {
     var _URL = window.URL || window.webkitURL;
     this.fileList = $event.target.files;
     var file, img;
     let skip = false;
+    const kineskoResenje = this;
+    let processed = false;
     if ((file = this.fileList[0])) {
       img = new Image();
       var objectUrl = _URL.createObjectURL(file);
@@ -173,27 +222,26 @@ export class AdminViewAccountsComponent implements OnInit {
             icon: 'error',
             title: 'Oops...',
             text: 'Slika prevazilazi velicinu od 300x300!',
-          });
+          })
+        } else {
+          if (skip === false && kineskoResenje.fileList[0] != undefined) {
+            kineskoResenje.uploadService.upload(kineskoResenje.fileList[0]).subscribe((res: any) => {
+              if (res instanceof HttpResponse) {
+                // @ts-ignore
+                let file_data = res.body.file_data;
+                let download_link = file_data.filename;
+                kineskoResenje.selected_employee.employee_data.profilePicture = download_link;
+                kineskoResenje.employeeService.updateEmployeePicture(kineskoResenje.selected_employee.id, download_link).subscribe((doc: any) => {
+
+                });
+              }
+            });
+          }
         }
         _URL.revokeObjectURL(objectUrl);
       };
-      img.src = objectUrl;
     }
-    if ( skip === false && this.fileList[0] != undefined) {
-      this.uploadService.upload(this.fileList[0]).subscribe((res: any) => {
-        if (res instanceof HttpResponse) {
-          // @ts-ignore
-          let file_data = res.body.file_data;
-          let download_link = file_data.filename;
-          this.selected_employee.employee_data.profilePicture = download_link;
-          this.employeeService.updateEmployeePicture(this.selected_employee.id, download_link).subscribe((doc: any) => {
-
-          });
-          localStorage.setItem('session', JSON.stringify(this.selected_employee));
-        }
-      });
-
-    }
+    img.src = objectUrl;
   }
 
   cancel() {
@@ -208,10 +256,97 @@ export class AdminViewAccountsComponent implements OnInit {
   change_title($event) {
     const title_id = Number($event.target.value);
     for (let i = 0; i < this.titles.length; i++) {
-      if(this.titles[i].id == title_id){
+      if (this.titles[i].id == title_id) {
         this.selected_employee.title = this.titles[i];
         break;
       }
     }
+  }
+
+  change_level_type($event) {
+    this.selectedStudent.student_data[0].academic_level = $event.target.value;
+    if( $event.target.value === 'm' || $event.target.value === 'p') {
+      this.selectedStudent.student_data[0].department = 3;
+    }
+  }
+
+  update_student() {
+    let regex = new RegExp("\\d{4}\\/\\d{4}")
+    if (!regex.test(this.selectedStudent.student_data[0].index)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops!',
+        text: 'Studentski indeks nije u odgovarajucem formatu!',
+      });
+      return;
+    }
+    const name = this.selectedStudent.name;
+    const surname = this.selectedStudent.surname;
+    const index = this.selectedStudent.student_data[0].index.split('/');
+    const studyType = this.selectedStudent.student_data[0].academic_level;
+
+    if (name === '' ||
+      surname === '') {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops!',
+        text: 'Studentski podaci ne smeju da budu prazni!',
+      });
+      return;
+    }
+
+    let username = '';
+    username += surname[0].toLowerCase();
+    username += name[0].toLowerCase();
+    username += String(index[0][2]) + String(index[0][3]) + String(index[1]);
+    username += studyType;
+    username += "@student.etf.bg.ac.rs";
+
+    this.selectedStudent.username = username;
+    this.selectedStudent.mail = username;
+
+    if (this.selectedStudent.student_data[0].academic_level !== 'd') {
+      this.selectedStudent.department = 3;
+    } else if (this.selectedStudent.student_data[0].academic_level === 'd' && this.selectedStudent.student_data[0].department != 0 && this.selectedStudent.student_data[0].department != 1 && this.selectedStudent.student_data[0].department != 2) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops!',
+        text: 'Treba da se odabere departman!',
+      });
+      return;
+    }
+
+    this.administratorService.updateStudent(this.selectedStudent).subscribe((response: any) => {
+      if (response.message === 'ok') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Uspeh!',
+          text: 'Uspesno azuriran student!',
+        });
+        this.isSelected = -1;
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops!',
+          text: response.message,
+        });
+      }
+      this.model2 = '';
+      this.model1 = '';
+      this.studentsIDs = [];
+
+      this.administratorService.getAllStudents().subscribe((students: any[]) => {
+        console.log(students)
+        this.students = students;
+        for (const student of this.students) {
+          this.studentsIDs.push(student.student_data[0].index + " - " + student.name + " " + student.surname);
+        }
+      })
+    })
+
+  }
+
+  chenge_dept($event) {
+    this.selectedStudent.student_data[0].department = Number($event.target.value);
   }
 }

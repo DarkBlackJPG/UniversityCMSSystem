@@ -24,7 +24,7 @@
 
       <td>
         <ol *ngIf="employee.course_data.length >= 1; else elseNo">
-          <li *ngFor="let course of employee.course_data">{{course.name}}</li>
+          <li *ngFor="let course of employee.course_data"><b>{{course.coursecode}}</b> - {{course.name}}</li>
         </ol>
         <ng-template #elseNo>
           Nije zaduzen na predmetima

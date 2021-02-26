@@ -37,8 +37,10 @@ export class CourseDetailsComponent implements OnInit {
       this.route.navigate(['']);
     } else {
       this.myUser = JSON.parse(user);
+
     }
     this.course = Number(this.activatedRoute.snapshot.paramMap.get('id'));
+
     this.today = new Date();
     this.today.setHours(0,0,0,0);
     this.courseService.getCourseById(this.course).subscribe((response:any) => {
@@ -62,6 +64,23 @@ export class CourseDetailsComponent implements OnInit {
           text: "Predmet ne postoji!",
         });
       }
+      this.courseDetails.notifications.sort( (a, b) => { return a.date < b.date} )
+      if(this.myUser.type === 2) {
+        this.studentService.checkEnrollment(this.myUser.id, this.courseDetails.coursecode).subscribe((response) => {
+          if(response === null) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              width: '100%',
+              text: "Niste prijavljeni na ovaj predmet, ne mozete da ga pregledate!",
+            }).then( () => {
+              this.route.navigate(['student']);
+            });
+
+          }
+        })
+      }
+
     });
   }
 
@@ -169,5 +188,18 @@ export class CourseDetailsComponent implements OnInit {
         text: "Nije postavljen fajl!",
       });
     }
+  }
+
+  filteredNotifs(notifications: any[]) {
+    let data =  notifications.filter( value => {
+        let date = new Date(value.date);
+
+      let today = new Date();
+      date.setHours(0,0,0,1);
+      today.setHours(0,0,0,1);
+      return date <= today;
+    })
+    console.log(notifications);
+    return data;
   }
 }

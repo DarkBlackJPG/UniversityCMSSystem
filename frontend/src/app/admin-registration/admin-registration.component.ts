@@ -4,6 +4,7 @@ import {Title} from "../models/database/Title";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import {UserRegistrationData} from "../models/appdata/UserRegistrationData";
 import {EmployeeRegistration} from "../models/appdata/EmployeeRegistration";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-admin-registration',
@@ -16,13 +17,24 @@ export class AdminRegistrationComponent implements OnInit {
   selectedTitle: Title = null;
   studentRegistration: UserRegistrationData = new UserRegistrationData();
   employeeRegistration: EmployeeRegistration = new EmployeeRegistration();
-
+  myUser: any = {};
   isStudentRegistration: number;
 
-  constructor(private administratorService: AdministratorFunctionsService) {
+  constructor(private administratorService: AdministratorFunctionsService,
+              private router: Router) {
   }
 
   ngOnInit(): void {
+    let userString = localStorage.getItem('session');
+    if(userString) {
+      this.myUser = JSON.parse(userString);
+      if (this.myUser.type !== 0) {
+        this.router.navigate(['']);
+      }
+    } else {
+      this.router.navigate([''])
+    }
+
     this.administratorService.getIsStudentRegistration().subscribe((value) => {
       this.isStudentRegistration = value;
     })
@@ -72,6 +84,14 @@ export class AdminRegistrationComponent implements OnInit {
       })
       return;
     }
+    if (this.studentRegistration.semester < 1 || this.studentRegistration.semester > 12 || this.studentRegistration.semester === undefined) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Semestar je u opsegu od jedan do 12 i mora da bude definisan!',
+      })
+      return;
+    }
     let firstnameLetter = this.studentRegistration.name[0].toLowerCase();
     let lastnameLetter = this.studentRegistration.surname[0].toLowerCase();
     let year = this.studentRegistration.index.split('/')[0];
@@ -89,7 +109,13 @@ export class AdminRegistrationComponent implements OnInit {
       return;
     }
     this.studentRegistration.verifyPassword = true;
+    this.studentRegistration.status = 1;
 
+    if (this.studentRegistration.type !== 'd') {
+      this.studentRegistration.department = 3;
+    }
+
+    console.log(this.studentRegistration)
     this.administratorService.add_new_student(this.studentRegistration).subscribe((response: any) => {
       if (response.message != 'ok') {
         Swal.fire({
@@ -97,6 +123,7 @@ export class AdminRegistrationComponent implements OnInit {
           title: 'Oops...',
           text: 'Doslo je do greske prilikom registracije! Moguce je da student sa ovim kredencijalima vec postoji',
         });
+        stop();
         return;
       } else {
         Swal.fire({
@@ -139,6 +166,16 @@ export class AdminRegistrationComponent implements OnInit {
       return;
     }
 
+    if (this.employeeRegistration.title.educational === 1 && this.employeeRegistration.office === '') {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: "Potrebno je uneti:",
+        html: 'Potrebno je uneti: <br> <ul class="text-left"> <li>Ime</li> <li>Prezime</li> <li>Korisnicko ime</li> <li>Lozinku i ponovljenu lozinku</li> <li>Adresu i </li> <li>Zvanje</li> </ul>',
+      })
+      return;
+    }
+
     this.employeeRegistration.email = this.employeeRegistration.username+"@etf.rs.bg.ac.rs";
 
     this.administratorService.add_new_employee(this.employeeRegistration).subscribe((response:any) => {
@@ -148,6 +185,7 @@ export class AdminRegistrationComponent implements OnInit {
           title: 'Oops...',
           text: 'Doslo je do greske prilikom registracije! Moguce je da student sa ovim kredencijalima vec postoji',
         });
+        stop();
         return;
       } else {
         Swal.fire({
@@ -160,5 +198,15 @@ export class AdminRegistrationComponent implements OnInit {
         document.getElementById('zvanjeZaposlenog').value = '-1';
       }
     });
+  }
+
+
+  change_department($event) {
+    this.studentRegistration.department = Number($event.target.value);
+
+  }
+
+  change_academic_level($event) {
+    this.studentRegistration.type = $event.target.value;
   }
 }

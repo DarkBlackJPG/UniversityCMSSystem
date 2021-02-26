@@ -6,6 +6,7 @@ import {CoursesService} from "../services/courses.service";
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import {HttpResponse} from "@angular/common/http";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-employee-course-notifications',
@@ -20,6 +21,7 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
   constructor(private employeeService: EmployeeService,
               private uploadService: UploadServiceService,
               private courseService: CoursesService,
+              private router: Router
   ) {
   }
 
@@ -37,13 +39,22 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
   userData: any = {};
 
   ngOnInit(): void {
-    this.userData = JSON.parse(localStorage.getItem('session'));
+    let userString = localStorage.getItem('session');
+    if(userString) {
+      this.userData = JSON.parse(userString);
+      if (this.userData.type !== 1) {
+        this.router.navigate(['']);
+      }
+    } else {
+      this.router.navigate([''])
+    }
     this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
       this.myCourses = courses;
     });
   }
 
   course_selection_change($event) {
+    this.asdf = '0';
     let courseId = $event.target.value;
     if (courseId != -1) {
       for (const course of this.myCourses) {
@@ -96,15 +107,15 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
           let date = new Date();
           let uploader = {
             id: this.userData.id,
-            name: this.userData.name,
-            surname: this.userData.surname,
+            // name: this.userData.name,
+            // surname: this.userData.surname,
           };
           let download_link = file_data.filename;
-          alert(type)
           let notification = {
             title: this.newNotification.title,
             description: this.newNotification.description,
             date: this.newNotification.date,
+            poster: this.userData.id,
             file: {
               filename: filename,
               type: type,
@@ -114,7 +125,7 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
               download_link: download_link,
             }
           }
-
+          console.log(notification)
           this.courseService.add_new_notification({
             courseId: this.course.id,
             notification: notification
@@ -130,8 +141,11 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
                 icon: 'error',
                 title: 'Oops...',
                 text: 'Nesto nije dobro!',
-              })
+              });
+              this.fileList = FileList;
             }
+            this.course = null;
+            this.asdf = '-1';
           });
         }
       });
@@ -140,6 +154,7 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
         title: this.newNotification.title,
         description: this.newNotification.description,
         date: this.newNotification.date,
+        poster: this.userData.id,
         file: {}
       }
       this.courseService.add_new_notification({
@@ -158,44 +173,52 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
             title: 'Oops...',
             text: 'Nesto nije dobro!',
           })
-        }
+        } this.courseService.getCoursesNotifications(this.course.id).subscribe((data: any[]) => {
+          for (let datum of data) {
+            datum.date = new Date(datum.date)
+          }
+          this.notifications = data;
+        });
+
       });
     }
-    this.courseService.getCoursesNotifications(this.course.id).subscribe((data: any[]) => {
-      for (let datum of data) {
-        datum.date = new Date(datum.date)
-      }
-      this.notifications = data;
-    });
+
   }
 
   fileList = FileList;
-  private getFileNameWithExt(file) {
+  delete_notification(notification) {
 
-    if (!file || !file.target || !file.target.files || file.target.files.length === 0) {
+    if (notification.poster !== this.userData.id) {
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Ne mozete da izbrisete objavu koju niste postavili!',
+      })
       return;
     }
-    const name = file.target.files[0].name;
-    const lastDot = name.lastIndexOf('.');
-    const ext = name.substring(lastDot + 1);
 
-    return ext;
-
-  }
-  set_selected($event) {
-    this.fileList = $event.target.files;
-  }
-
-  stringify(file: any) {
-    if (file != undefined) {
-      return file.name + " " + file.surname;
-    } else {
-      return '';
-    }
-  }
-
-  delete_notification(id) {
-
+    this.employeeService.removeNotification(notification, this.course).subscribe( (response: any) => {
+      console.log(response);
+      if(response.message === 'ok') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Uspeh!',
+          text: 'Uspesno obrisano!',
+        });
+        this.myCourses = [];
+        this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
+          this.myCourses = courses;
+        });
+        this.course = null;
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Nesto nije dobro!',
+        });
+      }
+    })
   }
   updateNotification: any = null;
   update_notification(id) {
@@ -206,6 +229,7 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
     }
   }
   updateFileList = FileList;
+  asdf: string = '-1';
   set_update_selected($event) {
     this.updateFileList = $event.target.files;
   }
@@ -241,6 +265,7 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
             title: this.updateNotification.title,
             description: this.updateNotification.description,
             date: this.updateNotification.date,
+            poster: this.userData.id,
             file: {
               filename: filename,
               type: type,
@@ -250,7 +275,6 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
               download_link: download_link,
             }
           }
-          alert("Salj")
           this.courseService.update_notification({
             courseId: this.course.id,
             notification: notification
@@ -261,6 +285,16 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
                 title: 'Jupi!',
                 text: 'Postavljeno obavestenje!',
               })
+              this.course = null;
+              this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
+                this.myCourses = courses;
+              });
+              this.courseService.getCoursesNotifications(this.course.id).subscribe((data: any[]) => {
+                for (let datum of data) {
+                  datum.date = new Date(datum.date)
+                }
+                this.notifications = data;
+              });
             } else {
               Swal.fire({
                 icon: 'error',
@@ -274,6 +308,7 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
     } else {
       let notification = {
         id: this.updateNotification.id,
+        poster: this.userData.id,
         title: this.updateNotification.title,
         description: this.updateNotification.description,
         date: this.updateNotification.date,
@@ -290,6 +325,10 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
             title: 'Jupi!',
             text: 'Azurirano obavestenje!',
           })
+          this.course = null;
+          this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
+            this.myCourses = courses;
+          });
         } else {
           Swal.fire({
             icon: 'error',
@@ -297,14 +336,14 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
             text: 'Nesto nije dobro!',
           })
         }
+        this.courseService.getCoursesNotifications(this.course.id).subscribe((data: any[]) => {
+          for (let datum of data) {
+            datum.date = new Date(datum.date)
+          }
+          this.notifications = data;
+        });
       });
     }
-    this.courseService.getCoursesNotifications(this.course.id).subscribe((data: any[]) => {
-      for (let datum of data) {
-        datum.date = new Date(datum.date)
-      }
-      this.notifications = data;
-    });
   }
 
   delete_file() {
@@ -322,5 +361,9 @@ export class EmployeeCourseNotificationsComponent implements OnInit {
         Swal.fire('Fajl nije izbrisan!', '', 'info')
       }
     })
+  }
+
+  set_selected($event) {
+    this.fileList = $event.target.files;
   }
 }

@@ -1,7 +1,7 @@
 <div class="container-fluid p-0">
   <nav style="z-index: 999" class="navbar shadow sticky-top  navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-      <a class="navbar-brand" routerLink="">RTI katedra |</a>
+      <a class="navbar-brand" routerLink="" (click)="changePage(PAGE.LANDING)" >RTI katedra |</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
               aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -9,14 +9,14 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" routerLink="">Pocetna</a>
+            <a class="nav-link active" aria-current="page" routerLink="" [class.active]="activePage === PAGE.LANDING" (click)="changePage(PAGE.LANDING)" >Pocetna</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" routerLink="employee/all">Zaposleni</a>
+            <a class="nav-link" aria-current="page" routerLink="employee/all" [class.active]="activePage === PAGE.EMPLOYEES_LIST" (click)="changePage(PAGE.EMPLOYEES_LIST)">Zaposleni</a>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-               aria-expanded="false">
+               aria-expanded="false" [class.active]="activePage === PAGE.NOTIFICATIONS" >
               Obavestenja
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -25,52 +25,44 @@
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#"  role="button" data-bs-toggle="dropdown"
-               aria-expanded="false">
+               aria-expanded="false" [class.active]="activePage === PAGE.DEPARTMENT_COURSES" >
               Osnovne studije
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item" routerLink="courses/info" (click)="view_course_info(rtiCoursesId)">Odsek za Racunarsku tehniku i informatiku</a></li>
-              <li><a class="dropdown-item" routerLink="courses/info" (click)="view_course_info(siCoursesId)">Odsek za Softversko inzenjerstvo</a></li>
-              <li><a class="dropdown-item" routerLink="courses/info" (click)="view_course_info(otherCoursesId)">Ostali odseci</a></li>
+              <li><a class="dropdown-item" routerLink="courses/info" (click)="view_course_info(rtiCoursesId); changePage(PAGE.DEPARTMENT_COURSES)">Odsek za Racunarsku tehniku i informatiku</a></li>
+              <li><a class="dropdown-item" routerLink="courses/info" (click)="view_course_info(siCoursesId); changePage(PAGE.DEPARTMENT_COURSES)">Odsek za Softversko inzenjerstvo</a></li>
+              <li><a class="dropdown-item" routerLink="courses/info" (click)="view_course_info(otherCoursesId); changePage(PAGE.DEPARTMENT_COURSES)">Ostali odseci</a></li>
             </ul>
           </li>
           <li class="nav-item">
-            <a class="nav-link " aria-current="page" routerLink="courses/master/info" (click)="view_course_info(masterCourseId)">Master studije</a>
+            <a class="nav-link " aria-current="page" routerLink="courses/master/info" [class.active]="activePage === PAGE.MASTER_COURSES"  (click)="view_course_info(masterCourseId); changePage(PAGE.MASTER_COURSES)">Master studije</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" routerLink="projects/proposals/all" aria-current="page">Projekti</a>
+            <a class="nav-link" routerLink="projects/proposals/all" aria-current="page" [class.active]="activePage === PAGE.PROJECTS" (click)="changePage(PAGE.PROJECTS)">Projekti</a>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#"  role="button" data-bs-toggle="dropdown"
+            <a class="nav-link dropdown-toggle" href="#" [class.active]="activePage === PAGE.SCIENCE"  role="button" data-bs-toggle="dropdown"
                aria-expanded="false">
               Nauka
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item" routerLink="statics/employee/projects" >Projekti zaposlenih</a></li>
+              <li><a class="dropdown-item" routerLink="statics/employee/projects" (click)="changePage(PAGE.SCIENCE)" >Projekti zaposlenih</a></li>
               <li><a class="dropdown-item" routerLink="statics/employee/science" >Istrazivanja</a></li>
             </ul>
           </li>
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" routerLink="contact">Kontakt</a>
+            <a class="nav-link" aria-current="page" routerLink="contact" [class.active]="activePage === PAGE.CONTACT" (click)="changePage(PAGE.CONTACT)">Kontakt</a>
           </li>
 
 
-          <div *ngIf="sessionNull; else sessionNotNull" style="display: flex;">
+          <div *ngIf="sessionNull" style="display: flex;">
             <li class="nav-item">
-              <a class="nav-link " aria-current="page" routerLink="login">Login</a>
+              <a class="nav-link " aria-current="page"  [class.active]="activePage === PAGE.LOGIN" (click)="changePage(PAGE.LOGIN)" routerLink="login">Login</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" routerLink="register/student">Register</a>
             </li>
           </div>
-          <ng-template #sessionNotNull>
-            <li class="nav-item">
-              <a *ngIf="sessionIsStudent" class="nav-link " aria-current="page" routerLink="profile">Profil</a>
-
-
-            </li>
-
-          </ng-template>
         </ul>
 
       </div>
@@ -79,7 +71,7 @@
 
   <nav style="z-index: 998" *ngIf="sessionIsAdmin" class="navbar sticky-top shadow navbar-expand-lg navbar-light bg-secondary">
     <div class="container-fluid">
-      <a class="navbar-brand" routerLink="admin">Admin dashboard | </a>
+      <a class="navbar-brand" routerLink="admin"  (click)="changePage(PAGE.ADMIN_LANDING)">Admin dashboard | </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav2"
               aria-controls="navbarNav2" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -87,31 +79,31 @@
       <div class="collapse navbar-collapse" id="navbarNav2">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" routerLink="/admin/accounts/all">Azuriranje naloga</a>
+            <a class="nav-link active" aria-current="page" routerLink="/admin/accounts/all" [class.active]="activePage === PAGE.ADMIN_ACCOUNT_EDIT" (click)="changePage(PAGE.ADMIN_ACCOUNT_EDIT)">Azuriranje naloga</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" (click)="set_register(0)" routerLink="/admin/student/register">Registracija
+            <a class="nav-link active" aria-current="page" (click)="set_register(0); changePage(PAGE.ADMIN_REGISTER_STUDENT)" [class.active]="activePage === PAGE.ADMIN_REGISTER_STUDENT" routerLink="/admin/student/register">Registracija
               studenata</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" (click)="set_register(1)" routerLink="/admin/faculty/register">Registracija
+            <a class="nav-link active" aria-current="page" (click)="set_register(1); changePage(PAGE.ADMIN_REGISTER_EMPLOYEE)" [class.active]="activePage === PAGE.ADMIN_REGISTER_EMPLOYEE" routerLink="/admin/faculty/register">Registracija
               zaposlenih</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" routerLink="/admin/courses">Predmeti</a>
+            <a class="nav-link active" aria-current="page" routerLink="/admin/courses" (click)="changePage(PAGE.ADMIN_COURSES)" [class.active]="PAGE.ADMIN_COURSES === activePage">Predmeti</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" routerLink="/admin/courses/engagement_plan">Plan
+            <a class="nav-link active" aria-current="page" routerLink="/admin/courses/engagement_plan" (click)="changePage(PAGE.ADMIN_ENGAGEMENT)" [class.active]="PAGE.ADMIN_ENGAGEMENT === activePage">Plan
               angazovanja</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" routerLink="/admin/notifications">Obavestenja</a>
+            <a class="nav-link active" aria-current="page" routerLink="/admin/notifications" (click)="changePage(PAGE.ADMIN_NOTIFICATIONS)" [class.active]="PAGE.ADMIN_NOTIFICATIONS === activePage">Obavestenja</a>
           </li>
           <li class="nav-item">
-            <a *ngIf="sessionIsAdmin" class="nav-link " aria-current="page" routerLink="admin">Profil</a>
+            <a *ngIf="sessionIsAdmin" class="nav-link " aria-current="page" routerLink="admin" [class.active]="activePage === PAGE.ADMIN_LANDING" (click)="changePage(PAGE.ADMIN_LANDING)">Profil</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" routerLink="" (click)="logout()">Logout</a>
+            <a class="nav-link" routerLink="" (click)="logout(); changePage(PAGE.LANDING)">Logout</a>
           </li>
         </ul>
       </div>
@@ -119,7 +111,7 @@
   </nav>
   <nav style="z-index: 998" *ngIf="sessionIsProfessor" class="navbar shadow sticky-top  navbar-expand-lg navbar-light bg-white">
     <div class="container-fluid">
-      <a class="navbar-brand" routerLink="employee">Professor dashboard | </a>
+      <a class="navbar-brand" routerLink="employee" (click)="changePage(PAGE.PROFESSOR_LANDING)">Professor dashboard | </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav2"
               aria-controls="navbarNav2" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -127,20 +119,20 @@
       <div class="collapse navbar-collapse" id="navbarNav2">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" routerLink="/employee/my_courses">Moji predmeti</a>
+            <a class="nav-link" aria-current="page" routerLink="/employee/my_courses" [class.active]="activePage === PAGE.PROFESSOR_COURSES" (click)="changePage(PAGE.PROFESSOR_COURSES)">Moji predmeti</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" routerLink="/employee/course/notifications">Predmetna obavestenja</a>
+            <a class="nav-link" aria-current="page" routerLink="/employee/course/notifications" [class.active]="activePage === PAGE.PROFESSOR_COURSE_NOTIFICATIONS" (click)="changePage(PAGE.PROFESSOR_COURSE_NOTIFICATIONS)">Predmetna obavestenja</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" routerLink="/employee/student/registration">Spiskovi</a>
+            <a class="nav-link" aria-current="page" routerLink="/employee/student/registration" [class.active]="activePage === PAGE.PROFESSOR_REGISTRATION_LISTS" (click)="changePage(PAGE.PROFESSOR_REGISTRATION_LISTS)">Spiskovi</a>
           </li>
 
           <li class="nav-item">
-            <a *ngIf="sessionIsProfessor" class=" nav-link " aria-current="page" routerLink="employee">Profil</a>
+            <a *ngIf="sessionIsProfessor" class=" nav-link " aria-current="page" routerLink="employee" [class.active]="activePage === PAGE.PROFESSOR_LANDING" (click)="changePage(PAGE.PROFESSOR_LANDING)">Profil</a>
           </li>
           <li class="nav-item ml-3">
-            <a class="nav-link" routerLink="" (click)="logout()">Logout</a>
+            <a class="nav-link" routerLink="" (click)="logout(); changePage(PAGE.LANDING)"  [class.active]="activePage === PAGE.LANDING">Logout</a>
           </li>
         </ul>
 
@@ -149,7 +141,7 @@
   </nav>
   <nav style="z-index: 998" *ngIf="sessionIsStudent" class="navbar shadow sticky-top  navbar-expand-lg navbar-light bg-warning">
     <div class="container-fluid">
-      <a class="navbar-brand" routerLink="student">Student dashboard | </a>
+      <a class="navbar-brand" routerLink="student" (click)="changePage(PAGE.STUDENT_LANDING)">Student dashboard | </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav2"
               aria-controls="navbarNav2" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -157,20 +149,20 @@
       <div class="collapse navbar-collapse" id="navbarNav2">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" routerLink="/student/courses/picker">Biranje predmeta</a>
+            <a class="nav-link active" aria-current="page" routerLink="/student/courses/picker" (click)="changePage(PAGE.STUDENT_COURSE_PICKER)" [class.active]="activePage === PAGE.STUDENT_COURSE_PICKER">Biranje predmeta</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" routerLink="/student/courses">Moji predmeti</a>
+            <a class="nav-link active" aria-current="page" routerLink="/student/courses" (click)="changePage(PAGE.STUDENT_MY_COURSES)" [class.active]="activePage === PAGE.STUDENT_MY_COURSES">Moji predmeti</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" routerLink="/student/course/registrations">Prijava na spiskove</a>
+            <a class="nav-link active" aria-current="page" routerLink="/student/course/registrations" (click)="changePage(PAGE.STUDENT_REG_LSIT)" [class.active]="activePage === PAGE.STUDENT_REG_LSIT">Prijava na spiskove</a>
           </li>
 
           <li class="nav-item">
-            <a *ngIf="sessionIsProfessor" class=" nav-link " aria-current="page" routerLink="employee">Profil</a>
+            <a class="nav-link " aria-current="page" routerLink="student/password" (click)="changePage(PAGE.STUDENT_PASSWORD_CHANGE)" [class.active]="activePage === PAGE.STUDENT_PASSWORD_CHANGE">Promeni sifru</a>
           </li>
           <li class="nav-item ml-3">
-            <a class="nav-link" routerLink="" (click)="logout()">Logout</a>
+            <a class="nav-link" routerLink="" (click)="logout(); changePage(PAGE.LANDING)">Logout</a>
           </li>
         </ul>
 

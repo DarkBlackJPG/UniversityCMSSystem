@@ -3,6 +3,7 @@ import {UploadServiceService} from "../services/upload-service.service";
 import {HttpResponse} from "@angular/common/http";
 import {EmployeeService} from "../services/employee.service";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
+import {Router} from "@angular/router";
 @Component({
   selector: 'app-employee',
   templateUrl: './employee.component.html',
@@ -10,17 +11,29 @@ import Swal from 'sweetalert2/dist/sweetalert2.js';
 })
 export class EmployeeComponent implements OnInit {
   active_employe: any;
-
+  userData: any = {};
   constructor(private uploadService: UploadServiceService,
-              private employeeService: EmployeeService) {
+              private employeeService: EmployeeService,
+              private router: Router,
+  ) {
   }
 
   ngOnInit(): void {
-
+    let userString = localStorage.getItem('session');
+    if(userString) {
+      this.userData = JSON.parse(userString);
+      if (this.userData.type !== 1) {
+        this.router.navigate(['']);
+      }
+    } else {
+      this.router.navigate([''])
+    }
     this.active_employe = JSON.parse(localStorage.getItem("session"));
   }
 
   fileList = FileList;
+  newPwd: any = '';
+  oldPwd: string = '';
 
   save_profile() {
       if (this.active_employe.name === '' ||
@@ -33,6 +46,28 @@ export class EmployeeComponent implements OnInit {
           text: 'Obavezna polja su polja za ime, prezime, adresu, kontakt i kancelariju/kabinet!',
         });
         return;
+      }
+
+      if(this.newPwd !== '' && this.oldPwd !== '') {
+        if (this.oldPwd !== this.active_employe.password) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Stare sifre se ne poklapaju!',
+          });
+        } else {
+          if (this.newPwd === '') {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Nova sifra ne moze da bude prazna!',
+            });
+          } else {
+            this.active_employe.password = this.newPwd;
+          }
+        }
+      } else {
+
       }
 
       this.employeeService.updateEmployeeData(this.active_employe).subscribe( (response:any) => {

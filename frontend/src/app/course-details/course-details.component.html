@@ -47,11 +47,15 @@
 
 <div *ngIf="(courseDetails != null && courseDetails.notifications.length > 0) && currentView === 1"
      class="row justify-content-center pt-3">
-  <div *ngFor="let notification of courseDetails.notifications" class="card p-0 text-white bg-dark mb-3 col-md-7">
+  <div *ngFor="let notification of filteredNotifs(courseDetails.notifications)" class="card p-0 text-white bg-dark mb-3 col-md-7">
     <div class="card-header"> {{notification.date | date: 'yyyy-MM-dd'}}</div>
     <div class="card-body">
       <h5 class="card-title" [class.text-info]="check_seven_day_date(notification.date)">{{notification.title}}</h5>
       <p [innerHTML]="notification.description"></p>
+      <hr>
+      <p *ngIf="notification.file !== undefined">
+      Prateci fajl uz objavu: <a [href]="'http://localhost:4000/download/' + notification.file.download_link"> {{notification.file.filename}}</a>
+      </p>
     </div>
   </div>
 </div>
@@ -170,29 +174,18 @@
       <p [innerHTML]="courseDetails.courseDetails[0].labInfo"></p>
     </div>
   </div>
-  <div class="card p-0 text-white bg-dark mb-3 col-md-7">
-    <div class="card-header"> Obavestenja vezana za laboratorijske vezbe</div>
-    <div class="card-body justify-content-center">
-      <ul style="list-style: none">
-        <li *ngFor="let course of courseDetails.labs_texts">
-          <h4>
-            {{course.title}}
-          </h4>
-          <p>
-            {{course.desc}}
-          </p>
-          <hr>
-        </li>
-      </ul>
-    </div>
-  </div>
-
   <div class="card text-white bg-dark mb-3 col-md-7">
     <div class="card-header"> Materijali za skidanje</div>
     <div class="card-body justify-content-center">
       <ul>
         <li *ngFor="let course of courseDetails.labs_docs">
-          {{course.filename}} &nbsp; {{course.date | date: 'yyyy-MM-dd'}} &nbsp; <a class="btn btn-link text-info"
+          <h3>{{course.title}}</h3>
+          <br>
+          <i>{{course.desc}}</i>
+          <br>
+          {{course.date | date: 'yyyy-MM-dd'}}
+          <hr>
+          {{course.filename}} &nbsp; &nbsp; <a class="btn btn-link text-info"
                                                                                     [href]="'http://localhost:4000/download/' + course.download_link"><i
           class="fas fa-download"></i></a>
         </li>
@@ -208,28 +201,34 @@
       <p [innerHTML]="courseDetails.courseDetails[0].homeworks"></p>
     </div>
   </div>
-  <div class="card text-white bg-dark mb-3 col-md-7">
-    <div class="card-header"> Obavestenja vezana za projekat</div>
-    <div class="card-body justify-content-center">
-      <ul style="list-style: none">
-        <li *ngFor="let course of courseDetails.projects_texts">
-          <h4>
-            {{course.title}}
-          </h4>
-          <p>
-            {{course.desc}}
-          </p>
-          <hr>
-        </li>
-      </ul>
-    </div>
-  </div>
-  <div class="card text-white bg-dark mb-3 col-md-7">
+<!--  <div class="card text-white bg-dark mb-3 col-md-7">-->
+<!--    <div class="card-header"> Obavestenja vezana za projekat</div>-->
+<!--    <div class="card-body justify-content-center">-->
+<!--      <ul style="list-style: none">-->
+<!--        <li *ngFor="let course of courseDetails.projects_texts">-->
+<!--          <h4>-->
+<!--            {{course.title}}-->
+<!--          </h4>-->
+<!--          <p>-->
+<!--            {{course.desc}}-->
+<!--          </p>-->
+<!--          <hr>-->
+<!--        </li>-->
+<!--      </ul>-->
+<!--    </div>-->
+<!--  </div>-->
+  <div class="card text-white p-0 bg-dark mb-3 col-md-7">
     <div class="card-header"> Materijali za skidanje</div>
     <div class="card-body justify-content-center">
       <ul>
         <li *ngFor="let course of courseDetails.projects_docs">
-          {{course.filename}} &nbsp; {{course.date | date: 'yyyy-MM-dd'}} &nbsp; <a class="btn btn-link text-info"
+          <h3>{{course.title}}</h3>
+          <br>
+          <i>{{course.desc}}</i>
+          <br>
+          {{course.date | date: 'yyyy-MM-dd'}}
+          <hr>
+          {{course.filename}} &nbsp; &nbsp; <a class="btn btn-link text-info"
                                                                                     [href]="'http://localhost:4000/download/' + course.download_link"><i
           class="fas fa-download"></i></a>
         </li>
@@ -238,56 +237,6 @@
   </div>
 </div>
 
-<div *ngIf="(courseDetails != null) && currentView === 8" class="row justify-content-center pt-3">
-  <div class="card p-0 text-white bg-dark mb-3 col-md-7">
-    <div class="card-header"> Spisi za prijavu na predmetu</div>
-    <div class="card-body justify-content-center">
-      <div class="col-12" *ngFor="let registration of registrations">
-        <h2>{{registration.title}}</h2>
-        <hr>
-        <div class="mb-3 row">
-          <label class="col-sm-2 col-form-label">Datum odrzavanja</label>
-          <div class="col-sm-10">
-            <label class="col-form-label">{{registration.exam_date | date: 'yyyy-MM-dd'}}</label>
-          </div>
-        </div>
-        <div class="mb-3 row">
-          <label class="col-sm-2 col-form-label">Lokacija</label>
-          <div class="col-sm-10">
-            <label class="col-form-label">{{registration.location}}</label>
-          </div>
-        </div>
-        <div class="mb-3 row">
-          <label class="col-sm-2 col-form-label">Maksimalan broj studenata</label>
-          <div class="col-sm-10">
-            <label class="col-form-label">{{registration.max_num_students}}</label>
-          </div>
-        </div>
-        <div class="mb-3 row">
-          <label class="col-sm-2 col-form-label">Prijavljeno studenata</label>
-          <div class="col-sm-10">
-            <label class="col-form-label">{{registration.enrolled_number}}</label>
-          </div>
-        </div>
-        <div class="mb-3 row">
-          <label class="col-sm-2 col-form-label">Prijave otvorene od-do</label>
-          <div class="col-sm-10">
-            <label class="col-form-label">{{registration.date_open | date: 'yyyy-MM-dd'}}
-              - {{registration.date_close | date: 'yyyy-MM-dd'}}</label>
-          </div>
-        </div>
-
-        <span class="text-danger"> Treba da se prikazuje u zavisnosti od toga da li si enrollovan ili ne</span>
-        <div class="mb-3 row">
-          <label class="col-sm-12 col-form-label">
-            <button class="btn btn-success ">Prijavi se</button>
-            <button class="btn btn-danger">Odjavi se</button>
-          </label>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 <div *ngIf="(courseDetails != null) && currentView === 9" class="row justify-content-center pt-3">
   <div class="card p-0 text-white bg-dark mb-3 col-md-7">
     <div class="card-header"> Spisi za prijavu na predmetu</div>

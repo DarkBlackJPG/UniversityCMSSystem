@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {Route, Router} from "@angular/router";
 
 @Component({
   selector: 'app-employee-my-courses',
@@ -7,9 +8,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class EmployeeMyCoursesComponent implements OnInit {
 
-  constructor() { }
-
+  constructor(private router: Router) { }
+  userData: any = {}
   ngOnInit(): void {
+    let userString = localStorage.getItem('session');
+    if(userString) {
+      this.userData = JSON.parse(userString);
+      if (this.userData.type !== 1) {
+        this.router.navigate(['']);
+      }
+    } else {
+      this.router.navigate([''])
+    }
   }
 
 }

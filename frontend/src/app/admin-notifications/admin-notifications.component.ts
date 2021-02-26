@@ -6,6 +6,7 @@ import Swal from 'sweetalert2/dist/sweetalert2.js';
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import {AdministratorFunctionsService} from "../services/administrator-functions.service";
 import {UserValidationServiceService} from "../services/user-validation-service.service";
+import {Router} from "@angular/router";
 @Component({
   selector: 'app-admin-notifications',
   templateUrl: './admin-notifications.component.html',
@@ -13,10 +14,21 @@ import {UserValidationServiceService} from "../services/user-validation-service.
 })
 export class AdminNotificationsComponent implements OnInit {
   public Editor = ClassicEditor;
-  constructor(private userValidationServiceService: UserValidationServiceService, private notificationService: NotificationService) {
+  constructor(private userValidationServiceService: UserValidationServiceService, private notificationService: NotificationService,
+              private router: Router) {
   }
 
   ngOnInit(): void {
+    let userString = localStorage.getItem('session');
+    if(userString) {
+      this.myUser = JSON.parse(userString);
+      if (this.myUser.type !== 0) {
+        this.router.navigate(['']);
+      }
+    } else {
+      this.router.navigate([''])
+    }
+
     this.notificationService.getAllNotificationTypes().subscribe((res: NotificationType[]) => {
       this.allNotificationTypes = res;
     })
@@ -31,7 +43,7 @@ export class AdminNotificationsComponent implements OnInit {
   newNotification: Notification = new Notification();
   existingNotification: Notification = new Notification();
   existingNotificationType: NotificationType = new NotificationType();
-
+  myUser: any = {}
 
   typeToRemove: number = -1;
   notificationToRemove: number = -1;
@@ -137,9 +149,9 @@ export class AdminNotificationsComponent implements OnInit {
     })
   }
 
-  removeNotification() {
-    this.notificationService.removeNotification(this.notificationToRemove).subscribe((res: any) => {
-      if (res.message == 'ok') {
+  removeNotification(notif: any) {
+    this.notificationService.removeNotification(notif).subscribe((res: any) => {
+      if (res.message !== 'ok') {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',

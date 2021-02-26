@@ -57,4 +57,15 @@ export class StudentService {
       user: myUser,
     });
   }
+
+  checkEnrollment(userId: number, coursecode: string) {
+    return this.http.get(`${this.url}/student/${userId}/course/${coursecode}/enrolled`);
+  }
+
+  changePassword(id, newPassword: string) {
+    return this.http.post(`${this.url}/student/change_password`, {
+      id: id,
+      pwd: newPassword
+    });
+  }
 }

@@ -17,10 +17,11 @@ export class StudentMyCoursesComponent implements OnInit {
   myCourses: any[] = [];
   ngOnInit(): void {
     let user = localStorage.getItem('session');
-
     if (user) {
       this.myUser = JSON.parse(user)
-
+      if (this.myUser.student_data.verify === true) {
+        this.router.navigate(['/verify'])
+      }
       this.studentService.getMyCourses(this.myUser).subscribe( (data: any) => {
         console.log(data)
         for (const datum of data) {

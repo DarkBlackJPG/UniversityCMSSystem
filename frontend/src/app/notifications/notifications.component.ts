@@ -8,15 +8,22 @@ import {Notification} from "../models/database/Notification";
   styleUrls: ['./notifications.component.css']
 })
 export class NotificationsComponent implements OnInit {
-  notifications: Notification[];
-
+  notifications: Notification[] = [];
+  allNotifications: any[];
   constructor(private notificationService: NotificationService) { }
 
   ngOnInit(): void {
     this.notificationService.getNotificationID().subscribe((id) => {
       this.notificationService.getAllNotificationsFor(id).subscribe((notifications:Notification[]) => {
-        this.notifications = notifications;
-        this.notifications.map(value => { value.date = new Date(value.date)});
+        this.allNotifications = notifications;
+        this.allNotifications.map(value => { value.date = new Date(value.date)});
+        this.notifications = this.allNotifications.filter(value => {
+          let today = new Date();
+          today.setMonth(today.getMonth() - 3);
+          if (value.date >= today) {
+            return value;
+          }
+        })
       })
     })
   }

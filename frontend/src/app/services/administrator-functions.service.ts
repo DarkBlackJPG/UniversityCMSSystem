@@ -32,7 +32,7 @@ export class AdministratorFunctionsService {
   }
 
   getAllStudents() {
-    return this.http.get(`${this.url}/students/get/all`);
+    return this.http.get(`${this.url}/administrator/students/get/all`);
   }
 
   getAllEmployees() {
@@ -43,20 +43,8 @@ export class AdministratorFunctionsService {
     return this.http.get(`${this.url}/course/${courseID}/get/enrolled/all`);
   }
 
-  findStudent(student: any) {
-
-  }
-
-  findEmployee(employee: any) {
-
-  }
-
   updateStudent(student: any) {
-
-  }
-
-  updateEmployee(employee: any) {
-    return this.http.post(`${this.url}/employees/update`, {data: employee});
+    return this.http.post(`${this.url}/administrator/student/update`, {data: student});
   }
 
   enrollStudent(course: string, index: string) {
@@ -90,7 +78,7 @@ export class AdministratorFunctionsService {
     return this.http.post(`${this.url}/course/create`, {data: newCourseDataObject});
   }
 
-  update_existing_course(course: Course) {
+  update_existing_course(course) {
     return this.http.post(`${this.url}/course/update`, {data: course});
   }
 

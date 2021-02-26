@@ -1,5 +1,3 @@
-
-
 <div class="row justify-content-center mt-2">
   <div class="card p-0 text-white bg-dark col-md-5 mb-3">
     <div class="card-header">Odabir predmeta</div>
@@ -8,7 +6,7 @@
         <label for="courseSelect" class="form-text">Odaberite predmet</label>
         <select id="courseSelect" (change)="select_current_course($event)" class="ml-2 form-control">
           <option value="-11">Odaberi...</option>
-          <option *ngFor="let course of myCourses" [value]="course.id">{{course.name}}</option>
+          <option *ngFor="let course of myCourses" [value]="course.id">{{course.coursecode}} - {{course.name}}</option>
         </select>
       </div>
     </div>
@@ -186,6 +184,7 @@
           <label class="input-group-text" for="novoPredavanje">Novo predavanje...</label>
         </div>
         <button class="btn btn-outline-light" (click)="upload_new_lecture()">Postavi</button>
+        <button class="btn btn-outline-light ml-3" (click)="submit_lecture_order()">Potvrdi izmenu redosleda</button>
         <hr>
         <div cdkDropList class="example-list" (cdkDropListDropped)="drop1($event)">
           <div class="border-secondary border rounded p-2 mb-3" *ngFor="let predavanje of selectedCourse.lectures"
@@ -237,7 +236,9 @@
             <div class="form-group row">
               <label [htmlFor]="'del_' + predavanje.id" class="col-sm-2 col-form-label">Izbrisi fajl: </label>
               <div class="col-sm-10">
-                <button [id]="'del_' + predavanje.id" class="btn btn-danger" (click)="delete_lecture_file(predavanje.filename)">Izbrisi</button>
+                <button [id]="'del_' + predavanje.id" class="btn btn-danger"
+                        (click)="delete_lecture_file(predavanje.download_link)">Izbrisi
+                </button>
               </div>
             </div>
           </div>
@@ -249,6 +250,7 @@
           <label class="input-group-text" for="novoPredavanje">Nove vezbe...</label>
         </div>
         <button class="btn btn-outline-light" (click)="upload_new_exercise()">Postavi</button>
+        <button class="btn btn-outline-light ml-3" (click)="submit_excercise_order()">Potvrdi izmenu redosleda</button>
         <hr>
         <div cdkDropList class="example-list" (cdkDropListDropped)="drop2($event)">
           <div class="border-secondary border rounded p-2 mb-3" *ngFor="let vezba of selectedCourse.excercises" cdkDrag>
@@ -299,7 +301,9 @@
             <div class="form-group row">
               <label [htmlFor]="'del_' + vezba.id" class="col-sm-2 col-form-label">Izbrisi fajl: </label>
               <div class="col-sm-10">
-                <button [id]="'del_' + vezba.id" class="btn btn-danger" (click)="delete_excercise_file(vezba.filename)">Izbrisi</button>
+                <button [id]="'del_' + vezba.id" class="btn btn-danger"
+                        (click)="delete_excercise_file(vezba.download_link)">Izbrisi
+                </button>
               </div>
             </div>
           </div>
@@ -307,16 +311,18 @@
       </div>
       <div *ngIf="activePage === 4" class="form-group col-12">
         <div class="form-check mb-3">
-          <input class="form-check-input" [(ngModel)]="selectedCourse.exams_visible" (change)="exam_change_visibility($event)" type="checkbox" value="" id="examVisible">
+          <input class="form-check-input" [(ngModel)]="selectedCourse.exams_visible"
+                 (change)="exam_change_visibility($event)" type="checkbox" value="" id="examVisible">
           <label class="form-check-label" for="examVisible">
             Sekcija vidljiva
           </label>
         </div>
         <div class="input-group mb-3">
-          <input type="file" class="form-control" (change)="register_new_exam_file($event)" id="noviRok">
-          <label class="input-group-text" for="noviRok">Novi rok...</label>
+          <input type="file" class="form-control" (change)="register_new_exam_file($event)" id="noviRok2">
+          <label class="input-group-text" for="noviRok2">Novi rok...</label>
         </div>
         <button class="btn btn-outline-light" (click)="upload_new_exam()">Postavi</button>
+        <button class="btn btn-outline-light ml-3" (click)="submit_exam_order()">Potvrdi izmenu redosleda</button>
         <hr>
         <div cdkDropList class="example-list" (cdkDropListDropped)="drop3($event)">
           <div class="border-secondary border rounded p-2 mb-3" *ngFor="let rok of selectedCourse.exams" cdkDrag>
@@ -367,7 +373,8 @@
             <div class="form-group row">
               <label [htmlFor]="'del_' + rok.id" class="col-sm-2 col-form-label">Izbrisi fajl: </label>
               <div class="col-sm-10">
-                <button [id]="'del_' + rok.id" class="btn btn-danger" (click)="delete_exam_file(rok.filename)">Izbrisi</button>
+                <button [id]="'del_' + rok.id" class="btn btn-danger" (click)="delete_exam_file(rok.filename)">Izbrisi
+                </button>
               </div>
             </div>
           </div>
@@ -375,22 +382,16 @@
       </div>
       <div *ngIf="activePage === 5" class="form-group col-12">
         <div class="form-check mb-3">
-          <input class="form-check-input" [(ngModel)]="selectedCourse.lab_visible" (change)="lab_change_visibility($event)" type="checkbox" value="" id="labVisible">
+          <input class="form-check-input" [(ngModel)]="selectedCourse.lab_visible"
+                 (change)="lab_change_visibility($event)" type="checkbox" value="" id="labVisible">
           <label class="form-check-label" for="labVisible">
             Sekcija vidljiva
           </label>
         </div>
-        <div class="input-group mb-3">
-          <select class="form-control" (change)="lab_view_change($event)">
-            <option value="-1">Odaberi..</option>
-            <option value="0">Tekstualna obavestenja</option>
-            <option value="1">Fajlovi</option>
-          </select>
-        </div>
         <hr>
-        <span *ngIf="currentLabView === 0">
+        <span>
                <div class="input-group mb-3">
-                  <label for="labTitle" class="col-sm-2 col-form-label">Naziv: </label>
+                  <label for="labTitle" class="col-sm-2 col-form-label">Naziv obavestenja: </label>
                   <div class="col-sm-10">
                      <input [(ngModel)]="newLabTextNotif.title" type="text" class="form-control" id="labTitle">
                   </div>
@@ -398,44 +399,37 @@
                <div class="input-group mb-3">
                   <label for="labDesc" class="col-sm-2 col-form-label">Opis: </label>
                   <div class="col-sm-10">
-                     <textarea [(ngModel)]="newLabTextNotif.desc" type="text" class="form-control" id="labDesc"></textarea>
+                     <textarea [(ngModel)]="newLabTextNotif.desc" type="text" class="form-control"
+                               id="labDesc"></textarea>
                   </div>
                </div>
-               <div class="input-group mb-3">
-                  <label for="labSub" class="col-sm-2 col-form-label"></label>
-                  <div class="col-sm-10">
-                     <button class="btn btn-outline-light" id="labSub" (click)="upload_lab_notif()">Postavi</button>
-                  </div>
-               </div>
+
             </span>
-        <hr>
-        <span *ngIf="currentLabView === 0">
-               <div *ngFor="let proj of selectedCourse.labs_texts">
-                  <div class="input-group mb-3">
-                     <label for="projTitle" class="col-sm-2 col-form-label">Naziv: </label>
-                     <div class="col-sm-10">
-                        <label type="text" class="col-form-label" id="projTitle">{{proj.title}}</label>
-                     </div>
-                  </div>
-                  <div class="input-group mb-3">
-                     <label for="projTitle" class="col-sm-2 col-form-label">Opis: </label>
-                     <div class="col-sm-10">
-                        <label type="text" class="col-form-label" id="projTitle">{{proj.desc}}</label>
-                     </div>
-                  </div>
-                  <hr>
-               </div>
-            </span>
-        <span *ngIf="currentLabView === 1">
+
+        <span>
             <div class="input-group mb-3">
           <input type="file" class="form-control" (change)="register_new_lab_file($event)" id="noviRok">
-          <label class="input-group-text" for="noviRok">Novi projekat...</label>
+          <label class="input-group-text" for="noviRok">Novi lab...</label>
         </div>
         <button class="btn btn-outline-light" (click)="upload_new_lab_file()">Postavi</button>
+        <button class="btn btn-outline-light ml-3" (click)="submit_lab_order()">Potvrdi izmenu redosleda</button>
          </span>
-        <div *ngIf="currentLabView === 1" cdkDropList class="example-list" (cdkDropListDropped)="drop3($event)">
+
+        <div cdkDropList class="example-list" (cdkDropListDropped)="drop4($event)">
           <div class="border-secondary border rounded p-2 mb-3" *ngFor="let rok of selectedCourse.labs_docs" cdkDrag>
             <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Naslov: </label>
+              <div class="col-sm-10">
+                <p>{{rok.title}}</p>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Opis: </label>
+              <div class="col-sm-10">
+                <p>{{rok.desc}}</p>
+              </div>
+            </div>
             <div class="form-group row">
               <label [htmlFor]="'filename_' + rok.id" class="col-sm-2 col-form-label">Naziv: </label>
               <div class="col-sm-10">
@@ -482,7 +476,9 @@
             <div class="form-group row">
               <label [htmlFor]="'del_' + rok.id" class="col-sm-2 col-form-label">Izbrisi fajl: </label>
               <div class="col-sm-10">
-                <button [id]="'del_' + rok.id" class="btn btn-danger" (click)="delete_lab_file(rok.filename)">Izbrisi</button>
+                <button [id]="'del_' + rok.id" class="btn btn-danger" (click)="delete_lab_file(rok.download_link)">
+                  Izbrisi
+                </button>
               </div>
             </div>
 
@@ -493,20 +489,14 @@
 
       <div *ngIf="activePage === 6" class="form-group col-12">
         <div class="form-check mb-3">
-          <input class="form-check-input" [(ngModel)]="selectedCourse.project_visible" (change)="project_change_visibility($event)" type="checkbox" value="" id="projVisible">
+          <input class="form-check-input" [(ngModel)]="selectedCourse.project_visible"
+                 (change)="project_change_visibility($event)" type="checkbox" value="" id="projVisible">
           <label class="form-check-label" for="projVisible">
             Sekcija vidljiva
           </label>
         </div>
-        <div class="input-group mb-3">
-          <select class="form-control" (change)="proj_view_change($event)">
-            <option value="-1">Odaberi..</option>
-            <option value="0">Tekstualna obavestenja</option>
-            <option value="1">Fajlovi</option>
-          </select>
-        </div>
-        <hr>
-        <span *ngIf="currentProjView === 0">
+
+        <span>
             <div class="input-group mb-3">
                <label for="projTitle" class="col-sm-2 col-form-label">Naziv: </label>
                <div class="col-sm-10">
@@ -516,44 +506,39 @@
             <div class="input-group mb-3">
                <label for="projDesc" class="col-sm-2 col-form-label">Opis: </label>
                <div class="col-sm-10">
-                  <textarea [(ngModel)]="newProjTextNotif.desc" type="text" class="form-control" id="projDesc"></textarea>
+                  <textarea [(ngModel)]="newProjTextNotif.desc" type="text" class="form-control"
+                            id="projDesc"></textarea>
                </div>
             </div>
-            <div class="input-group mb-3">
-               <label for="projSub" class="col-sm-2 col-form-label"></label>
-               <div class="col-sm-10">
-                  <button class="btn btn-outline-light" id="projSub" (click)="upload_proj_notif()">Postavi</button>
-               </div>
-            </div>
+
          </span>
-        <span *ngIf="currentProjView === 1">
+
+        <span>
             <div class="input-group mb-3">
           <input type="file" class="form-control" (change)="register_new_proj_file($event)" id="noviRok">
           <label class="input-group-text" for="noviRok">Novi projekat...</label>
         </div>
         <button class="btn btn-outline-light" (click)="upload_new_proj_file()">Postavi</button>
+          <button class="btn btn-outline-light ml-3" (click)="submit_project_order()">Potvrdi izmenu redosleda</button>
          </span>
         <hr>
-        <span *ngIf="currentProjView === 0">
-            <div *ngFor="let proj of selectedCourse.projects_texts">
-               <div class="input-group mb-3">
-                  <label for="projTitle" class="col-sm-2 col-form-label">Naziv: </label>
-                  <div class="col-sm-10">
-                     <label type="text" class="col-form-label" id="projTitle">{{proj.title}}</label>
-                  </div>
-               </div>
-               <div class="input-group mb-3">
-                  <label for="projTitle" class="col-sm-2 col-form-label">Opis: </label>
-                  <div class="col-sm-10">
-                     <label type="text" class="col-form-label" id="projTitle">{{proj.desc}}</label>
-                  </div>
-               </div>
-               <hr>
-            </div>
-         </span>
-        <div *ngIf="currentProjView === 1" cdkDropList class="example-list" (cdkDropListDropped)="drop3($event)">
-          <div class="border-secondary border rounded p-2 mb-3" *ngFor="let rok of selectedCourse.projects_docs" cdkDrag>
+
+        <div cdkDropList class="example-list" (cdkDropListDropped)="drop5($event)">
+          <div class="border-secondary border rounded p-2 mb-3" *ngFor="let rok of selectedCourse.projects_docs"
+               cdkDrag>
             <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Naslov: </label>
+              <div class="col-sm-10">
+                <p>{{rok.title}}</p>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Opis: </label>
+              <div class="col-sm-10">
+                <p>{{rok.desc}}</p>
+              </div>
+            </div>
             <div class="form-group row">
               <label [htmlFor]="'filename_' + rok.id" class="col-sm-2 col-form-label">Naziv: </label>
               <div class="col-sm-10">
@@ -600,7 +585,9 @@
             <div class="form-group row">
               <label [htmlFor]="'del_' + rok.id" class="col-sm-2 col-form-label">Izbrisi fajl: </label>
               <div class="col-sm-10">
-                <button [id]="'del_' + rok.id" class="btn btn-danger" (click)="delete_project_file(rok.filename)">Izbrisi</button>
+                <button [id]="'del_' + rok.id" class="btn btn-danger" (click)="delete_project_file(rok.download_link)">
+                  Izbrisi
+                </button>
               </div>
             </div>
 

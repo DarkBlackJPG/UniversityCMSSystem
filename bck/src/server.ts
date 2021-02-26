@@ -108,6 +108,7 @@ router.post('/courses/notifications/upload', (req, res) => {
                     id: lastIndex,
                     title: notification.title,
                     description: notification.description,
+                    poster: notification.poster,
                     date: notification.date,
                     file: notification.file,
                 },
@@ -116,7 +117,33 @@ router.post('/courses/notifications/upload', (req, res) => {
             if (err) {
                 console.log(err);
             } else {
-                res.status(200).json({message: 'ok'});
+                Course.findOne({
+                    id: courseId,
+                }, (errorr: any, docs: any) => {
+                    if (errorr) {
+                        console.log(errorr);
+                    } else {
+                        if (docs) {
+                            const mapHash = docs.mapHash;
+                            Course.updateMany(
+                                {
+                                    mapHash,
+                                }, {
+                                    $set: {
+                                        notifications: docs.notifications,
+                                    },
+                                }, null, (e2, r2) => {
+                                    if (e2) {
+                                        console.log(e2);
+                                    } else {
+                                        console.log(r2);
+                                        res.status(200).json({message: 'ok'});
+                                    }
+                                });
+                        }
+                    }
+                });
+
             }
         }));
     });
@@ -137,7 +164,78 @@ router.post('/courses/notifications/update', (req, res) => {
         if (err) {
             console.log(err);
         } else {
-            res.status(200).json({message: 'ok'});
+            Course.findOne({
+                id: courseId,
+            }, (errorr: any, docs: any) => {
+                if (errorr) {
+                    console.log(errorr);
+                } else {
+                    if (docs) {
+                        const mapHash = docs.mapHash;
+                        Course.updateMany(
+                            {
+                                mapHash,
+                            }, {
+                                $set: {
+                                    notifications: docs.notifications,
+                                },
+                            }, null, (e2, r2) => {
+                                if (e2) {
+                                    console.log(e2);
+                                } else {
+                                    console.log(r2);
+                                    res.status(200).json({message: 'ok'});
+                                }
+                            });
+                    }
+                }
+            });
+        }
+    });
+});
+router.post('/employee/course/:courseId/notification/:notifId/delete', (req, res) => {
+    const courseId = req.params.courseId;
+    const notification = req.params.notifId;
+    console.log(courseId);
+    console.log(notification);
+    Course.update({
+        'id': Number(courseId),
+        'notifications.id': Number(notification),
+    }, {
+        $pull: {
+            notifications: {id: Number(notification)},
+        },
+    }, null, (err, raw) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(raw);
+            Course.findOne({
+                id: courseId,
+            }, (errorr: any, docs: any) => {
+                if (errorr) {
+                    console.log(errorr);
+                } else {
+                    if (docs) {
+                        const mapHash = docs.mapHash;
+                        Course.updateMany(
+                            {
+                                mapHash,
+                            }, {
+                                $set: {
+                                    notifications: docs.notifications,
+                                },
+                            }, null, (e2, r2) => {
+                                if (e2) {
+                                    console.log(e2);
+                                } else {
+                                    console.log(r2);
+                                    res.status(200).json({message: 'ok'});
+                                }
+                            });
+                    }
+                }
+            });
         }
     });
 });
@@ -349,36 +447,36 @@ router.route('/course/:id/get/enrolled/all').get(
 
         EnrolledStudents.aggregate([
             {
-                $match : {
-                    course_id : '13S112AOR',
+                $match: {
+                    course_id: courseId,
                 },
             },
             {
-                $lookup : {
-                    from : 'students',
-                    localField : 'student_id',
-                    foreignField : 'user_id',
-                    as : 'student_data',
+                $lookup: {
+                    from: 'students',
+                    localField: 'student_id',
+                    foreignField: 'user_id',
+                    as: 'student_data',
                 },
             },
             {
-                $unwind : {
-                    path : '$student_data',
-                    preserveNullAndEmptyArrays : true,
+                $unwind: {
+                    path: '$student_data',
+                    preserveNullAndEmptyArrays: true,
                 },
             },
             {
-                $lookup : {
-                    from : 'users',
-                    localField : 'student_id',
-                    foreignField : 'id',
-                    as : 'user_data',
+                $lookup: {
+                    from: 'users',
+                    localField: 'student_id',
+                    foreignField: 'id',
+                    as: 'user_data',
                 },
             },
             {
-                $unwind : {
-                    path : '$user_data',
-                    preserveNullAndEmptyArrays : true,
+                $unwind: {
+                    path: '$user_data',
+                    preserveNullAndEmptyArrays: true,
                 },
             },
         ], (error: Error, users: any[]) => {
@@ -410,7 +508,6 @@ router.route('/course/get/ids').get(
         CourseModel.find({},
             (error, course) => {
                 if (error) {
-                    res.status(505).json(error);
                     console.log(error.message);
                 } else {
                     res.status(200).json(course);
@@ -434,15 +531,14 @@ router.route('/department/course/info/get/:id').get(
     (req, res) => {
         const depId = req.params.id;
 
-        CourseModel.find({department: depId},
-            (error, department) => {
-                if (error) {
-                    res.status(505).json(error);
-                    console.log(error.message);
-                } else {
-                    res.status(200).json(department);
-                }
-            });
+        CourseModel.find({department: depId}).sort('semester').exec((error, docs) => {
+            if (error) {
+                res.status(505).json(error);
+                console.log(error.message);
+            } else {
+                res.status(200).json(docs);
+            }
+        });
     });
 router.route('/projects/get/all/proposals').get(
     (req, res) => {
@@ -483,9 +579,14 @@ router.route('/notifications/get/all/:id').get(
                 notificationTypesNames = types;
             }
         }).then(() => {
-            Notification.find({notification_type: notificationType}, (error, notifications: NotificationAPI[]) => {
+            const today = new Date();
+            today.setMonth(today.getMonth() - 3);
+            Notification.find({
+                notification_type: notificationType,
+
+            }, (error, notifications: NotificationAPI[]) => {
                 if (error) {
-                    res.status(505).json(error);
+                    // res.status(505).json(error);
                     console.log(error.message);
                 } else {
                     const notifs: NotificationAPI[] = [];
@@ -527,9 +628,9 @@ router.route('/notifications/types/remove').post((req, res) => {
 });
 
 router.route('/notifications/remove').post((req, res) => {
-    const id = req.body.data;
+    const notif = req.body.data;
     Notification.deleteOne({
-        id,
+        id: notif.id,
     }).then(() => {
         res.status(200).json({message: 'ok'});
     });
@@ -557,7 +658,7 @@ router.route('/notifications/update').post((req, res) => {
         id: notification.id,
     }, {
         $set: {
-            date: notification.id,
+            date: notification.date,
             description: notification.description,
             notification_type: notification.notification_type,
             title: notification.title,
@@ -578,7 +679,11 @@ router.route('/notifications/add').post((req, res) => {
         .findOne({})
         .sort('-id')  // give me the max
         .exec((err, member) => {
-            lastIndex = member.id;
+            if (member) {
+                lastIndex = member.id;
+            } else {
+                lastIndex = 0;
+            }
             lastIndex++;
             const newNotificationType = new Notification(
                 {
@@ -606,7 +711,11 @@ router.route('/notifications/types/add').post((req, res) => {
         .findOne({})
         .sort('-id')  // give me the max
         .exec((err, member) => {
-            lastIndex = member.id;
+            if (member) {
+                lastIndex = member.id;
+            } else {
+                lastIndex = 0;
+            }
             lastIndex++;
             const newNotificationType = new NotificationType(
                 {
@@ -740,50 +849,60 @@ router.route('/employee/course/:id/change_section_visibility').post(
         const secition = data.section;
         console.log(courseId);
         console.log(data);
-        if (secition === 'e') {
-            console.log(visibility);
-            Course.updateOne({
-                id: courseId,
-            }, {
-                $set: {
-                    exams_visible: visibility,
-                },
-            }, null, (err, raw) => {
-                if (err) {
-                    console.log(err);
+        Course.findOne({
+            id: courseId,
+        }, (firstE: any, firstDoc: any) => {
+            if (firstE) {
+                console.log(firstE);
+            } else {
+                console.log(firstDoc);
+                if (secition === 'e') {
+                    console.log(visibility);
+                    Course.updateMany({
+                        mapHash: firstDoc.mapHash,
+                    }, {
+                        $set: {
+                            exams_visible: visibility,
+                        },
+                    }, null, (err, raw) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            res.status(200).json({message: 'ok'});
+                        }
+                    });
+                } else if (secition === 'l') {
+                    Course.updateMany({
+                        mapHash: firstDoc.mapHash,
+                    }, {
+                        $set: {
+                            lab_visible: visibility,
+                        },
+                    }, null, (err, raw) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            res.status(200).json({message: 'ok'});
+                        }
+                    });
                 } else {
-                    res.status(200).json({message: 'ok'});
+                    Course.updateMany({
+                        mapHash: firstDoc.mapHash,
+                    }, {
+                        $set: {
+                            project_visible: visibility,
+                        },
+                    }, null, (err, raw) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            res.status(200).json({message: 'ok'});
+                        }
+                    });
                 }
-            });
-        } else if (secition === 'l') {
-            Course.updateOne({
-                id: courseId,
-            }, {
-                $set: {
-                    lab_visible: visibility,
-                },
-            }, null, (err, raw) => {
-                if (err) {
-                    console.log(err);
-                } else {
-                    res.status(200).json({message: 'ok'});
-                }
-            });
-        } else {
-            Course.updateOne({
-                id: courseId,
-            }, {
-                $set: {
-                    project_visible: visibility,
-                },
-            }, null, (err, raw) => {
-                if (err) {
-                    console.log(err);
-                } else {
-                    res.status(200).json({message: 'ok'});
-                }
-            });
-        }
+
+            }
+        });
 
     });
 
@@ -836,6 +955,22 @@ router.route('/employees/get/all/ignore_active').get(
             res.status(200).json(das);
         });
     });
+router.route('/student/:id/course/:coursecode/enrolled').get(
+    (req, res) => {
+        const userId = req.params.id;
+        const coursecode = req.params.coursecode;
+        EnrolledStudents.findOne({
+            student_id: userId,
+            course_id: coursecode,
+        }, (error: any, docs: any) => {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log(docs);
+                res.status(200).json(docs);
+            }
+        });
+    });
 router.route('/employees/update').post((req, res) => {
     const employee = req.body.data;
     User.findOne({
@@ -864,6 +999,7 @@ router.route('/employees/update').post((req, res) => {
                             phonenumber: employee.employee_data.phonenumber,
                             biography: employee.employee_data.biography,
                             title: employee.title.id,
+                            office: employee.employee_data.office,
                         },
                     },
                 ).then(() => {
@@ -1016,6 +1152,150 @@ router.route('/course/student/remove').post((req, res) => {
     });
 });
 
+router.route('/administrator/students/get/all').get(
+    (req, resp) => {
+        User.aggregate([
+            {
+                $match: {
+                    type: 2,
+                },
+            },
+            {
+                $lookup: {
+                    from: 'students',
+                    localField: 'id',
+                    foreignField: 'user_id',
+                    as: 'student_data',
+                },
+            },
+        ], (error: any, docs: any) => {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log(docs);
+                resp.status(200).json(docs);
+            }
+        });
+    },
+);
+
+router.route('/administrator/student/update').post(
+    (req, resp) => {
+        const studentData = req.body.data;
+        console.log(req.body);
+        User.findOne({
+            username: studentData.username,
+        }, (err: any, doc: any) => {
+            if (err) {
+                console.log(err);
+            } else {
+                if (doc && (doc.id !== studentData.id)) {
+                    resp.status(200).json({message: 'Student sa ovim kredencijalima se nalazi vec u bazi'});
+                } else {
+                    User.updateOne({
+                        id: studentData.id,
+                    }, {
+                        $set: {
+                            username: studentData.username,
+                            name: studentData.name,
+                            surname: studentData.surname,
+                            email: studentData.username,
+                            status: studentData.status,
+                        },
+                    }, null, (error, raw) => {
+                        if (error) {
+                            console.log(error);
+                        } else {
+                            console.log(raw);
+                            Student.updateOne({
+                                user_id: studentData.id,
+                            }, {
+                                $set: {
+                                    academic_level: studentData.student_data[0].academic_level,
+                                    index: studentData.student_data[0].index,
+                                    semester: studentData.student_data[0].semester,
+                                    department: studentData.student_data[0].department,
+                                },
+                            }, null, (error2, raw2) => {
+                                if (error2) {
+                                    console.log(error2);
+                                } else {
+                                    console.log(raw2);
+                                    CourseRegistrationList.updateMany(
+                                        {
+                                            'student_files.uploader.id': studentData.id,
+                                        }, {
+                                            $set: {
+                                                'student_files.$.uploader.name': studentData.name,
+                                                'student_files.$.uploader.surname': studentData.surname,
+                                            },
+                                        }, null,
+                                        (error3, raw3) => {
+                                            if (error3) {
+                                                console.log(error3);
+                                            } else {
+                                                console.log(raw3);
+                                                resp.status(200).json({message: 'ok'});
+                                            }
+                                        });
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        });
+
+    },
+);
+router.route('/employee/course/:id/update/order').post(
+    (req, resp) => {
+        const courseData = req.body.data;
+        const course_id = req.params.id;
+        console.log(req.body);
+        if (courseData.isMapped) {
+            Course.updateMany({
+                mapHash: courseData.mapHash,
+            }, {
+                $set: {
+                    exams: courseData.exams,
+                    labs_docs: courseData.labs_docs,
+                    projects_docs: courseData.projects_docs,
+                    lectures: courseData.lectures,
+                    excercises: courseData.excercises,
+                },
+            }, null, (error, doc) => {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log(doc);
+                    resp.status(200).json({message: 'ok'});
+                }
+            });
+        } else {
+            Course.updateOne({
+                id: course_id,
+            }, {
+                $set: {
+                    exams: courseData.exams,
+                    labs_docs: courseData.labs_docs,
+                    projects_docs: courseData.projects_docs,
+                    lectures: courseData.lectures,
+                    excercises: courseData.excercises,
+                },
+            }, null, (error, doc) => {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log(doc);
+                    resp.status(200).json({message: 'ok'});
+                }
+            });
+        }
+
+    },
+);
+
 router.route('/employee/profile/profilepicture/upload/:id').post(((req, res) => {
     const id = req.params.id;
     Employee.updateOne({
@@ -1036,12 +1316,17 @@ router.route('/employee/course/registration_lists/new').post(((req, res) => {
     const data = req.body.data;
     const courseId = data.course_id;
     CourseRegistrationList.findOne({})
-        .sort('-course_id')
+        .sort('-id')
         .exec((err, res1: any) => {
             if (err) {
                 console.log(err);
             } else {
-                let lastIndex = res1.course_id;
+                let lastIndex;
+                if (res1) {
+                    lastIndex = res1.id;
+                } else {
+                    lastIndex = 0;
+                }
                 const newCourseRegList = new CourseRegistrationList({
                     id: ++lastIndex,
                     title: data.title,
@@ -1269,6 +1554,7 @@ router.route('/employee/profile/update').post(((req, res) => {
 router.route('/employee/course/:id/update').post(((req, res) => {
     const courseId = req.params.id;
     const courseData = req.body.data;
+    console.log(courseData);
     Course.findOne({
         id: courseId,
     }, (err: Error, doc: any) => {
@@ -1296,14 +1582,18 @@ router.route('/employee/course/:id/update').post(((req, res) => {
                                 mapHash: courseData.mapHash,
                             }, {
                                 // courseDetails: courseData.courseDetails, Ne mapiramo detalje, mapiramo sve ostalo
-                                notifications: courseData.notifications,
-                                exams: courseData.exams,
-                                excercises: courseData.excercises,
-                                labs_docs: courseData.labs_docs,
-                                labs_texts: courseData.labs_texts,
-                                lectures: courseData.lectures,
-                                projects_docs: courseData.projects_docs,
-                                projects_texts: courseData.projects_texts,
+                                $set: {
+                                    'courseDetails.$.homeworks': courseData.courseDetails[0].homeworks,
+                                    'courseDetails.$.labInfo': courseData.courseDetails[0].labInfo,
+                                },
+                                'notifications': courseData.notifications,
+                                'exams': courseData.exams,
+                                'excercises': courseData.excercises,
+                                'labs_docs': courseData.labs_docs,
+                                'labs_texts': courseData.labs_texts,
+                                'lectures': courseData.lectures,
+                                'projects_docs': courseData.projects_docs,
+                                'projects_texts': courseData.projects_texts,
                             },
                         );
                     }
@@ -1583,7 +1873,11 @@ router.route('/course/create').post((req, res) => {
         .findOne({})
         .sort('-id')  // give me the max
         .exec((err, member) => {
-            lastIndex = member.id;
+            if (member) {
+                lastIndex = member.id;
+            } else {
+                lastIndex = 0;
+            }
 
             const coursesToInsert = req.body.data;
             const coursenames: string[] = [];
@@ -1612,6 +1906,9 @@ router.route('/course/create').post((req, res) => {
 router.route('/course/update').post((req, res) => {
     const courseData = req.body.data;
     const courseId = courseData.id;
+
+    console.log(courseData);
+
     Course.findOne({
         id: courseId,
     }, (err: Error, doc: any) => {
@@ -1626,9 +1923,19 @@ router.route('/course/update').post((req, res) => {
                 coursecode: courseData.coursecode,
                 acronym: courseData.acronym,
                 semester: courseData.semester,
+                isMaster: courseData.isMaster,
                 type: courseData.type,
                 department: courseData.department,
                 courseDetails: courseData.courseDetails,
+                notifications: courseData.notifications,
+                exams: courseData.exams,
+                excercises: courseData.excercises,
+                labs_docs: courseData.labs_docs,
+                labs_texts: courseData.labs_texts,
+                lectures: courseData.lectures,
+                projects_docs: courseData.projects_docs,
+                projects_texts: courseData.projects_texts,
+
             }, null, (error: Error, course: any) => {
                 if (error) {
                     console.log(error);
@@ -1638,17 +1945,20 @@ router.route('/course/update').post((req, res) => {
                             {
                                 mapHash: courseData.mapHash,
                             }, {
-                                courseDetails: courseData.courseDetails,
-                                notifications: courseData.notifications,
-                                exams: courseData.exams,
-                                excercises: courseData.excercises,
-                                labs_docs: courseData.labs_docs,
-                                labs_texts: courseData.labs_texts,
-                                lectures: courseData.lectures,
-                                projects_docs: courseData.projects_docs,
-                                projects_texts: courseData.projects_texts,
-                            },
-                        );
+                                $set: {
+                                    courseDetails: courseData.courseDetails,
+                                    notifications: courseData.notifications,
+                                    exams: courseData.exams,
+                                    excercises: courseData.excercises,
+                                    labs_docs: courseData.labs_docs,
+                                    labs_texts: courseData.labs_texts,
+                                    lectures: courseData.lectures,
+                                    projects_docs: courseData.projects_docs,
+                                    projects_texts: courseData.projects_texts,
+                                },
+                            }, null, (err1, raw) => {
+                                console.log(raw);
+                            });
                     }
                     EnrolledStudents.updateMany({
                         course_id: oldcoursecode,
@@ -1798,7 +2108,11 @@ router.route('/students/create/new').post(
             .findOne({})
             .sort('-id')  // give me the max
             .exec((err, member) => {
-                lastIndex = member.id;
+                if (member) {
+                    lastIndex = member.id;
+                } else {
+                    lastIndex = 0;
+                }
 
                 User.find({username: userData.username}, (error, document) => {
                     if (document.length !== 0) {
@@ -1819,7 +2133,9 @@ router.route('/students/create/new').post(
                             user_id: lastIndex,
                             index: userData.index,
                             academic_level: userData.type,
+                            department: userData.department,
                             verify: userData.verifyPassword,
+                            semester: userData.semester,
                         });
 
                         newUser.save().then(() => newStudent.save().then(() => {
@@ -1839,7 +2155,11 @@ router.route('/employees/create/new').post(
             .findOne({})
             .sort('-id')  // give me the max
             .exec((err, member) => {
-                lastIndex = member.id;
+                if (member) {
+                    lastIndex = member.id;
+                } else {
+                    lastIndex = 0;
+                }
 
                 User.find({username: userData.username}, (error, document) => {
                     if (document.length !== 0) {
@@ -2105,5 +2425,196 @@ router.route('/student/verify').post(
 
     });
 
+router.route('/student/change_password').post(
+    (req, res) => {
+        const newPassword = req.body.pwd;
+        const user = req.body.id;
+
+        console.log(req.body);
+
+        User.updateOne({
+            id: user,
+        }, {
+            $set: {
+                password: newPassword,
+            },
+        }, null, (error, doc) => {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log(doc);
+                res.status(200).json({message: 'ok'});
+            }
+        });
+
+    });
+
+router.route('/course/:course_id/projects/:download_link/delete').post(
+    (req, res) => {
+        const course_id = req.params.course_id;
+        const dlink = req.params.download_link;
+        Course.findOne({
+            id: course_id,
+        }, (findError: any, findDoc: any) => {
+            if (findError) {
+                console.log(findError);
+            } else {
+                console.log(findDoc);
+                if (findDoc) {
+                    const mapHash = findDoc.mapHash;
+                    Course.updateMany({
+                        'mapHash': mapHash,
+                        'projects_docs.download_link': dlink,
+                    }, {
+                        $pull: {
+                            projects_docs: {download_link: dlink},
+                        },
+                    }, null, (error, raw) => {
+                        if (error) {
+                            console.log(error);
+                        } else {
+                            console.log(raw);
+                            res.status(200).json({message: 'ok'});
+                        }
+                    });
+                }
+            }
+        });
+
+    });
+
+router.route('/course/:course_id/labs/:download_link/delete').post(
+    (req, res) => {
+        const course_id = req.params.course_id;
+        const dlink = req.params.download_link;
+        Course.findOne({
+            id: course_id,
+        }, (findError: any, findDoc: any) => {
+            if (findError) {
+                console.log(findError);
+            } else {
+                console.log(findDoc);
+                if (findDoc) {
+                    const mapHash = findDoc.mapHash;
+                    Course.updateMany({
+                        'mapHash': mapHash,
+                        'labs_docs.download_link': dlink,
+                    }, {
+                        $pull: {
+                            labs_docs: {download_link: dlink},
+                        },
+                    }, null, (error, raw) => {
+                        if (error) {
+                            console.log(error);
+                        } else {
+                            console.log(raw);
+                            res.status(200).json({message: 'ok'});
+                        }
+                    });
+                }
+            }
+        });
+
+    });
+
+router.route('/course/:course_id/exams/:download_link/delete').post(
+    (req, res) => {
+        const course_id = req.params.course_id;
+        const dlink = req.params.download_link;
+        Course.findOne({
+            id: course_id,
+        }, (findError: any, findDoc: any) => {
+            if (findError) {
+                console.log(findError);
+            } else {
+                console.log(findDoc);
+                if (findDoc) {
+                    const mapHash = findDoc.mapHash;
+                    Course.updateMany({
+                        'mapHash': mapHash,
+                        'exams.download_link': dlink,
+                    }, {
+                        $pull: {
+                            exams: {download_link: dlink},
+                        },
+                    }, null, (error, raw) => {
+                        if (error) {
+                            console.log(error);
+                        } else {
+                            console.log(raw);
+                            res.status(200).json({message: 'ok'});
+                        }
+                    });
+                }
+            }
+        });
+    });
+
+router.route('/course/:course_id/exercises/:download_link/delete').post(
+    (req, res) => {
+        const course_id = req.params.course_id;
+        const dlink = req.params.download_link;
+        Course.findOne({
+            id: course_id,
+        }, (findError: any, findDoc: any) => {
+            if (findError) {
+                console.log(findError);
+            } else {
+                console.log(findDoc);
+                if (findDoc) {
+                    const mapHash = findDoc.mapHash;
+                    Course.updateMany({
+                        'mapHash': mapHash,
+                        'excercises.download_link': dlink,
+                    }, {
+                        $pull: {
+                            excercises: {download_link: dlink},
+                        },
+                    }, null, (error, raw) => {
+                        if (error) {
+                            console.log(error);
+                        } else {
+                            console.log(raw);
+                            res.status(200).json({message: 'ok'});
+                        }
+                    });
+                }
+            }
+        });
+    });
+
+router.route('/course/:course_id/lectures/:download_link/delete').post(
+    (req, res) => {
+
+        const course_id = req.params.course_id;
+        const dlink = req.params.download_link;
+        Course.findOne({
+            id: course_id,
+        }, (findError: any, findDoc: any) => {
+            if (findError) {
+                console.log(findError);
+            } else {
+                console.log(findDoc);
+                if (findDoc) {
+                    const mapHash = findDoc.mapHash;
+                    Course.updateMany({
+                        'mapHash': mapHash,
+                        'lectures.download_link': dlink,
+                    }, {
+                        $pull: {
+                            lectures: {download_link: dlink},
+                        },
+                    }, null, (error, raw) => {
+                        if (error) {
+                            console.log(error);
+                        } else {
+                            console.log(raw);
+                            res.status(200).json({message: 'ok'});
+                        }
+                    });
+                }
+            }
+        });
+    });
 app.use('/', router);
 app.listen(4000, () => console.log(`Express server running on port 4000`));

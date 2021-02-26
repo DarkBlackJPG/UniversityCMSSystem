@@ -1,4 +1,3 @@
-
 <div *ngIf="isStudentRegistration == 0" class="row justify-content-center">
   <div class="card bg-dark text-white col-md-5 mt-4">
     <div class="card-body">
@@ -16,18 +15,21 @@
       <hr>
       <div class="mb-3">
         <label for="exampleInputEmail1" class="form-label">Korisnicko ime</label>
-        <input required type="email" [(ngModel)]="studentRegistration.username" class="form-control" id="exampleInputEmail1">
+        <input required type="email" [(ngModel)]="studentRegistration.username" class="form-control"
+               id="exampleInputEmail1">
         <div id="emailHelp" class="form-text">Korisnicko ime je u obliku <i>piGGBBBB@student.etf.rs</i>.</div>
       </div>
       <hr>
       <div class="mb-3">
         <label for="exampleInputPassword1" class="form-label">Lozinka</label>
-        <input required type="password" [(ngModel)]="studentRegistration.password" class="form-control" id="exampleInputPassword1">
+        <input required type="password" [(ngModel)]="studentRegistration.password" class="form-control"
+               id="exampleInputPassword1">
       </div>
       <hr>
       <div class="mb-3">
         <label for="exampleInputPassword2" class="form-label">Potvrdi loziku</label>
-        <input required type="password"[(ngModel)]="studentRegistration.password_repeat" class="form-control" id="exampleInputPassword2">
+        <input required type="password" [(ngModel)]="studentRegistration.password_repeat" class="form-control"
+               id="exampleInputPassword2">
       </div>
       <hr>
       <div class="mb-3">
@@ -37,30 +39,45 @@
       </div>
       <hr>
       <div class="mb-3">
+        <label for="exampleIndex" class="form-label">Semestar</label>
+        <input type="number" min="1" max="12" class="form-control" [(ngModel)]="studentRegistration.semester">
+      </div>
+      <hr>
+      <div class="mb-3">
         <label class="form-label">Tip studija</label>
-        <div class="form-check">
-          <input class="form-check-input" value="d" [(ngModel)]="studentRegistration.type" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-          <label class="form-check-label" for="flexRadioDefault1">
+        <select class="form-control" (change)="change_academic_level($event)">
+          <option value="d">
             Osnovne akademske
-          </label>
-        </div>
-        <div class="form-check">
-          <input class="form-check-input" [(ngModel)]="studentRegistration.type" value="m" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
-          <label class="form-check-label" for="flexRadioDefault2">
-            Master akademske
-          </label>
-        </div>
-        <div class="form-check">
-          <input class="form-check-input" [(ngModel)]="studentRegistration.type" value="p" type="radio" name="flexRadioDefault" id="flexRadioDefault3">
-          <label class="form-check-label" for="flexRadioDefault2">
-            Doktorske
-          </label>
-        </div>
+          </option>
+          <option value="m">
+            Master studije
+          </option>
+          <option value="p">
+            Doktorske studije
+          </option>
+        </select>
+      </div>
+      <hr>
+      <div class="mb-3">
+        <label class="form-label">Odsek</label>
+        <select class="form-control" (change)="change_department($event)" [class.invisible]="studentRegistration.type === 'm' || studentRegistration.type === 'p'">
+          <option value="1">
+            Softversko inzenjerstvo
+          </option>
+          <option value="0">
+            Racunarska tehnika i informatika
+          </option>
+          <option value="2">
+            Ostali odseci
+          </option>
+        </select>
+
       </div>
       <hr>
       <div class="mb-3">
         <div class="custom-control custom-checkbox">
-          <input type="checkbox" class="custom-control-input" [(ngModel)]="studentRegistration.active" id="customCheck12">
+          <input type="checkbox" class="custom-control-input" [(ngModel)]="studentRegistration.active"
+                 id="customCheck12">
           <label class="custom-control-label" for="customCheck12">Aktivan</label>
         </div>
       </div>
@@ -82,28 +99,33 @@
       <hr>
       <div class="mb-3">
         <label for="prezimeZaposlenog" class="form-label">Prezime</label>
-        <input required type="text" [(ngModel)]="employeeRegistration.surname" class="form-control" id="prezimeZaposlenog">
+        <input required type="text" [(ngModel)]="employeeRegistration.surname" class="form-control"
+               id="prezimeZaposlenog">
       </div>
       <hr>
       <div class="mb-3">
         <label for="korisnickoImeZaposlenog" class="form-label">Korisnicko ime</label>
-        <input required type="text" [(ngModel)]="employeeRegistration.username" class="form-control" id="korisnickoImeZaposlenog">
+        <input required type="text" [(ngModel)]="employeeRegistration.username" class="form-control"
+               id="korisnickoImeZaposlenog">
       </div>
       <hr>
       <div class="mb-3">
         <label for="adresaZaposlenog" class="form-label">Adresa</label>
-        <input required type="text" class="form-control" [(ngModel)]="employeeRegistration.address" id="adresaZaposlenog">
+        <input required type="text" class="form-control" [(ngModel)]="employeeRegistration.address"
+               id="adresaZaposlenog">
 
       </div>
       <hr>
       <div class="mb-3">
         <label for="lozinkaZaposlenog" class="form-label">Lozinka</label>
-        <input required type="password" class="form-control" [(ngModel)]="employeeRegistration.password" id="lozinkaZaposlenog">
+        <input required type="password" class="form-control" [(ngModel)]="employeeRegistration.password"
+               id="lozinkaZaposlenog">
       </div>
       <hr>
       <div class="mb-3">
         <label for="lozinkaZaposlenog2" class="form-label">Potvrdi loziku</label>
-        <input required type="password" class="form-control" id="lozinkaZaposlenog2" [(ngModel)]="employeeRegistration.password_verify">
+        <input required type="password" class="form-control" id="lozinkaZaposlenog2"
+               [(ngModel)]="employeeRegistration.password_verify">
       </div>
       <hr>
       <div class="mb-3">
@@ -113,17 +135,19 @@
       <hr>
       <div class="mb-3">
         <label for="websiteZaposlenog" class="form-label">Website (opciono)</label>
-        <input type="text" class="form-control" [(ngModel)]="employeeRegistration.website"  id="websiteZaposlenog">
+        <input type="text" class="form-control" [(ngModel)]="employeeRegistration.website" id="websiteZaposlenog">
       </div>
       <hr>
       <div class="mb-3">
         <label for="biografijaZaposlenog" class="form-label">Biografija (opciono)</label>
-        <textarea type="text" class="form-control" id="biografijaZaposlenog" [(ngModel)]="employeeRegistration.bio"></textarea>
+        <textarea type="text" class="form-control" id="biografijaZaposlenog"
+                  [(ngModel)]="employeeRegistration.bio"></textarea>
       </div>
       <hr>
       <div class="mb-3">
         <label for="zvanjeZaposlenog" class="form-label">Zvanje</label>
-        <select id="zvanjeZaposlenog" (change)="changeSelectedTitle($event)" class="form-select form-control col-12" id="inputGroupSelect01">
+        <select id="zvanjeZaposlenog" (change)="changeSelectedTitle($event)" class="form-select form-control col-12"
+                id="inputGroupSelect01">
           <option value="-1">Odaberi...</option>
           <option *ngFor="let title of titles"
                   [value]="title.id">{{title.name}}</option>
@@ -138,7 +162,8 @@
       <div class="mb-3">
         <div class="custom-control custom-checkbox">
           <input type="checkbox" class="custom-control-input" id="customCheck1">
-          <label class="custom-control-label" [(ngModel)]="employeeRegistration.active" for="customCheck1">Aktivan</label>
+          <label class="custom-control-label" [(ngModel)]="employeeRegistration.active"
+                 for="customCheck1">Aktivan</label>
         </div>
       </div>
       <hr>

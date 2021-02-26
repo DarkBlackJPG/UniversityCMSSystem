@@ -7,6 +7,7 @@ import {Observable} from "rxjs/internal/Observable";
 import {UploadServiceService} from "../services/upload-service.service";
 import {HttpEventType, HttpResponse} from "@angular/common/http";
 import {logger} from "codelyzer/util/logger";
+import {Route, Router} from "@angular/router";
 
 
 @Component({
@@ -18,7 +19,8 @@ export class EmployeeCourseListsComponent implements OnInit {
   public Editor = ClassicEditor;
 
   constructor(private employeeService: EmployeeService,
-              private uploadService: UploadServiceService) {
+              private uploadService: UploadServiceService,
+              private router: Router) {
   }
 
 
@@ -28,129 +30,28 @@ export class EmployeeCourseListsComponent implements OnInit {
   activePage: number = 1;
   userData: any;
   ngOnInit(): void {
-    this.userData = JSON.parse(localStorage.getItem('session'));
+    let userString = localStorage.getItem('session');
+    if(userString) {
+      this.userData = JSON.parse(userString);
+      if (this.userData.type !== 1) {
+        this.router.navigate(['']);
+      }
+    } else {
+      this.router.navigate([''])
+    }
     this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
       this.myCourses = courses;
     });
   }
 
   predavanja = [
-    {
-      id: 1,
-      filename: "Moj zadatak.pdf",
-      type: "PDF",
-      size: '20MB',
-      date: new Date(),
-      posted: {
-        id: 1,
-        name: 'Drazen',
-        surname: 'Draskovic'
-      },
-      download_link: "",
-    }, {
-      id: 2,
-      filename: "Moj drugi.zip",
-      type: "ZIP",
-      size: '1MB',
-      date: new Date(),
-      posted: {
-        id: 1,
-        name: 'Bosko',
-        surname: 'Prasic'
-      },
-      download_link: "",
-    }, {
-      id: 3,
-      filename: "Moj dsaas.pdf",
-      type: "PDF",
-      size: '20MB',
-      date: new Date(),
-      posted: {
-        id: 1,
-        name: 'Drazen',
-        surname: 'Draskovic'
-      },
-      download_link: "",
-    },
+
   ];
   vezbe = [
-    {
-      id: 1,
-      filename: "Vezbe1.pdf",
-      type: "PDF",
-      size: '20MB',
-      date: new Date(),
-      posted: {
-        id: 1,
-        name: 'Drazen',
-        surname: 'Draskovic'
-      },
-      download_link: "",
-    }, {
-      id: 2,
-      filename: "Vez2.zip",
-      type: "ZIP",
-      size: '1MB',
-      date: new Date(),
-      posted: {
-        id: 1,
-        name: 'Bosko',
-        surname: 'Prasic'
-      },
-      download_link: "",
-    }, {
-      id: 3,
-      filename: "Vezbe3.pdf",
-      type: "PDF",
-      size: '20MB',
-      date: new Date(),
-      posted: {
-        id: 1,
-        name: 'Drazen',
-        surname: 'Draskovic'
-      },
-      download_link: "",
-    },
+
   ];
   rokovi = [
-    {
-      id: 1,
-      filename: "20202021.pdf",
-      type: "PDF",
-      size: '20MB',
-      date: new Date(),
-      posted: {
-        id: 1,
-        name: 'Drazen',
-        surname: 'Draskovic'
-      },
-      download_link: "",
-    }, {
-      id: 2,
-      filename: "20192020.zip",
-      type: "ZIP",
-      size: '1MB',
-      date: new Date(),
-      posted: {
-        id: 1,
-        name: 'Bosko',
-        surname: 'Prasic'
-      },
-      download_link: "",
-    },
-    {
-      id: 3,
-      filename: "20182019.pdf",
-      type: "PDF",
-      size: '20MB',
-      date: new Date(),
-      posted: {
-        id: 1,
-        name: 'Drazen',
-        surname: 'Draskovic'
-      },
-      download_link: "",
-    },
+
   ];
 
   drop1(event: CdkDragDrop<string[]>) {
@@ -168,6 +69,9 @@ export class EmployeeCourseListsComponent implements OnInit {
   newLecture = FileList;
   newExcercise = FileList;
   newExam = FileList;
+  newProjectFile = FileList;
+  newLabFile = FileList;
+
 
   select_current_course($event) {
     const courseId = Number($event.target.value)
@@ -365,6 +269,7 @@ export class EmployeeCourseListsComponent implements OnInit {
               this.myCourses = courses;
             });
             this.selectedCourse = null;
+            this.newLecture = FileList;
           });
 
         }
@@ -416,6 +321,7 @@ export class EmployeeCourseListsComponent implements OnInit {
               this.myCourses = courses;
             });
             this.selectedCourse = null;
+            this.newExcercise = FileList;
           });
 
         }
@@ -466,6 +372,7 @@ export class EmployeeCourseListsComponent implements OnInit {
               this.myCourses = courses;
             });
             this.selectedCourse = null;
+            this.newExam = FileList;
           });
 
         }
@@ -570,9 +477,6 @@ export class EmployeeCourseListsComponent implements OnInit {
     });
   }
 
-  newProjectFile = FileList;
-  newLabFile = FileList;
-
 
   register_new_proj_file($event) {
     this.newProjectFile = $event.target.files;
@@ -591,6 +495,8 @@ export class EmployeeCourseListsComponent implements OnInit {
 
           let download_link = file_data.filename;
           let filedata = {
+            title: this.newProjTextNotif.title, // Dodato
+            desc: this.newProjTextNotif.desc,   // Dodato
             filename: filename,
             type: type,
             size: size,
@@ -621,6 +527,7 @@ export class EmployeeCourseListsComponent implements OnInit {
               this.myCourses = courses;
             });
             this.selectedCourse = null;
+            this.newProjectFile = FileList;
           });
 
         }
@@ -641,6 +548,8 @@ export class EmployeeCourseListsComponent implements OnInit {
 
           let download_link = file_data.filename;
           let filedata = {
+            title: this.newLabTextNotif.title, // Dodato
+            desc: this.newLabTextNotif.desc,   // Dodato
             filename: filename,
             type: type,
             size: size,
@@ -671,6 +580,7 @@ export class EmployeeCourseListsComponent implements OnInit {
               this.myCourses = courses;
             });
             this.selectedCourse = null;
+            this.newLabFile = FileList;
           });
 
         }
@@ -683,23 +593,118 @@ export class EmployeeCourseListsComponent implements OnInit {
   }
 
   delete_project_file(filename: string) {
-    // Todo brisanje project fajlova
+    this.employeeService.delete_project_file(filename, this.selectedCourse.id).subscribe( (resp: any) => {
+      if (resp.message == 'ok') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Uspeh!',
+          text: "Uspesno izbrisan fajl!",
+        });
+        this.myCourses = [];
+        this.selectedCourse = null;
+        this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
+          this.myCourses = courses;
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops!',
+          text: "Doslo je do greske!",
+        });
+      }
+    })
   }
 
   delete_lab_file(filename: string) {
-
+    this.employeeService.delete_lab_file(filename, this.selectedCourse.id).subscribe( (resp: any) => {
+      if (resp.message == 'ok') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Uspeh!',
+          text: "Uspesno izbrisan fajl!",
+        });
+        this.myCourses = [];
+        this.selectedCourse = null;
+        this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
+          this.myCourses = courses;
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops!',
+          text: "Doslo je do greske!",
+        });
+      }
+    })
   }
 
   delete_exam_file(filename: string) {
-
+    this.employeeService.delete_exam_file(filename, this.selectedCourse.id).subscribe( (resp: any) => {
+      if (resp.message == 'ok') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Uspeh!',
+          text: "Uspesno izbrisan fajl!",
+        });
+        this.myCourses = [];
+        this.selectedCourse = null;
+        this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
+          this.myCourses = courses;
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops!',
+          text: "Doslo je do greske!",
+        });
+      }
+    })
   }
 
   delete_excercise_file(filename: string) {
-
+    this.employeeService.delete_excercise_file(filename, this.selectedCourse.id).subscribe( (resp: any) => {
+      if (resp.message == 'ok') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Uspeh!',
+          text: "Uspesno izbrisan fajl!",
+        });
+        this.myCourses = [];
+        this.selectedCourse = null;
+        this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
+          this.myCourses = courses;
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops!',
+          text: "Doslo je do greske!",
+        });
+      }
+    })
   }
 
   delete_lecture_file(filename: string) {
-
+    this.employeeService.delete_lecture_file(filename, this.selectedCourse.id).subscribe( (resp: any) => {
+      if (resp.message == 'ok') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Uspeh!',
+          text: "Uspesno izbrisan fajl!",
+        });
+        this.myCourses = [];
+        this.selectedCourse = null;
+        this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
+          this.myCourses = courses;
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops!',
+          text: "Doslo je do greske!",
+        });
+      }
+    })
   }
 
   project_change_visibility($event) {
@@ -727,7 +732,6 @@ export class EmployeeCourseListsComponent implements OnInit {
   }
 
   exam_change_visibility($event) {
-    alert(this.selectedCourse.exams_visible);
     this.employeeService.change_section_visibility(this.selectedCourse.id, 'e', this.selectedCourse.exams_visible).subscribe( (response: any) => {
       if(response.message !== 'ok') {
         Swal.fire({
@@ -737,5 +741,128 @@ export class EmployeeCourseListsComponent implements OnInit {
         });
       }
     });
+  }
+
+  submit_lecture_order() {
+    console.log(this.selectedCourse.lectureDates)
+    this.employeeService.update_order(this.selectedCourse).subscribe( (response: any) => {
+        if(response.message === 'ok') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Uspeh.',
+            text: "Uspesno azuriran redosled!",
+          });
+          this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
+            this.myCourses = courses;
+          });
+        }else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: "Redosloed nije promenjen usled greske!",
+          });
+        }
+
+    })
+  }
+
+  submit_excercise_order() {
+    console.log(this.selectedCourse.excercises)
+     this.employeeService.update_order(this.selectedCourse).subscribe( (response: any) => {
+        if(response.message === 'ok') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Uspeh.',
+            text: "Uspesno azuriran redosled!",
+          });
+          this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
+            this.myCourses = courses;
+          });
+        }else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: "Redosloed nije promenjen usled greske!",
+          });
+        }
+
+    })
+  }
+
+  submit_lab_order() {
+    console.log(this.selectedCourse.labs_docs)
+     this.employeeService.update_order(this.selectedCourse).subscribe( (response: any) => {
+        if(response.message === 'ok') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Uspeh.',
+            text: "Uspesno azuriran redosled!",
+          });
+          this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
+            this.myCourses = courses;
+          });
+        }else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: "Redosloed nije promenjen usled greske!",
+          });
+        }
+
+    })
+  }
+
+  submit_exam_order() {
+    console.log(this.selectedCourse.exams)
+     this.employeeService.update_order(this.selectedCourse).subscribe( (response: any) => {
+        if(response.message === 'ok') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Uspeh.',
+            text: "Uspesno azuriran redosled!",
+          });
+          this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
+            this.myCourses = courses;
+          });
+        }else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: "Redosloed nije promenjen usled greske!",
+          });
+        }
+
+    })
+  }
+
+  submit_project_order() {
+    console.log(this.selectedCourse.projects_docs)
+     this.employeeService.update_order(this.selectedCourse).subscribe( (response: any) => {
+        if(response.message === 'ok') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Uspeh.',
+            text: "Uspesno azuriran redosled!",
+          });
+          this.employeeService.getEmployeeCourses(this.userData.id).subscribe((courses: any[]) => {
+            this.myCourses = courses;
+          });
+        }else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: "Redosloed nije promenjen usled greske!",
+          });
+        }
+
+    })
+  }
+
+  drop4(event: CdkDragDrop<string[]>) {
+    moveItemInArray(this.selectedCourse.labs_docs, event.previousIndex, event.currentIndex);
+  }
+
+  drop5(event: CdkDragDrop<string[]>) {
+    moveItemInArray(this.selectedCourse.projects_docs, event.previousIndex, event.currentIndex);
   }
 }

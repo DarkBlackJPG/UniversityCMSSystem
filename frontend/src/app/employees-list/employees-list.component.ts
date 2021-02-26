@@ -15,8 +15,9 @@ export class EmployeesListComponent implements OnInit {
   public isCollapsed = false;
   constructor(private employeeService: EmployeeService,
               private router: Router) { }
-
+  myUser: any = {};
   ngOnInit(): void {
+
     this.employeeService.getAllEmployees().subscribe((result: any[]) => {
       this.employees = result;
     });

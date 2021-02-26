@@ -14,6 +14,9 @@ export class StudentComponent implements OnInit {
     let userString = localStorage.getItem('session');
     if(userString) {
       this.myUser = JSON.parse(userString);
+      if (this.myUser.type !== 2) {
+        this.router.navigate(['']);
+      }
       if (this.myUser.student_data.verify === true) {
         this.router.navigate(['/verify'])
       }

@@ -9,6 +9,8 @@ export class UserRegistrationDataAPI {
   public type: string;
   public verifyPassword: boolean;
   public active: boolean;
+  public semester: number;
+  public department: number;
 
   constructor() {
     this.name = '';
@@ -20,5 +22,7 @@ export class UserRegistrationDataAPI {
     this.type = '';
     this.verifyPassword = false;
     this.active = false;
+    this.semester = 1;
+    this.department = 1;
   }
 }

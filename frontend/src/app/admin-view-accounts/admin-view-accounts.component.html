@@ -1,60 +1,126 @@
 
 <div class="row justify-content-center">
-  <div class="card mt-3 shadow text-white bg-dark mb-3 col-md-5">
+  <div class="card mt-3 shadow p-0 text-white bg-dark mb-3 col-md-5">
     <div class="card-header">Odabir naloga</div>
     <div class="card-body justify-content-center">
-      <table style="margin: auto">
-        <tr>
-          <td>Studenti:</td>
-          <td>
-            <input
-              id="students_focus"
-              type="text"
-              class="form-control ml-3"
-              [(ngModel)]="model1"
-              [ngbTypeahead]="search_students"
-              (focus)="focus_students$.next($any($event).target.value); lastFocused = 0;"
-              (click)="click_students$.next($any($event).target.value)"
-              #instance_student="ngbTypeahead"
-            />
-          </td>
-        </tr>
-        <tr>
-          <td>Zaposleni:</td>
-          <td>
-            <input
-              id="faculty_focus"
-              type="text"
-              class="form-control ml-3"
-              [(ngModel)]="model2"
-              [ngbTypeahead]="search_faculty"
-              (focus)="focus_faculty$.next($any($event).target.value); lastFocused = 1"
-              (click)="click_faculty$.next($any($event).target.value)"
-              #instance_faculty="ngbTypeahead"
-            />
-          </td>
-        </tr>
-
-        <tr>
-          <td>
-            <button class="btn btn-outline-success" (click)="find_student()">Nadji studenta</button>
-          </td>
-        </tr>
-
-        <tr>
-          <td>
-            <button class="btn btn-outline-success mt-2" (click)="find_faculty()">Nadji zaposlenog</button>
-          </td>
-        </tr>
-      </table>
-
+      <div class="mb-3 row">
+        <label  class="col-sm-2 offset-2 col-form-label">Studenti</label>
+        <div class="col-sm-5">
+          <input
+            id="students_focus"
+            type="text"
+            class="form-control ml-3"
+            [(ngModel)]="model1"
+            [ngbTypeahead]="search_students"
+            (focus)="focus_students$.next($any($event).target.value); lastFocused = 0;"
+            (click)="click_students$.next($any($event).target.value)"
+            #instance_student="ngbTypeahead"
+          />
+        </div>
+      </div>
+      <div class="mb-3 row">
+        <label  class="col-sm-2 offset-2 col-form-label">Zaposleni</label>
+        <div class="col-sm-5">
+          <input
+            id="faculty_focus"
+            type="text"
+            class="form-control ml-3"
+            [(ngModel)]="model2"
+            [ngbTypeahead]="search_faculty"
+            (focus)="focus_faculty$.next($any($event).target.value); lastFocused = 1"
+            (click)="click_faculty$.next($any($event).target.value)"
+            #instance_faculty="ngbTypeahead"
+          />
+        </div>
+      </div>
+      <div class="mb-3 row d-flex justify-content-around">
+        <button class="btn btn-outline-success" (click)="find_student()">Nadji studenta</button>
+        <button class="btn btn-outline-success mt-2" (click)="find_faculty()">Nadji zaposlenog</button>
+      </div>
     </div>
   </div>
 </div>
+
+
 <div class="row justify-content-center" *ngIf="isSelected > -1">
   <div class="card shadow mt-3 text-white bg-dark mb-3 col-md-5">
     <div class="card-header">Rezultat pretrage</div>
     <div class="card-body justify-content-center" *ngIf="isSelected == 0; else other">
+
+      <i class="mb-3">
+        Napomena: Username se automatski azurira...
+      </i>
+      <hr>
+      <div class="col-12 mb-3">
+        <div class="input-group flex-nowrap">
+          <span class="input-group-text">Ime i prezime</span>
+          <input type="text" aria-label="Ime" class="form-control" [(ngModel)]="selectedStudent.name">
+          <input type="text" aria-label="Prezime" class="form-control" [(ngModel)]="selectedStudent.surname">
+        </div>
+      </div>
+      <div class="col-12 mb-3">
+        <div class="input-group flex-nowrap">
+          <span class="input-group-text">Index</span>
+          <input type="text" aria-label="index" class="form-control" [(ngModel)]="selectedStudent.student_data[0].index">
+        </div>
+      </div>
+      <div class="col-12 mb-3">
+        <div class="input-group flex-nowrap">
+          <span class="input-group-text">Semestar</span>
+          <input type="number" aria-label="index" class="form-control" [(ngModel)]="selectedStudent.student_data[0].semester">
+        </div>
+      </div>
+      <div class="col-12 mb-3">
+        <div class="input-group flex-nowrap">
+          <span class="input-group-text">Tip Studija</span>
+          <select (change)="change_level_type($event)" class="form-control">
+            <option [selected]="selectedStudent.student_data[0].academic_level === 'd'" value="d">
+              Osnovne Akademske
+            </option>
+            <option [selected]="selectedStudent.student_data[0].academic_level === 'm'" value="m">
+              Master studije
+            </option>
+            <option [selected]="selectedStudent.student_data[0].academic_level === 'p'" value="p">
+              Doktorske studije
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="col-12 mb-3" *ngIf="selectedStudent.student_data[0].academic_level === 'd'">
+        <div class="input-group flex-nowrap">
+          <span class="input-group-text">Odsek Studija</span>
+          <select (change)="chenge_dept($event)" class="form-control">
+            <option [selected]="selectedStudent.student_data[0].department === -1 || selectedStudent.student_data[0].department === 3" value="-1">
+              Odaberi...
+            </option>
+            <option [selected]="selectedStudent.student_data[0].department === 1" value="1">
+              Softversko inzenjerstvo
+            </option>
+            <option [selected]="selectedStudent.student_data[0].academic_level === 0" value="0">
+              RTI
+            </option>
+            <option [selected]="selectedStudent.student_data[0].academic_level === 2" value="2">
+              Ostali odseci
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="col-12 mt-3 mb-3">
+        <div class="input-group flex-nowrap">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox"
+                   [(ngModel)]="selectedStudent.status" id="flexCheckDefault43">
+            <label class="form-check-label" for="flexCheckDefault43">
+              Aktivan (Soft delete ako je neaktivan)
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 ">
+        <button class="btn btn-outline-success" (click)="update_student()">
+          Prihvati
+        </button>
+      </div>
 
     </div>
     <ng-template #other>
@@ -151,12 +217,10 @@
             </div>
           </div>
         </div>
-        <div class="col-md-4 mt-3 justify-content-center">
+        <div class="col-md-4 mt-3 mb-3 justify-content-center">
           <button type="submit" class="btn btn-primary" (click)="update_employee()">Azuriraj</button>
         </div>
-        <div class="col-md-4 mt-3 mb-5 ">
-          <button type="submit" class="btn btn-warning" (click)="cancel()">Odustani</button>
-        </div>
+
       </div>
     </ng-template>
   </div>

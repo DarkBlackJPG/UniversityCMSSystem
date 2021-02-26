@@ -10,6 +10,8 @@ import {NotificationService} from "./services/notification.service";
 import {faCoffee} from '@fortawesome/fontawesome-free';
 import {AdministratorFunctionsService} from "./services/administrator-functions.service";
 import {NotificationType} from "./models/database/NotificationType";
+import {Page} from "./services/PageEnum";
+import {NavigationService} from "./services/navigation.service";
 
 @Component({
   selector: 'app-root',
@@ -31,7 +33,9 @@ export class AppComponent {
 
   notificationTypes: NotificationType[] = [];
 
-  constructor(private adminService: AdministratorFunctionsService, private notificationService: NotificationService, private userValidation: UserValidationServiceService, private courseService: CoursesService, private router: Router) {
+  activePage: Page = Page.LANDING;
+  PAGE = Page;
+  constructor(private navigationService: NavigationService, private adminService: AdministratorFunctionsService, private notificationService: NotificationService, private userValidation: UserValidationServiceService, private courseService: CoursesService, private router: Router) {
 
   }
 
@@ -41,9 +45,12 @@ export class AppComponent {
       if (isOpen) {
         this.refreshSession();
       }
+
     });
 
-
+    this.navigationService.getObserver().subscribe( (value)=> {
+      this.activePage = value;
+    })
 
     this.courseService.getDepartmentIds().subscribe((response: Department[]) => {
       for (let i = 0; i < response.length; ++i) {
@@ -110,9 +117,15 @@ export class AppComponent {
 
   view_notifications_for(number: number) {
     this.notificationService.setNotificationID(number);
+    this.changePage(Page.NOTIFICATIONS);
   }
 
   set_register(number: number) {
+
     this.adminService.setIsStudentRegistration(number);
+  }
+
+  changePage(next: any) {
+    this.navigationService.setPageValue(next);
   }
 }

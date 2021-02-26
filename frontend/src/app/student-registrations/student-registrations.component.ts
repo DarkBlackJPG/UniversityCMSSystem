@@ -23,7 +23,9 @@ export class StudentRegistrationsComponent implements OnInit {
 
     if (user) {
       this.myUser = JSON.parse(user)
-
+      if (this.myUser.student_data.verify === true) {
+        this.router.navigate(['/verify'])
+      }
       this.studentService.getMyCourses(this.myUser).subscribe( (data: any) => {
         console.log(data)
         for (const datum of data) {
@@ -45,6 +47,14 @@ export class StudentRegistrationsComponent implements OnInit {
     return false;
   }
   register_for_activity(reg: any) {
+    if (reg.max_num_students !== 0 && reg.enrolled_number + 1 > reg.max_num_students) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Prijavljen je maksimalan broj ljudi!',
+      })
+      return;
+    }
     this.studentService.registerForCourseEvent(this.myUser, reg).subscribe( (response: any) => {
       console.log(response)
       if(response.message === 'ok') {

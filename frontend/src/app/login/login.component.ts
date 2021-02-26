@@ -1,9 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {UsersService} from '../services/users.service';
-import {AppComponent} from "../app.component";
 import {UserValidationServiceService} from "../services/user-validation-service.service";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
+import {NavigationService} from "../services/navigation.service";
+import {Page} from "../services/PageEnum";
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -15,7 +17,8 @@ export class LoginComponent implements OnInit {
 
   constructor(private service: UsersService,
               private router: Router,
-              private validationService: UserValidationServiceService) {
+              private validationService: UserValidationServiceService,
+              private navService: NavigationService) {
   }
 
   ngOnInit(): void {
@@ -30,12 +33,16 @@ export class LoginComponent implements OnInit {
 
           if (response.type == 0) {
             this.router.navigate(['/admin']).then(() => {
-
+                this.navService.setPageValue(Page.ADMIN_LANDING)
             });
           } else if (response.type == 1) {
-            this.router.navigate(['/employee']);
+            this.router.navigate(['/employee']).then(() => {
+              this.navService.setPageValue(Page.PROFESSOR_LANDING)
+            });
           } else {
-            this.router.navigate(['/student']);
+            this.router.navigate(['/student']).then(() => {
+              this.navService.setPageValue(Page.STUDENT_LANDING)
+            });
           }
           this.validationService.setOpen(false);
           this.validationService.setOpen(true);

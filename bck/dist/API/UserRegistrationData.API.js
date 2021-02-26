@@ -12,6 +12,8 @@ class UserRegistrationDataAPI {
         this.type = '';
         this.verifyPassword = false;
         this.active = false;
+        this.semester = 1;
+        this.department = 1;
     }
 }
 exports.UserRegistrationDataAPI = UserRegistrationDataAPI;

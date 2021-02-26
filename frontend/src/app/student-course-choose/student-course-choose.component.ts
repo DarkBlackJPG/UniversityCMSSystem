@@ -24,6 +24,10 @@ export class StudentCourseChooseComponent implements OnInit {
 
     if (user) {
       this.myUser = JSON.parse(user)
+      if (this.myUser.student_data.verify === true) {
+        this.router.navigate(['/verify'])
+      }
+      console.log(this.myUser)
       this.studentService.coursesForSemester(this.myUser.student_data.semester, this.myUser.student_data.department).subscribe((docs: any[]) => {
         console.log(docs);
         for (const doc of docs) {

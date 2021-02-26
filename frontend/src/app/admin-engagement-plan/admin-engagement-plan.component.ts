@@ -12,6 +12,7 @@ import {CourseGroup} from "../models/appdata/CourseGroup";
 import {Employee} from "../models/database/Employee";
 import {Student} from "../models/database/Student";
 import {getLocaleCurrencyCode} from "@angular/common";
+import {Router} from "@angular/router";
 
 
 @Component({
@@ -31,12 +32,22 @@ export class AdminEngagementPlanComponent implements OnInit {
   filterText: string = "Prikazuju se svi kursevi";
   enrolledStudents: Student[] = [];
   searchModel: any;
-
+  myUser: any = {};
   constructor(private administratorService: AdministratorFunctionsService,
-              private courseService: CoursesService) {
+              private courseService: CoursesService,
+              private router: Router) {
   }
 
   ngOnInit(): void {
+    let userString = localStorage.getItem('session');
+    if(userString) {
+      this.myUser = JSON.parse(userString);
+      if (this.myUser.type !== 0) {
+        this.router.navigate(['']);
+      }
+    } else {
+      this.router.navigate([''])
+    }
     this.courseService.getCourseIds().subscribe((result: Course[]) => {
       this.allCourses = result;
       this.viewableCourses = this.allCourses;
@@ -46,7 +57,8 @@ export class AdminEngagementPlanComponent implements OnInit {
     });
 
     this.administratorService.getAllEmployees().subscribe((employees: Employee[]) => {
-      this.lecturers = employees;
+      console.log(employees)
+      this.lecturers = employees.filter(value => value.title.educational === 1);
     })
   }
 

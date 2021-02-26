@@ -8,6 +8,7 @@ const Student = new Schema({
     index: {type: String},
     academic_level: {type: String},
     verify: {type: Boolean},
+    semester: {type: Number},
     department : {type: Number},
 });
 

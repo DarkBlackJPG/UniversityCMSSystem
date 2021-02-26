@@ -19,7 +19,7 @@ export class RegisterComponent implements OnInit {
   }
 
   register_user() {
-    if (this.userData.type == '' || this.userData.index == '' || this.userData.password_repeat == '' || this.userData.password == '' || this.userData.username == '' || this.userData.surname == '' || this.userData.name == '') {
+    if (this.userData.type == '' || this.userData.semester === undefined || this.userData.index == '' || this.userData.password_repeat == '' || this.userData.password == '' || this.userData.username == '' || this.userData.surname == '' || this.userData.name == '') {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -27,7 +27,28 @@ export class RegisterComponent implements OnInit {
       })
       return;
     }
-    let indexRegex = "^\\d\\d\\d\\d\/\\d\\d\\d\\d$";
+    if (this.userData.type === 'm' || this.userData.type === 'p') {
+      this.userData.department = 3
+    }
+
+    if(this.userData.department === -1) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Sva polja su obavezna!',
+      })
+      return;
+    }
+    if(this.userData.semester < 0 || this.userData.semester > 8) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Semestar je izvan opsega!',
+      })
+      return;
+    }
+
+    let indexRegex = "^\\d{4}\\/\\d{4}$";
     let indexRegexer = new RegExp(indexRegex);
     if (!indexRegexer.test(this.userData.index)) {
       Swal.fire({
@@ -81,5 +102,13 @@ export class RegisterComponent implements OnInit {
         });
       }
     });
+  }
+
+  update_level($event) {
+    this.userData.type = $event.target.value;
+  }
+
+  update_department($event) {
+    this.userData.department = Number($event.target.value);
   }
 }

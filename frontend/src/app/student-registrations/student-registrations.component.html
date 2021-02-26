@@ -39,7 +39,7 @@
               Ogranicenje studenata:
             </div>
             <div class="col-md-8">
-              {{reg.max_num_students}}
+              {{reg.max_num_students === 0 ? 'Nema ogranicenje' : reg.max_num_students}}
             </div>
           </div>
           <div class="col-12 mt-3 d-flex">

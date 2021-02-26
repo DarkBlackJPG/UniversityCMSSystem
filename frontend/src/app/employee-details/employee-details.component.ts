@@ -13,7 +13,9 @@ export class EmployeeDetailsComponent implements OnInit {
               private employeeService: EmployeeService) { }
   employeeId: number = 0;
   employee: any = {};
+  userData: any = {};
   ngOnInit(): void {
+
     this.employeeId = Number(this.activatedRoute.snapshot.paramMap.get('id'));
 
     let ar:number[] = [];
