@@ -3,10 +3,10 @@
     <div class="card shadow text-white bg-dark mb-3">
       <div class="card-header">Predmeti</div>
       <div class="card-body d-flex justify-content-between">
-        <button class="btn btn-outline-info" (click)="trigger_add_new_course()">
+        <button class="btn btn-outline-info" [class.btn-info]="addNewCourse === true" (click)="trigger_add_new_course()">
           Dodaj novi predmet
         </button>
-        <button class="btn btn-outline-warning" (click)="trigger_update_existing_course()">
+        <button class="btn btn-outline-warning" [class.btn-warning]="editExisting === true" (click)="trigger_update_existing_course()">
           Azuriraj postojeci predmet
         </button>
       </div>
@@ -373,6 +373,7 @@
         <div class="form-group row">
           <div class="col-sm-3 col-form-label">
             <button class="btn-outline-success btn" (click)="update_course()">Azuriraj</button>
+            <button class="btn-outline-danger ml-2 btn" (click)="remove_course(selectedEditCourse)">Izbrisi</button>
           </div>
         </div>
       </div>

@@ -164,6 +164,8 @@ export class AdminNotificationsComponent implements OnInit {
           text: "Uspesno izbrisan tip notifikacije",
         });
         this.notificationToRemove = -1;
+        this.updateNotificationData = null;
+        this.currentPage = -1;
       }
     })
   }

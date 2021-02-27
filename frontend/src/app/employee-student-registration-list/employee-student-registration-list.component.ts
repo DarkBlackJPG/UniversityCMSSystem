@@ -4,6 +4,7 @@ import {UploadServiceService} from "../services/upload-service.service";
 import {CoursesService} from "../services/courses.service";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import {Router} from "@angular/router";
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-employee-student-registration-list',
@@ -366,6 +367,20 @@ export class EmployeeStudentRegistrationListComponent implements OnInit {
         this.courseLists = docs;
       });
     })
+
+  }
+
+  download_csv(course: any) {
+    this.employeeService.getStudentsById(course.enrolled).subscribe((resp: any) => {
+      console.log(resp);
+      let csv = 'Ime, Prezime, Indeks, Username\n';
+      for (const student of resp) {
+        csv += student.name + ", " + student.surname + ", " + student.student_data[0].index + ", " + student.username + "\n";
+      }
+      console.log(csv);
+      const blob = new Blob([csv], {type: 'text/csv'});
+      saveAs(blob, course.title + "_" + (new Date().toISOString()) + ".csv")
+    });
 
   }
 }

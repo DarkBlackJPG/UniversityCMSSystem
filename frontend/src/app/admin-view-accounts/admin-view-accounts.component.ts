@@ -349,4 +349,48 @@ export class AdminViewAccountsComponent implements OnInit {
   chenge_dept($event) {
     this.selectedStudent.student_data[0].department = Number($event.target.value);
   }
+
+  remove_employee() {
+    this.employeeService.deleteEmployee(this.selected_employee).subscribe( (response: any) => {
+      Swal.fire({
+        icon: 'success',
+        title: 'Uspeh!',
+        text: 'Uspesno izbrisan zaposleni!',
+      });
+      this.selected_employee = null;
+      this.isSelected = -1;
+      this.model2 = '';
+      this.model1 = '';
+      this.administratorService.getAllEmployees().subscribe((employees: Employee[]) => {
+        this.faculty = employees;
+        for (let i = 0; i < this.faculty.length; i++) {
+          this.facultyIDs.push(
+            this.faculty[i].id + '. ' + this.faculty[i].name + ' ' + this.faculty[i].surname
+          );
+        }
+      });
+
+    });
+  }
+
+  remove_student() {
+    this.administratorService.deleteStudent(this.selectedStudent).subscribe( (response: any) => {
+      Swal.fire({
+        icon: 'success',
+        title: 'Uspeh!',
+        text: 'Uspesno izbrisan student!',
+      });
+      this.selectedStudent = null;
+      this.isSelected = -1;
+      this.model2 = '';
+      this.model1 = '';
+      this.administratorService.getAllStudents().subscribe((students: any[]) => {
+        console.log(students)
+        this.students = students;
+        for (const student of this.students) {
+          this.studentsIDs.push(student.student_data[0].index + " - " + student.name + " " + student.surname);
+        }
+      })
+    });
+  }
 }

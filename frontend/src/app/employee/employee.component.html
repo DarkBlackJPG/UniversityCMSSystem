@@ -79,7 +79,7 @@
           </div>
 
         </div>
-        <div class="col-12 mt-3">
+        <div class="col-12 mt-3" *ngIf="active_employe.title.educational === 1">
           <div class="input-group flex-nowrap">
             <span class="input-group-text">Kabinet</span>
             <input placeholder="Kabinet" type="text" class="form-control" [(ngModel)]="active_employe.employee_data.office"

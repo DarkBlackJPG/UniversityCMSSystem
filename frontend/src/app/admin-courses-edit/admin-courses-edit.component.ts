@@ -85,7 +85,7 @@ export class AdminCoursesEditComponent implements OnInit {
   }
 
   addNewCourse: boolean = false;
-  editExisting: boolean = true;
+  editExisting: boolean = false;
 
   trigger_add_new_course() {
     this.addNewCourse = true;
@@ -432,5 +432,21 @@ export class AdminCoursesEditComponent implements OnInit {
       }
     })
 
+  }
+
+
+  remove_course(course: any) {
+    this.courseService.removeCourse(course).subscribe((response) => {
+      this.swalSuccess('Uspesno izbrisan kurs');
+      this.courseService.getCourseIds().subscribe((courses: any) => {
+       this.selectedEditCourse = null;
+
+        if (courses) {
+          this.myUserCourses = courses;
+        } else {
+          this.swalError('Trenutno nema kurseva');
+        }
+      })
+    })
   }
 }

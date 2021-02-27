@@ -13,6 +13,7 @@ export class EmployeeRegistrationAPI {
     public bio: string;
     public title: TitleAPI;
     public office: string;
+    public profilePicture: string;
     public active: number;
 
     constructor() {

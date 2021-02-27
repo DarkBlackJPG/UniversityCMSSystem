@@ -107,4 +107,12 @@ export class EmployeeService {
   delete_lecture_file(download_link: string, course_id: number) {
     return this.http.post(`${this.url}/course/${course_id}/lectures/${download_link}/delete`, {});
   }
+
+  getStudentsById(ids: any[]) {
+    return this.http.post(`${this.url}/students/get/ids`, {data: ids});
+  }
+
+  deleteEmployee(selected_employee: any) {
+    return this.http.post(`${this.url}/employees/remove`, {data: selected_employee});
+  }
 }

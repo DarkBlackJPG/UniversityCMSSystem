@@ -92,4 +92,8 @@ export class AdministratorFunctionsService {
   updateEmployeeData(selected_employee: any) {
     return this.http.post(`${this.url}/employees/update`, {data: selected_employee});
   }
+
+  deleteStudent(selectedStudent: any) {
+    return this.http.post(`${this.url}/students/remove`, {data: selectedStudent});
+  }
 }

@@ -7,6 +7,7 @@ export class EmployeeRegistration {
   public password: string;
   public address: string;
   public email: string;
+  public profilePicture: string;
   public password_verify: string;
   public phonenumber: string;
   public website: string;
@@ -19,6 +20,7 @@ export class EmployeeRegistration {
     this.name = '';
     this.surname = '';
     this.username = '';
+    this.profilePicture = 'default.jpg';
     this.password = '';
     this.address = '';
     this.password_verify = '';

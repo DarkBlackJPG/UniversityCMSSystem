@@ -5,6 +5,8 @@ import Swal from 'sweetalert2/dist/sweetalert2.js';
 import {UserRegistrationData} from "../models/appdata/UserRegistrationData";
 import {EmployeeRegistration} from "../models/appdata/EmployeeRegistration";
 import {Router} from "@angular/router";
+import {HttpResponse} from "@angular/common/http";
+import {UploadServiceService} from "../services/upload-service.service";
 
 @Component({
   selector: 'app-admin-registration',
@@ -21,7 +23,8 @@ export class AdminRegistrationComponent implements OnInit {
   isStudentRegistration: number;
 
   constructor(private administratorService: AdministratorFunctionsService,
-              private router: Router) {
+              private router: Router,
+              private uploadService: UploadServiceService) {
   }
 
   ngOnInit(): void {
@@ -208,5 +211,39 @@ export class AdminRegistrationComponent implements OnInit {
 
   change_academic_level($event) {
     this.studentRegistration.type = $event.target.value;
+  }
+  fileList = FileList;
+  upload_image($event) {
+    var _URL = window.URL || window.webkitURL;
+    this.fileList = $event.target.files;
+    var file, img;
+    let skip = false;
+    if ((file = this.fileList[0])) {
+      img = new Image();
+      var objectUrl = _URL.createObjectURL(file);
+      img.onload = function () {
+        if (this.width > 300 || this.height > 300) {
+          skip = true;
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Slika prevazilazi velicinu od 300x300!',
+          });
+        }
+        _URL.revokeObjectURL(objectUrl);
+      };
+      img.src = objectUrl;
+    }
+    if ( skip === false && this.fileList[0] != undefined) {
+      this.uploadService.upload(this.fileList[0]).subscribe((res: any) => {
+        if (res instanceof HttpResponse) {
+          // @ts-ignore
+          let file_data = res.body.file_data;
+          let download_link = file_data.filename;
+          this.employeeRegistration.profilePicture = download_link;
+        }
+      });
+
+    }
   }
 }

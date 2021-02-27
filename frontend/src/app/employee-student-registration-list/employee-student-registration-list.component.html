@@ -87,7 +87,11 @@
     <div class="card-header">Aktivni spisi</div>
     <div class="card-body">
       <div class="row mb-3 border-bottom" *ngFor="let course of courseLists">
-        <h3 class="col-12">{{course.title}} <button class="btn  ml-3  btn-link" (click)="delete_reg_list(course.id)"><i class="fas fa-trash-alt text-danger"></i></button> <button class="btn  ml-3 btn-link"  data-toggle="modal" data-target="#exampleModal" (click)="set_editable_course(course.id)"><i class="fas fa-pen-alt text-warning"></i></button></h3>
+        <h3 class="col-12">{{course.title}}
+          <button class="btn  ml-3  btn-link" (click)="delete_reg_list(course.id)"><i class="fas fa-trash-alt text-danger"></i></button>
+          <button class="btn  ml-3 btn-link"  data-toggle="modal" data-target="#exampleModal" (click)="set_editable_course(course.id)"><i class="fas fa-pen-alt text-warning"></i></button>
+          <button class="btn  ml-3 btn-link"  (click)="download_csv(course)"><i class="fas fa-download text-success"></i></button>
+        </h3>
 
           <div class="col-md-3 p-1 pl-3">
             Broj prijavljenih: {{course.enrolled_number}}

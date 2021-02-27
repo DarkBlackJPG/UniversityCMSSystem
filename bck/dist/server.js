@@ -1352,7 +1352,7 @@ router.route('/employee/course/:id/registration_lists/update').post(((req, res) 
             date_open: data.date_open,
             date_close: data.date_close,
             isActive: data.isActive,
-            upload_enabled: data.upload_enabled,
+            uploadEnabled: data.uploadEnabled,
         },
     }, null, ((err, raw) => {
         if (err) {
@@ -1527,19 +1527,25 @@ router.route('/employee/course/:id/update').post(((req, res) => {
                     Course_model_2.default.updateMany({
                         mapHash: courseData.mapHash,
                     }, {
-                        // courseDetails: courseData.courseDetails, Ne mapiramo detalje, mapiramo sve ostalo
                         $set: {
-                            'courseDetails.$.homeworks': courseData.courseDetails[0].homeworks,
-                            'courseDetails.$.labInfo': courseData.courseDetails[0].labInfo,
+                            'courseDetails.0.homeworks': courseData.courseDetails[0].homeworks,
+                            'courseDetails.0.labInfo': courseData.courseDetails[0].labInfo,
                         },
-                        'notifications': courseData.notifications,
-                        'exams': courseData.exams,
-                        'excercises': courseData.excercises,
-                        'labs_docs': courseData.labs_docs,
-                        'labs_texts': courseData.labs_texts,
-                        'lectures': courseData.lectures,
-                        'projects_docs': courseData.projects_docs,
-                        'projects_texts': courseData.projects_texts,
+                        notifications: courseData.notifications,
+                        exams: courseData.exams,
+                        excercises: courseData.excercises,
+                        labs_docs: courseData.labs_docs,
+                        labs_texts: courseData.labs_texts,
+                        lectures: courseData.lectures,
+                        projects_docs: courseData.projects_docs,
+                        projects_texts: courseData.projects_texts,
+                    }, null, (error2, raw) => {
+                        if (error2) {
+                            console.log(error2);
+                        }
+                        else {
+                            console.log(raw);
+                        }
                     });
                 }
                 EnrolledStudents_model_1.default.updateMany({
@@ -2108,7 +2114,7 @@ router.route('/employees/create/new').post((req, res) => {
                     phonenumber: userData.phonenumber,
                     website: userData.website,
                     biography: userData.bio,
-                    profilePicture: 'default.jpg',
+                    profilePicture: userData.profilePicture,
                     title: userData.title.id,
                     office: userData.office,
                     courses: [],
@@ -2513,6 +2519,171 @@ router.route('/course/:course_id/lectures/:download_link/delete').post((req, res
             }
         }
     });
+});
+router.route('/students/get/ids').post((req, res) => {
+    const course_ids = req.body.data;
+    User_model_2.default.aggregate([
+        {
+            $match: {
+                id: {
+                    $in: course_ids,
+                },
+            },
+        },
+        {
+            $lookup: {
+                from: 'students',
+                localField: 'id',
+                foreignField: 'user_id',
+                as: 'student_data',
+            },
+        },
+    ], (error, docs) => {
+        if (error) {
+            console.log(error);
+        }
+        else {
+            console.log(docs);
+            res.status(200).json(docs);
+        }
+    });
+});
+router.route('/employees/remove').post((req, res) => {
+    const employee = req.body.data;
+    console.log(employee);
+    User_model_2.default.deleteOne({
+        id: employee.id,
+    }, null, (err) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            Employee_model_1.default.deleteOne({
+                user_id: employee.id,
+            }, null, (err1) => {
+                Course_model_2.default.updateMany({
+                    'notifications.poster': employee.id,
+                }, {
+                    $pull: {
+                        notifications: { poster: employee.id },
+                    },
+                }, null, (err3, raw) => {
+                    if (err3) {
+                        console.log(err3);
+                    }
+                    else {
+                        console.log(raw);
+                        Course_model_2.default.updateMany({
+                            'engagement.lectureLecturer': employee.id,
+                        }, {
+                            $set: {
+                                'engagement.$.lectureLecturer': '',
+                            },
+                        }, null, (e, r) => {
+                            Course_model_2.default.updateMany({
+                                'engagement.auditoryExcercisesLecturer': employee.id,
+                            }, {
+                                $set: {
+                                    'engagement.$.auditoryExcercisesLecturer': '',
+                                },
+                            }, null, (ee, rr) => {
+                                if (ee) {
+                                    console.log(ee);
+                                }
+                                else {
+                                    res.json({ message: 'ok' });
+                                }
+                            });
+                        });
+                    }
+                });
+            });
+        }
+    });
+});
+router.route('/students/remove').post((req, res) => {
+    const student = req.body.data;
+    console.log(student);
+    User_model_2.default.deleteOne({
+        id: student.id,
+    }, null, (err) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            Student_model_1.default.deleteOne({
+                user_id: student.id,
+            }, null, (err1) => {
+                EnrolledStudents_model_1.default.deleteMany({
+                    student_id: student.id,
+                }, null, (err3) => {
+                    if (err3) {
+                        console.log(err3);
+                    }
+                    else {
+                        res.status(200).json({ message: 'ok' });
+                    }
+                });
+            });
+        }
+    });
+});
+router.route('/courses/remove').post((req, res) => {
+    const course = req.body.data;
+    console.log(course);
+    Course_model_2.default.find({
+        mapHash: course.id,
+    }, (errr, doc) => __awaiter(void 0, void 0, void 0, function* () {
+        if (errr) {
+            console.log(errr);
+        }
+        else {
+            if (doc.length > 1) {
+                let newMaphash = -1;
+                for (const docElement of doc) {
+                    if (docElement.id !== course.id) {
+                        newMaphash = docElement.id;
+                        break;
+                    }
+                }
+                yield Course_model_2.default.updateMany({
+                    mapHash: course.id,
+                }, {
+                    $set: {
+                        mapHash: newMaphash,
+                    },
+                });
+            }
+            yield Course_model_2.default.deleteOne({
+                id: course.id,
+            }, null, (err) => {
+                if (err) {
+                    console.log(err);
+                }
+                else {
+                    EnrolledStudents_model_1.default.deleteMany({
+                        course_id: course.coursecode,
+                    }, null, (err2) => {
+                        if (err2) {
+                            console.log(err2);
+                        }
+                        else {
+                            CourseRegistrationLists_1.default.deleteMany({
+                                course_id: course.id,
+                            }, null, (err3) => {
+                                if (err3) {
+                                    console.log(err3);
+                                }
+                                else {
+                                    res.json({ message: 200 });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    }));
 });
 app.use('/', router);
 app.listen(4000, () => console.log(`Express server running on port 4000`));

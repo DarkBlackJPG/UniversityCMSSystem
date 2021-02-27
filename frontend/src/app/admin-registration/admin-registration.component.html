@@ -92,6 +92,20 @@
     <div class="card-body">
       <h1 class="card-title">Registraciona forma za zaposlenog</h1>
       <br>
+      <div class="col-md-12 justify-content-center">
+        <img class="img-fluid "
+
+             [src]="'http://localhost:4000/download/' + employeeRegistration.profilePicture">
+      </div>
+      <div class="input-group mt-3 col-md-5">
+        <div class="input-group-prepend">
+          <span class="input-group-text">Promeni sliku</span>
+        </div>
+        <div class="custom-file">
+          <input accept="image/x-png,image/gif,image/jpeg" type="file" class="custom-file-input" (change)="upload_image($event)" id="inputGroupFile01">
+          <label class="custom-file-label" for="inputGroupFile01">Odaberi</label>
+        </div>
+      </div>
       <div class="mb-3">
         <label for="imeZaposlenog" class="form-label">Ime</label>
         <input required type="text" [(ngModel)]="employeeRegistration.name" class="form-control" id="imeZaposlenog">

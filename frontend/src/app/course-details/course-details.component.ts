@@ -101,7 +101,7 @@ export class CourseDetailsComponent implements OnInit {
   }
 
   get_year(semester: any) {
-    return parseInt(String(Number(semester) / 2));
+    return parseInt(String(Math.ceil(Number(semester) / 2)));
   }
 
   route_to_employee_details(id) {
@@ -109,9 +109,11 @@ export class CourseDetailsComponent implements OnInit {
   }
 
   check_enrolled(registration: any) {
-    for (const enrolledElement of registration.enrolled) {
-      if(enrolledElement === this.myUser.id) {
-        return true;
+    if (registration.isActive || new Date(registration.date_close) >= new Date()) {
+      for (const enrolledElement of registration.enrolled) {
+        if (enrolledElement === this.myUser.id) {
+          return true;
+        }
       }
     }
     return false;

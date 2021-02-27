@@ -51,4 +51,8 @@ export class CoursesService {
   getCourseById(courseId: number) {
     return this.http.get(`${this.url}/course/${courseId}/get_details`);
   }
+
+  removeCourse(course: any) {
+    return this.http.post(`${this.url}/courses/remove`, {data: course});
+  }
 }
